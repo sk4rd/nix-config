@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "Sk4rd's NixOS and Home-Manager Configuration";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
