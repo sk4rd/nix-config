@@ -9,7 +9,7 @@
     }
   };
 
-  outputs = { self, nixpkgs }: {
+  outputs = { nixpkgs, home-manager, ... }@inputs: {
 
     packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
 
