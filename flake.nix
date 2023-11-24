@@ -20,6 +20,7 @@
     in {
       nixosConfigurations = {
         desktop = nixpkgs.lib.nixosSystem { modules = [ ./hosts/desktop ]; };
+        laptop = nixpkgs.lib.nixosSystem { modules = [ ./hosts/laptop ]; };
       };
     };
 }
