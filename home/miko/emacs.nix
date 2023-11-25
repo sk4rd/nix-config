@@ -8,6 +8,7 @@
 
   home.packages = with pkgs; [
     iosevka # Sleek, monospaced font optimized for coding
+    fortune # Random quotation display
   ];
 
   home.file = {
