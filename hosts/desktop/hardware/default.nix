@@ -1,5 +1,5 @@
 { ... }:
 
 {
-  imports = [ ./gpu.nix ];
+  imports = [ ./gpu.nix ./filesystem.nix ];
 }
