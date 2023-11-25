@@ -7,9 +7,13 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    emacs = {
+      url = "github:sk4rd/emacs.d";
+      flake = false;
+    };
   };
 
-  outputs = { nixpkgs, home-manager, ... }@inputs:
+  outputs = { nixpkgs, home-manager, emacs, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -31,7 +35,8 @@
       homeConfigurations = {
         "miko@desktop" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          modules = [ ./home ];
+          modules = [ ./home/miko ];
+          extraSpecialArgs = { inherit emacs; };
         };
       };
     };

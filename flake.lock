@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "emacs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1700915702,
+        "narHash": "sha256-mlOjDW9m0ADVM4OWPszusHNZzdXNiLswKijLl3S0QZ8=",
+        "owner": "sk4rd",
+        "repo": "emacs.d",
+        "rev": "f1c23d40a31f6f7951ffb1cd56944d23f351aac9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sk4rd",
+        "repo": "emacs.d",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -37,6 +53,7 @@
     },
     "root": {
       "inputs": {
+        "emacs": "emacs",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs"
       }
