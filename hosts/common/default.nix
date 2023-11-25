@@ -1,6 +1,8 @@
 { config, lib, pkgs, ... }:
 
 {
+  imports = [ ./programs.nix ];
+
   boot.loader = {
     efi.canTouchEfiVariables = true;
     grub = {
@@ -15,6 +17,7 @@
     isNormalUser = true;
     createHome = true;
     extraGroups = [ "wheel" ];
+    shell = pkgs.zsh;
     description = "Mikolaj Bajtkiewicz";
   };
 
