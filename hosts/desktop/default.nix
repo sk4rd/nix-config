@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }: 
 
 {
-  imports = [ ../common ];
+  imports = [ ../common ./hardware ];
 
   networking.hostName = "desktop";
 }
