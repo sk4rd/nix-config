@@ -28,5 +28,11 @@
           modules = [ ./hosts/laptop ];
         };
       };
+      homeConfigurations = {
+        "miko@desktop" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [ ./home ];
+        };
+      };
     };
 }
