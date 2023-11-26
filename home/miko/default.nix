@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  imports = [ ./emacs.nix ];
+  imports = [ ./emacs.nix ./git.nix ];
 
   home = {
     username = "miko";
