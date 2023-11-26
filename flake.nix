@@ -13,7 +13,7 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, emacs, ... }@inputs:
+  outputs = { nixpkgs, home-manager, emacs, ... }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
