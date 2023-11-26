@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  imports = [ ./programs ];
+  imports = [ ./programs ./xdg.nix ];
 
   home = {
     username = "miko";
