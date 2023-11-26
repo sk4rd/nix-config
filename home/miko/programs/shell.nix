@@ -15,10 +15,10 @@
       enable = true;
       theme = "candy";
       plugins = [
-        "fzf" # Requires 'fzf' to be installed
+        "fzf"
         "git"
-        "sudo" # Key bindings (ESC)
-        "thefuck" # Requires 'thefuck' to be installed
+        "sudo"
+        "thefuck"
         "z"
       ];
     };
