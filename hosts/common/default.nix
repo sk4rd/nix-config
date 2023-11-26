@@ -3,7 +3,7 @@
 {
   imports = [ ./programs.nix ./sound.nix ];
 
-  boot.loader = {
+  boot.loader = lib.mkDefault {
     efi.canTouchEfiVariables = true;
     grub = {
       efiSupport = true;
