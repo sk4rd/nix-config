@@ -1,8 +1,8 @@
-{ ... }:
+{ lib, ... }:
 
 {
   # Set sound.enable to false, as it is only applicable to alsa
-  sound.enable = mkForce false;
+  sound.enable = lib.mkForce false;
 
   # rtkit is optional but recommended
   security.rtkit.enable = true;
