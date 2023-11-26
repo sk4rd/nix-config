@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [ ./programs.nix ./sound.nix ./networking.nix ./hardware ];
+  imports = [ ./programs.nix ./sound.nix ./networking.nix./hardware ./virtualisation.nix ];
 
   boot.loader = lib.mkDefault {
     efi.canTouchEfiVariables = true;
