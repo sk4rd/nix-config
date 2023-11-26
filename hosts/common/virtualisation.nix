@@ -23,5 +23,5 @@
   };
 
   # Enable Spice vdagent
-  services.spice-vdagent.enable = true;
+  services.spice-vdagentd.enable = true;
 }
