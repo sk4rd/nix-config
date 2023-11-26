@@ -10,7 +10,7 @@
       qemu.ovmf = {
         enable = true;
         packages = [ pkgs.OVMFFull.fd ];
-      }
+      };
       # Virtual TPM
       qemu.swtpm.enable = true;
     };
