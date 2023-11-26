@@ -1,5 +1,5 @@
 { ... }:
 
 {
-  imports = [ ./emacs.nix ./git.nix ];
+  imports = [ ./emacs.nix ./firefox.nix ./git.nix ];
 }
