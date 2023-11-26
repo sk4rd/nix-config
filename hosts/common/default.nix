@@ -12,6 +12,8 @@
     };
   };
 
+  time.timeZone = "Europe/Berlin";
+
   # System user
   users.users."miko" = {
     isNormalUser = true;
