@@ -3,7 +3,7 @@
 {
   # Default networking configuration
   networking = lib.mkDefault {
-    hostname = "nixos";
+    hostName = "nixos";
     networkmanager.enable = true;
     firewall.enable = true;
   };
