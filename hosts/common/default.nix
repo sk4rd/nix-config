@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [ ./programs.nix ];
+  imports = [ ./programs.nix ./sound.nix ];
 
   boot.loader = {
     efi.canTouchEfiVariables = true;
