@@ -14,13 +14,7 @@
     oh-my-zsh = {
       enable = true;
       theme = "candy";
-      plugins = [
-        "fzf"
-        "git"
-        "sudo"
-        "thefuck"
-        "z"
-      ];
+      plugins = [ "fzf" "git" "sudo" "thefuck" "z" ];
     };
     initExtra = ''
       date +'%a %d %B %Y' | lolcat -t -F 0.01

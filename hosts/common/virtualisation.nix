@@ -15,9 +15,7 @@
       qemu.swtpm.enable = true;
     };
     # Docker specific settings
-    docker = {
-      enable = true;
-    };
+    docker = { enable = true; };
     # USB redirection support
     spiceUSBRedirection.enable = true;
   };
