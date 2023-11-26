@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -9,4 +9,16 @@
     ./syncthing.nix
     ./shell.nix
   ];
+
+  # Programs without configuration
+  home.packages = with pkgs; [
+    discord          # Internet messaging platform
+    element-desktop  # Secure messaging app
+    gimp             # Advanced image editing tool
+    keepassxc        # Secure password management
+    monero-gui       # Cryptocurrency wallet for Monero
+    xournalpp        # App for taking handwritten notes
+    prismlauncher    # Launcher for Minecraft
+  ];
 }
+
