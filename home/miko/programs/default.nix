@@ -1,5 +1,5 @@
 { ... }:
 
 {
-  imports = [ ./emacs.nix ./firefox.nix ./git.nix ./github.nix ];
+  imports = [ ./emacs.nix ./firefox.nix ./git.nix ./github.nix ./syncthing.nix ];
 }
