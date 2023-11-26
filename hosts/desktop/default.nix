@@ -1,9 +1,7 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [ ../common ./hardware ];
-
-  networking.hostName = "desktop";
+  imports = [ ../common ./hardware ./networking.nix ];
 
   # Basic Plasma5 install
   services.xserver.enable = true;
