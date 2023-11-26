@@ -5,7 +5,7 @@
     enable = true;
     lfs.enable = true;
     package = pkgs.gitFull;
-    userName  = "Mikolaj Bajtkiewicz";
+    userName = "Mikolaj Bajtkiewicz";
     userEmail = "mikolaj.bajtkiewicz@tutanota.de";
     aliases = {
       a = "add";

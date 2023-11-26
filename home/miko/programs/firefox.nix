@@ -11,8 +11,14 @@
           urls = [{
             template = "https://search.nixos.org/packages";
             params = [
-              { name = "type"; value = "packages"; }
-              { name = "query"; value = "{searchTerms}"; }
+              {
+                name = "type";
+                value = "packages";
+              }
+              {
+                name = "query";
+                value = "{searchTerms}";
+              }
             ];
           }];
           definedAliases = [ "@np" ];
@@ -31,18 +37,31 @@
         # SearX meta search engine
         "SearX" = {
           urls = [{
-            template = "https://searx.tiekoetter.com/search?q={searchTerms}&category_general=1&language=en-US&time_range=&safesearch=0&theme=simple";
+            template =
+              "https://searx.tiekoetter.com/search?q={searchTerms}&category_general=1&language=en-US&time_range=&safesearch=0&theme=simple";
             params = [
-              { name = "category_general"; value = "1"; }
-              { name = "language"; value = "en-US"; }
-              { name = "safesearch"; value = "0"; }
-              { name = "theme"; value = "simple"; }
+              {
+                name = "category_general";
+                value = "1";
+              }
+              {
+                name = "language";
+                value = "en-US";
+              }
+              {
+                name = "safesearch";
+                value = "0";
+              }
+              {
+                name = "theme";
+                value = "simple";
+              }
             ];
           }];
           definedAliases = [ "@sx" ];
         };
       };
-      
+
       # Set the default search engine
       search.default = "SearX";
     };
