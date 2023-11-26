@@ -7,7 +7,6 @@
     package = pkgs.gitFull;
     userName  = "Mikolaj Bajtkiewicz";
     userEmail = "mikolaj.bajtkiewicz@tutanota.de";
-    config.init.defaultBranch = "main";
     aliases = {
       a = "add";
       br = "branch";
