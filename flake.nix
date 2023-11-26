@@ -8,7 +8,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     emacs = {
-      url = "github:sk4rd/emacs.d";
+      url = "github:sk4rd/emacs.d/dev";
       flake = false;
     };
   };
