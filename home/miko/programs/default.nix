@@ -16,11 +16,11 @@
     element-desktop # Secure messaging app
     gimp # Advanced image editing tool
     keepassxc # Secure password management
-    monero-gui # Cryptocurrency wallet for Monero
-    xournalpp # App for taking handwritten notes
-    prismlauncher # Launcher for Minecraft
     lutris # Game launcher
+    monero-gui # Cryptocurrency wallet for Monero
+    prismlauncher # Launcher for Minecraft
     protonup-qt # Proton version manager
+    xournalpp # App for taking handwritten notes
   ];
 }
 
