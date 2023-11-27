@@ -8,6 +8,7 @@
     ./github.nix
     ./syncthing.nix
     ./shell.nix
+    ./mangohud.nix
   ];
 
   # Programs without configuration
@@ -17,7 +18,6 @@
     gimp # Advanced image editing tool
     keepassxc # Secure password management
     lutris # Game launcher
-    mangohud # Game performance menu
     monero-gui # Cryptocurrency wallet for Monero
     prismlauncher # Launcher for Minecraft
     protonup-qt # Proton version manager
