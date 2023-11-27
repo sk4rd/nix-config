@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  imports = [ ../common ./hardware ./networking.nix ./hardware-configuration.nix ];
+  imports = [ ../common ./hardware ./networking.nix ./boot.nix ];
 
   # Basic Plasma5 install
   services.xserver.enable = true;
