@@ -19,6 +19,8 @@
     monero-gui # Cryptocurrency wallet for Monero
     xournalpp # App for taking handwritten notes
     prismlauncher # Launcher for Minecraft
+    lutris # Game launcher
+    protonup-qt # Proton version manager
   ];
 }
 
