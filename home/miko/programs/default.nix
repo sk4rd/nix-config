@@ -6,9 +6,9 @@
     ./firefox.nix
     ./git.nix
     ./github.nix
-    ./syncthing.nix
-    ./shell.nix
     ./mangohud.nix
+    ./shell.nix
+    ./syncthing.nix
   ];
 
   # Programs without configuration
