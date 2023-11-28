@@ -6,12 +6,12 @@
     ./firefox.nix
     ./git.nix
     ./github.nix
-    ./mangohud.nix
-    ./shell.nix
-    ./syncthing.nix
     ./kitty.nix
     ./lf
+    ./mangohud.nix
     ./neofetch
+    ./shell.nix
+    ./syncthing.nix
   ];
 
   # Programs without configuration
