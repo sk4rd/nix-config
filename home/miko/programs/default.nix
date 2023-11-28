@@ -9,6 +9,7 @@
     ./mangohud.nix
     ./shell.nix
     ./syncthing.nix
+    ./kitty.nix
   ];
 
   # Programs without configuration
