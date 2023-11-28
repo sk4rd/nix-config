@@ -2,6 +2,7 @@
 
 {
   networking = {
+    hostName = "desktop";
     firewall.allowedTCPPorts = [
       22 # ssh
       22000 # Syncthing TCP
