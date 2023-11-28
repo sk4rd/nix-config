@@ -8,8 +8,8 @@
     theme = "Gruvbox Dark";
     font = {
       package = pkgs.nerdfonts.override { fonts = [ "IosevkaTerm" ]; };
-      name = "Iosevka";
-      size = 11;
+      name = "IosevkaTerm NF";
+      size = 12;
     };
     settings = {
       enable_audio_bell = false;
