@@ -11,4 +11,7 @@
 
   # Enable the ssh-agent
   services.ssh-agent.enable = true;
+
+  # Let fonts be managed by home-manager
+  fonts.fontconfig.enable = true;
 }
