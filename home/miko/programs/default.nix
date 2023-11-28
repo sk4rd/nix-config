@@ -10,6 +10,7 @@
     ./shell.nix
     ./syncthing.nix
     ./kitty.nix
+    ./lf
   ];
 
   # Programs without configuration
