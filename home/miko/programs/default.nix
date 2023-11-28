@@ -11,6 +11,7 @@
     ./syncthing.nix
     ./kitty.nix
     ./lf
+    ./neofetch
   ];
 
   # Programs without configuration
