@@ -12,6 +12,7 @@
     ./neofetch
     ./shell.nix
     ./syncthing.nix
+    ./rofi.nix
   ];
 
   # Programs without configuration
