@@ -9,6 +9,7 @@
   programs.rofi = {
     enable = true;
     package = pkgs.rofi-wayland;
+    terminal = "${pkgs.kitty}/bin/kitty";
     theme = let inherit (config.lib.formats.rasi) mkLiteral;
     in {
       "*" = {
@@ -43,18 +44,18 @@
       };
       "#window" = {
         background-color = mkLiteral "@gruvbox-dark0";
-        border-color = mkLiteral "@accent-color";
+        border-color = mkLiteral "@gruvbox-dark5";
 
         location = mkLiteral "center";
-        width = mkLiteral "25%";
-        border = mkLiteral "2px";
+        width = mkLiteral "300px";
+        border = mkLiteral "3px";
       };
       "#inputbar" = {
         padding = mkLiteral "8px 12px";
         spacing = mkLiteral "12px";
         children = map mkLiteral [ "prompt" "entry" ];
       };
-      "#prompt" = { text-color = mkLiteral "@gruvbox-dark11"; };
+      "#prompt" = { text-color = mkLiteral "@gruvbox-dark14"; };
       "#listview" = {
         lines = 12;
         columns = 1;
@@ -68,7 +69,7 @@
       "#element normal active" = { text-color = mkLiteral "@gruvbox-dark12"; };
       "#element selected" = { text-color = mkLiteral "@gruvbox-dark0"; };
       "#element selected normal" = {
-        background-color = mkLiteral "@gruvbox-dark14";
+        background-color = mkLiteral "@gruvbox-dark11";
       };
       "#element selected urgent" = {
         background-color = mkLiteral "@gruvbox-dark12";
