@@ -1,18 +1,14 @@
 { lib, pkgs, ... }:
 
 {
-  imports =
-    [ ./programs ./sound.nix ./networking.nix ./hardware ./virtualisation.nix ];
-
-  boot.loader = lib.mkDefault {
-    efi.canTouchEfiVariables = true;
-    grub = {
-      enable = true;
-      efiSupport = true;
-      device = "nodev";
-      useOSProber = true;
-    };
-  };
+  imports = [
+    ./programs
+    ./sound.nix
+    ./networking.nix
+    ./hardware
+    ./virtualisation.nix
+    ./boot.nix
+  ];
 
   time.timeZone = "Europe/Berlin";
 
