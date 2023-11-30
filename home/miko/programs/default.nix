@@ -26,6 +26,7 @@
     prismlauncher # Launcher for Minecraft
     protonup-qt # Proton version manager
     xournalpp # App for taking handwritten notes
+    swww # Wallpaper switcher
   ];
 }
 
