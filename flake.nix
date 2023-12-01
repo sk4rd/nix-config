@@ -11,9 +11,10 @@
       url = "github:sk4rd/emacs.d/dev";
       flake = false;
     };
+    hyprland.url = "github:hyprwm/Hyprland";
   };
 
-  outputs = { nixpkgs, home-manager, emacs, ... }:
+  outputs = { nixpkgs, home-manager, emacs, hyprland, ... }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -35,7 +36,7 @@
       homeConfigurations = {
         "miko@desktop" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          modules = [ ./home/miko ];
+          modules = [ ./home/miko hyprland.homeManagerModules.default ];
           extraSpecialArgs = { inherit emacs; };
         };
       };
