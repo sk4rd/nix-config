@@ -2,13 +2,13 @@
 
 {
   imports = [
+    ./boot.nix
+    ./hardware
+    ./networking.nix
     ./programs
     ./sound.nix
-    ./networking.nix
-    ./hardware
-    ./virtualisation.nix
-    ./boot.nix
     ./users.nix
+    ./virtualisation.nix
   ];
 
   time.timeZone = "Europe/Berlin";
