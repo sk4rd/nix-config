@@ -8,18 +8,10 @@
     ./hardware
     ./virtualisation.nix
     ./boot.nix
+    ./users.nix
   ];
 
   time.timeZone = "Europe/Berlin";
-
-  # System user
-  users.users."miko" = {
-    isNormalUser = true;
-    createHome = true;
-    extraGroups = [ "wheel" "docker" ];
-    shell = pkgs.zsh;
-    description = "Mikolaj Bajtkiewicz";
-  };
 
   # Enable the new nix commands and flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
