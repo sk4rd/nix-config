@@ -6,7 +6,7 @@
   home = {
     username = "miko";
     homeDirectory = "/home/miko";
-    stateVersion = "23.05";
+    stateVersion = "23.11";
   };
 
   # Enable the ssh-agent

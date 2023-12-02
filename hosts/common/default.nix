@@ -16,5 +16,5 @@
   # Enable the new nix commands and flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  system.stateVersion = "23.05";
+  system.stateVersion = "23.11";
 }
