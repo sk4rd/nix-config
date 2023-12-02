@@ -15,6 +15,9 @@
       enable_audio_bell = false;
       window_margin_width = 8;
     };
+    extraConfig = ''
+      background_opacity 0.85
+    '';
   };
 }
 
