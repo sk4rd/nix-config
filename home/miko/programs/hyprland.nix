@@ -17,6 +17,42 @@ in {
      bind = $mod, W, exec, ${browser}
      bind = $mod, R, exec, ${launcher}
 
+     bind = $mod SHIFT, C, killactive
+     bind = $mod, V, togglefloating,
+
+     bind = $mod, h, movefocus, l
+     bind = $mod, l, movefocus, r
+     bind = $mod, k, movefocus, u
+     bind = $mod, j, movefocus, d
+
+     bind = $mod, 1, workspace, 1
+     bind = $mod, 2, workspace, 2
+     bind = $mod, 3, workspace, 3
+     bind = $mod, 4, workspace, 4
+     bind = $mod, 5, workspace, 5
+     bind = $mod, 6, workspace, 6
+     bind = $mod, 7, workspace, 7
+     bind = $mod, 8, workspace, 8
+     bind = $mod, 9, workspace, 9
+     bind = $mod, 0, workspace, 10
+
+     bind = $mod SHIFT, 1, movetoworkspace, 1
+     bind = $mod SHIFT, 2, movetoworkspace, 2
+     bind = $mod SHIFT, 3, movetoworkspace, 3
+     bind = $mod SHIFT, 4, movetoworkspace, 4
+     bind = $mod SHIFT, 5, movetoworkspace, 5
+     bind = $mod SHIFT, 6, movetoworkspace, 6
+     bind = $mod SHIFT, 7, movetoworkspace, 7
+     bind = $mod SHIFT, 8, movetoworkspace, 8
+     bind = $mod SHIFT, 9, movetoworkspace, 9
+     bind = $mod SHIFT, 0, movetoworkspace, 10
+
+     bind = $mod, S, togglespecialworkspace, magic
+     bind = $mod SHIFT, S, movetoworkspace, special:magic
+
+     bindm = $mod, mouse:272, movewindow
+     bindm = $mod, mouse:273, resizewindow
+
      # Input device settings
      input {
        kb_layout = us,de
