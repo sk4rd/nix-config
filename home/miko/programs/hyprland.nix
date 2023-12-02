@@ -4,9 +4,13 @@ let
   terminal = "${pkgs.kitty}/bin/kitty";
   browser = "${pkgs.firefox}/bin/firefox";
   launcher = "${pkgs.rofi-wayland}/bin/rofi -show run";
+  editor = "${pkgs.emacs29}/bin/emacsclient -a '' -c";
 in {
   wayland.windowManager.hyprland.enable = true;
   wayland.windowManager.hyprland.extraConfig = ''
+     # Autostart settings
+     exec-once = ${pkgs.emacs29}/bin/emacs --daemon
+
      # Screen settings
      monitor = DP-1, 2560x1440@165, 1920x0, 1
      monitor = HDMI-A-1, 1920x1080@60, 0x0, 1
@@ -16,6 +20,7 @@ in {
      bind = $mod, Q, exec, ${terminal}
      bind = $mod, W, exec, ${browser}
      bind = $mod, R, exec, ${launcher}
+     bind = $mod, E, exec, ${editor}
 
      bind = $mod SHIFT, C, killactive
      bind = $mod, V, togglefloating,
