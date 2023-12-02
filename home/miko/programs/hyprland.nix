@@ -25,6 +25,11 @@ in {
      bind = $mod, k, movefocus, u
      bind = $mod, j, movefocus, d
 
+     bind = $mod SHIFT, h, movewindow, l
+     bind = $mod SHIFT, l, movewindow, r
+     bind = $mod SHIFT, k, movewindow, u
+     bind = $mod SHIFT, j, movewindow, d
+
      bind = $mod, 1, workspace, 1
      bind = $mod, 2, workspace, 2
      bind = $mod, 3, workspace, 3
@@ -46,6 +51,8 @@ in {
      bind = $mod SHIFT, 8, movetoworkspace, 8
      bind = $mod SHIFT, 9, movetoworkspace, 9
      bind = $mod SHIFT, 0, movetoworkspace, 10
+
+     bind = $mod, RETURN, layoutmsg, swapwithmaster
 
      bind = $mod, S, togglespecialworkspace, magic
      bind = $mod SHIFT, S, movetoworkspace, special:magic
