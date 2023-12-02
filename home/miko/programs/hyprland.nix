@@ -22,6 +22,13 @@ in {
        kb_layout = us
        follow_mouse = 1
        accel_profile = flat
+
+       touchpad {
+         disable_while_typng = true
+         natural_scroll = true
+         clickfinger_behavior = true
+         tap-to-click = true
+       }
      }
 
     # General Hyprland variables
@@ -60,6 +67,8 @@ in {
       animation = fade, 1, 7, default
       animation = workspaces, 1, 6, default
     }
+
+
   '';
 }
 
