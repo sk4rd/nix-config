@@ -35,6 +35,18 @@ in {
       layout = master
       allow_tearing = false
     }
+
+    # Decoration and blur settings
+    decoration {
+      rounding = 10
+
+      blur {
+        enabled = true
+        size = 4
+        passes = 1
+        vibrancy = 0.17
+      }
+    }
   '';
 }
 
