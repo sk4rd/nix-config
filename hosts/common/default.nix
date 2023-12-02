@@ -9,6 +9,7 @@
     ./sound.nix
     ./users.nix
     ./virtualisation.nix
+    ./filesystems.nix
   ];
 
   time.timeZone = "Europe/Berlin";
