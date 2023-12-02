@@ -10,6 +10,9 @@
     enable = true;
     package = pkgs.rofi-wayland;
     terminal = "${pkgs.kitty}/bin/kitty";
+    extraConfig = {
+      run-shell-command = "${pkgs.kitty}/bin/kitty --hold {cmd}";
+    };
     theme = let inherit (config.lib.formats.rasi) mkLiteral;
     in {
       "*" = {
