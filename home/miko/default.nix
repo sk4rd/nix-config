@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  imports = [ ./programs ./xdg.nix ./cursor.nix ];
+  imports = [ ./programs ./xdg.nix ./cursor.nix ./gtk.nix ];
 
   home = {
     username = "miko";
