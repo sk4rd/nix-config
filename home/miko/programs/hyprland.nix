@@ -25,7 +25,7 @@ in {
        accel_profile = flat
 
        touchpad {
-         disable_while_typng = true
+         disable_while_typing = true
          natural_scroll = true
          clickfinger_behavior = true
          tap-to-click = true
