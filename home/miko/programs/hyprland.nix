@@ -116,6 +116,14 @@ in {
       animation = fade, 1, 7, default
       animation = workspaces, 1, 6, default
     }
+
+    # Workspace settings
+    workspace = 1, monitor:DP-1
+    workspace = 2, monitor:DP-1
+    workspace = 3, monitor:DP-1
+    workspace = 4, monitor:HDMI-A-1
+    workspace = 5, monitor:HDMI-A-1
+    workspace = 6, monitor:HDMI-A-1
   '';
 }
 
