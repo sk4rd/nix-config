@@ -30,6 +30,8 @@
     swww # Wallpaper switcher
     wayshot # Screenshot tool for wlroots
     slurp # Area selection tool for wlroots
+    imv # Wayland image viewer
+    mpv # Minimal video player
   ];
 }
 
