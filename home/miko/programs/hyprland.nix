@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 let
   terminal = "${pkgs.kitty}/bin/kitty";
@@ -111,8 +111,6 @@ in {
       animation = fade, 1, 7, default
       animation = workspaces, 1, 6, default
     }
-
-
   '';
 }
 
