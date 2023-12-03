@@ -16,8 +16,9 @@ in {
       gh = "cd ${cfg.home.homeDirectory}";
       gdl = "cd ${userDirs.download}";
       gdo = "cd ${userDirs.documents}";
-      gp = "cd ${userDirs.documents}";
+      gp = "cd ${userDirs.pictures}";
       gv = "cd ${userDirs.videos}";
+      gm = "cd /run/media/${cfg.home.username}";
     };
     settings = {
       drawbox = true;
