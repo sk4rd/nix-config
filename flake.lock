@@ -24,11 +24,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1701433070,
-        "narHash": "sha256-Gf9JStfENaUQ7YWFz3V7x/srIwr4nlnVteqaAxtwpgM=",
+        "lastModified": 1701575983,
+        "narHash": "sha256-U+TY9+RJ+B19gSGVRM6R5BFjSryJXesLRitB6WdREHk=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "4a8545f5e737a6338814a4676dc8e18c7f43fc57",
+        "rev": "0d4010711922388c80a115d62cdb7ba04c2ed738",
         "type": "github"
       },
       "original": {
@@ -46,11 +46,11 @@
         "xdph": "xdph"
       },
       "locked": {
-        "lastModified": 1701451430,
-        "narHash": "sha256-uVrtDJUb5+WylStcz2M8Awx1MFNFzpGZwklaPtXv20Y=",
+        "lastModified": 1701607992,
+        "narHash": "sha256-SLPZ7b7GbTx58v1TtIStJBYLS49vCXEpYYt9054Y2Fw=",
         "owner": "hyprwm",
         "repo": "Hyprland",
-        "rev": "6e8b9ef7d8aa53247d5122b6641b9afa0df798df",
+        "rev": "59cb0e20def602c0fe928c40f8398daa7ea1427d",
         "type": "github"
       },
       "original": {
@@ -120,7 +120,8 @@
         "emacs": "emacs",
         "home-manager": "home-manager",
         "hyprland": "hyprland",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs_2",
+        "wallpapers": "wallpapers"
       }
     },
     "systems": {
@@ -135,6 +136,22 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default-linux",
+        "type": "github"
+      }
+    },
+    "wallpapers": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1698569583,
+        "narHash": "sha256-k3p7p55kkOMGDpLWNlJSlIHLjSNFetIMnVX2PMgcUyM=",
+        "owner": "sk4rd",
+        "repo": "wallpapers",
+        "rev": "2601db9074b20ac9459de0fc88bc109d0669bc0e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sk4rd",
+        "repo": "wallpapers",
         "type": "github"
       }
     },
