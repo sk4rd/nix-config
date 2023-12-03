@@ -13,7 +13,7 @@
     ./shell.nix
     ./syncthing.nix
     ./rofi.nix
-    ./hyprland.nix
+    ./hyprland
   ];
 
   # Programs without configuration

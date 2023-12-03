@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ wallpapers, pkgs, ... }:
 
 let
   terminal = "${pkgs.kitty}/bin/kitty";
@@ -10,6 +10,10 @@ in {
   wayland.windowManager.hyprland.extraConfig = ''
      # Autostart settings
      exec-once = ${pkgs.emacs29}/bin/emacs --daemon
+     exec-once = ${
+       pkgs.writeShellScriptBin "change-wallpaper"
+       (builtins.readFile ./change-wallpaper.sh)
+     }/bin/change-wallpaper ${wallpapers}/steampunk
 
      # Screen settings
      monitor = DP-1, 2560x1440@165, 1920x0, 1
