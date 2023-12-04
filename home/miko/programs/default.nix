@@ -14,6 +14,7 @@
     ./syncthing.nix
     ./rofi.nix
     ./hyprland
+    ./waybar.nix
   ];
 
   # Programs without configuration

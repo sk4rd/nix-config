@@ -17,6 +17,10 @@ in {
        pkgs.writeShellScriptBin "change-wallpaper"
        (builtins.readFile ./change-wallpaper.sh)
      }/bin/change-wallpaper ${wallpapers}/steampunk
+     exec = ${
+       pkgs.writeShellScriptBin "waybar-launcher"
+       (builtins.readFile ./waybar-launcher.sh)
+     }/bin/waybar-launcher
 
      # Screen settings
      monitor = DP-1, 2560x1440@165, 1920x0, 1
