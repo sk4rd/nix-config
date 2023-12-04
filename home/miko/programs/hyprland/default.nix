@@ -5,10 +5,13 @@ let
   browser = "${pkgs.firefox}/bin/firefox";
   launcher = "${pkgs.rofi-wayland}/bin/rofi -show run";
   editor = "${pkgs.emacs29}/bin/emacsclient -a '' -c";
+  polkitAgent =
+    "${pkgs.polkit-kde-agent}/libexec/polkit-kde-authentication-agent-1";
 in {
   wayland.windowManager.hyprland.enable = true;
   wayland.windowManager.hyprland.extraConfig = ''
      # Autostart settings
+     exec-once = ${polkitAgent}
      exec-once = ${pkgs.emacs29}/bin/emacs --daemon
      exec-once = ${
        pkgs.writeShellScriptBin "change-wallpaper"
