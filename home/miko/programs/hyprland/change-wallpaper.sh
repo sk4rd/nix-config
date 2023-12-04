@@ -4,18 +4,10 @@ wallpaper_directory="$1"  # Subdirectory within wallpapers
 sleep_duration="${2:-15m}"  # Sleep duration, default to 15 minutes if not provided
 
 # Kill all running instances of swww
-process_ids=$(ps aux | grep '[s]www' | awk '{print $2}')
+swww kill
 
-if [ -n "$process_ids" ]
-then
-    echo "Terminating all running instances of swww..."
-    for pid in $process_ids
-    do
-        kill $pid
-    done
-    # Wait a bit to ensure all processes are killed
-    sleep 1
-fi
+# Wait a bit to ensure all processes are killed
+sleep 1
 
 # Initialize swww
 swww init
