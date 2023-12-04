@@ -13,7 +13,7 @@ in {
      # Autostart settings
      exec-once = ${polkitAgent}
      exec-once = ${pkgs.emacs29}/bin/emacs --daemon
-     exec-once = ${
+     exec = ${
        pkgs.writeShellScriptBin "change-wallpaper"
        (builtins.readFile ./change-wallpaper.sh)
      }/bin/change-wallpaper ${wallpapers}/steampunk
