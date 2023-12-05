@@ -2,6 +2,19 @@
 
 wallpaper_directory="$1"  # Subdirectory within wallpapers
 sleep_duration="${2:-15m}"  # Sleep duration, default to 15 minutes if not provided
+lock_file="/tmp/swww_wallpaper_changer.lock"
+
+# Check for existing lock file
+if [ -e "$lock_file" ]; then
+    echo "Another instance of the script is running. Exiting."
+    exit 1
+else
+    # Create a lock file
+    touch "$lock_file"
+fi
+
+# Ensure lock file is removed on script exit
+trap 'rm -f "$lock_file"; exit' INT TERM EXIT
 
 # Kill all running instances of swww
 swww kill
