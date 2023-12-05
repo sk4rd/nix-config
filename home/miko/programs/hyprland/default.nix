@@ -16,7 +16,7 @@ in {
      exec = ${
        pkgs.writeShellScriptBin "change-wallpaper"
        (builtins.readFile ./change-wallpaper.sh)
-     }/bin/change-wallpaper ${wallpapers}/steampunk
+     }/bin/change-wallpaper ${wallpapers}/gruvbox
      exec = ${
        pkgs.writeShellScriptBin "waybar-launcher"
        (builtins.readFile ./waybar-launcher.sh)
