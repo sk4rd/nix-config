@@ -89,6 +89,10 @@ in {
          clickfinger_behavior = true
          tap-to-click = true
        }
+
+       tablet {
+         output = DP-1
+       }
      }
 
     # General Hyprland variables
