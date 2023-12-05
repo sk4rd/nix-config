@@ -96,7 +96,7 @@ in {
       gaps_in = 5
       gaps_out = 20
       border_size = 3
-      col.active_border = rgba(fabd2fee) rgba(fe8019ee) 90deg
+      col.active_border = rgba(8ec07cee)
       col.inactive_border = rgba(282828aa)
       cursor_inactive_timeout = 5
       layout = master
