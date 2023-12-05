@@ -53,7 +53,7 @@
       }
 
       window#waybar {
-        background: rgba(40, 40, 40, 0.6);
+        background: rgba(40, 40, 40, 1);
         color: rgba(235, 219, 178, 1);
         border-bottom: 4px solid rgba(142, 192, 124, 1);
         border-radius: 0px;
