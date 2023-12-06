@@ -3,5 +3,7 @@
 {
   imports = [ ../common ./power-management.nix ./networking.nix ./hardware ];
 
-  networking.hostName = "laptop";
+  # Enable sddm display manager
+  services.xserver.enable = true;
+  services.xserver.displayManager.sddm.enable = true;
 }
