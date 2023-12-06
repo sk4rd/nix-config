@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  imports = [ ../common ./power-management.nix ];
+  imports = [ ../common ./power-management.nix ./networking.nix ];
 
   networking.hostName = "laptop";
 }
