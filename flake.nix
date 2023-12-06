@@ -38,7 +38,7 @@
         };
       };
       homeConfigurations = {
-        "miko@desktop" = home-manager.lib.homeManagerConfiguration {
+        "miko" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           modules = [ ./home/miko hyprland.homeManagerModules.default ];
           extraSpecialArgs = { inherit emacs wallpapers; };
