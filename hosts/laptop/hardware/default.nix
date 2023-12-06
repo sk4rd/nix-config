@@ -1,6 +1,6 @@
 { ... }:
 
 {
-  imports = [ ./cpu.nix ];
+  imports = [ ./cpu.nix ./filesystem.nix ];
 }
 
