@@ -62,7 +62,7 @@
         border-radius: 12px 12px 0px 0px;
       }
 
-      #tray, #temperature, #clock, #cpu, #workspaces {
+      #tray, #temperature, #clock, #cpu, #workspaces, #battery {
         padding: 0px 20px;
         background: rgba(40, 40, 40, 1);
         border-bottom: 4px solid rgba(142, 192, 124, 1);
@@ -78,6 +78,10 @@
 
       #temperature {
         border-color: rgba(131, 165, 152, 1);
+      }
+
+      #battery {
+        border-color: rgba(184, 187, 38, 1);
       }
 
       @keyframes blink {
