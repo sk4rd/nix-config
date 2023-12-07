@@ -15,5 +15,6 @@
       21027 # Syncthing discovery broadcast
       51820 # WireGuard
     ];
+    wireguard.enable = true;
   };
 }
