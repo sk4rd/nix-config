@@ -1,5 +1,5 @@
 { ... }:
 
 {
-  imports = [ ./common ];
+  imports = [ ../common ./hyprland.nix ./waybar.nix ];
 }

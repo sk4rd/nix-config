@@ -4,7 +4,7 @@
   # Install Emacs version 29
   programs.emacs = {
     enable = true;
-    package = pkgs.emacs29;
+    package = pkgs.emacs29-pgtk;
   };
 
   # Install some optional dependencies

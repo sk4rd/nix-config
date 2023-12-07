@@ -4,7 +4,7 @@ let
   terminal = "${pkgs.kitty}/bin/kitty";
   browser = "${pkgs.firefox}/bin/firefox";
   launcher = "${pkgs.rofi-wayland}/bin/rofi -show run";
-  editor = "${pkgs.emacs29}/bin/emacsclient -a '' -c";
+  editor = "${pkgs.emacs29-pgtk}/bin/emacsclient -a '' -c";
   polkitAgent =
     "${pkgs.polkit-kde-agent}/libexec/polkit-kde-authentication-agent-1";
 in {
@@ -12,7 +12,7 @@ in {
   wayland.windowManager.hyprland.extraConfig = ''
      # Autostart settings
      exec-once = ${polkitAgent}
-     exec-once = ${pkgs.emacs29}/bin/emacs --daemon
+     exec-once = ${pkgs.emacs29-pgtk}/bin/emacs --daemon
      exec = ${
        pkgs.writeShellScriptBin "change-wallpaper"
        (builtins.readFile ./change-wallpaper.sh)
@@ -21,10 +21,6 @@ in {
        pkgs.writeShellScriptBin "waybar-launcher"
        (builtins.readFile ./waybar-launcher.sh)
      }/bin/waybar-launcher
-
-     # Screen settings
-     monitor = DP-1, 2560x1440@165, 1920x0, 1
-     monitor = HDMI-A-1, 1920x1080@60, 0x0, 1
 
      # Keybindings
      $mod = SUPER
@@ -82,17 +78,6 @@ in {
        kb_options=grp:win_space_toggle
        follow_mouse = 1
        accel_profile = flat
-
-       touchpad {
-         disable_while_typing = true
-         natural_scroll = true
-         clickfinger_behavior = true
-         tap-to-click = true
-       }
-
-       tablet {
-         output = DP-1
-       }
      }
 
     # General Hyprland variables
@@ -131,14 +116,6 @@ in {
       animation = fade, 1, 7, default
       animation = workspaces, 1, 6, default
     }
-
-    # Workspace settings
-    workspace = 1, monitor:DP-1
-    workspace = 2, monitor:DP-1
-    workspace = 3, monitor:DP-1
-    workspace = 4, monitor:HDMI-A-1
-    workspace = 5, monitor:HDMI-A-1
-    workspace = 6, monitor:HDMI-A-1
   '';
 }
 

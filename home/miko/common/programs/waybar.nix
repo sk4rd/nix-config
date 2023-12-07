@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, ... }:
 
 {
   # Waybar configuration
@@ -9,7 +9,6 @@
         layer = "top";
         position = "top";
         height = 30;
-        output = [ "DP-1" ];
 
         modules-left =
           [ "hyprland/workspaces" "wlr/taskbar" "hyprland/window" ];
@@ -28,7 +27,6 @@
         };
 
         "temperature" = {
-          hwmon-path = "/sys/class/hwmon/hwmon5/temp1_input";
           critical-threshold = 90;
           format = "{icon} {temperatureC}°C";
           format-icons = [ "󱃃" "󰔏" "󱃂" ];
