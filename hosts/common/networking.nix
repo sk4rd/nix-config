@@ -13,7 +13,7 @@
     firewall.allowedUDPPorts = [
       22000 # Syncthing QUIC
       21027 # Syncthing discovery broadcast
-      51280 # WireGuard
+      51820 # WireGuard
     ];
   };
 }
