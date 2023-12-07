@@ -13,7 +13,7 @@
         modules-left =
           [ "hyprland/workspaces" "wlr/taskbar" "hyprland/window" ];
         modules-center = [ "clock" ];
-        modules-right = [ "cpu" "temperature" "tray" ];
+        modules-right = [ "cpu" "temperature" ];
 
         "clock" = {
           format = "{:%H:%M %d.%m %a}";

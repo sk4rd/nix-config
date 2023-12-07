@@ -21,6 +21,7 @@ in {
        pkgs.writeShellScriptBin "waybar-launcher"
        (builtins.readFile ./waybar-launcher.sh)
      }/bin/waybar-launcher
+     exec-once = ${pkgs.networkmanagerapplet}/bin/nm-applet
 
      # Keybindings
      $mod = SUPER

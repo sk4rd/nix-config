@@ -7,7 +7,7 @@
     settings = {
       mainBar = {
         output = [ "eDP-1" ];
-        modules-right = lib.mkAfter [ "battery" ];
+        modules-right = lib.mkAfter [ "battery" "tray" ];
         "temperature" = { hwmon-path = "/sys/class/hwmon/hwmon2/temp1_input"; };
         "battery" = {
           states = {
