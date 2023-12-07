@@ -8,7 +8,10 @@
       mainBar = {
         output = [ "eDP-1" ];
         modules-right = lib.mkAfter [ "battery" "tray" ];
-        "temperature" = { hwmon-path = "/sys/class/hwmon/hwmon2/temp1_input"; };
+        "temperature" = {
+          hwmon-path =
+            "/sys/devices/platform/thinkpad_hwmon/hwmon/hwmon5/temp1_input";
+        };
         "battery" = {
           states = {
             warning = 25;
