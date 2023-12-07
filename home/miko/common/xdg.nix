@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 let
   home = "/home/miko";
   videoPlayer = "mpv.desktop";
