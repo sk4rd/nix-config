@@ -25,11 +25,15 @@ sleep 1
 # Initialize swww
 swww init
 
+# Create an array of wallpapers and shuffle them
+wallpapers=($(find "$wallpaper_directory" -type f \( -iname "*.jpg" -o -iname "*.png" \) | shuf))
+
 # Main loop for changing wallpapers
 while true; do
-  for wallpaper in "$wallpaper_directory"/*.{jpg,png}; do
+  for wallpaper in "${wallpapers[@]}"; do
     [ -f "$wallpaper" ] || continue
     swww img "$wallpaper" -t wipe --transition-fps 60
     sleep "$sleep_duration"
   done
 done
+
