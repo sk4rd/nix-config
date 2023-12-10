@@ -1,4 +1,4 @@
-{ wallpapers, pkgs, ... }:
+{ wallpapers, pkgs, split-monitor-workspaces, ... }:
 
 let
   terminal = "${pkgs.kitty}/bin/kitty";
@@ -9,6 +9,9 @@ let
     "${pkgs.polkit-kde-agent}/libexec/polkit-kde-authentication-agent-1";
 in {
   wayland.windowManager.hyprland.enable = true;
+  wayland.windowManager.hyprland.plugins = [
+    split-monitor-workspaces.packages.${pkgs.system}.split-monitor-workspaces
+  ];
   wayland.windowManager.hyprland.extraConfig = ''
      # Autostart settings
      exec-once = ${polkitAgent}
@@ -117,6 +120,25 @@ in {
       animation = fade, 1, 7, default
       animation = workspaces, 1, 6, default
     }
+
+    plugin {
+      split-monitor-workspaces {
+          count = 3
+      }
+    }
+
+    # Switch workspaces with mod + [1-3]
+    bind = $mod, 1, split-workspace, 1
+    bind = $mod, 2, split-workspace, 2
+    bind = $mod, 3, split-workspace, 3
+
+    # Move active window to a workspace with mod + SHIFT + [1-3]
+    bind = $mod SHIFT, 1, split-movetoworkspacesilent, 1
+    bind = $mod SHIFT, 2, split-movetoworkspacesilent, 2
+    bind = $mod SHIFT, 3, split-movetoworkspacesilent, 3
+
+    # Send window to the next monitor in line
+    bind = $mod SHIFT, period, split-changemonitor, next
   '';
 }
 
