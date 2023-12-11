@@ -16,9 +16,14 @@
       flake = false;
     };
     hyprland.url = "github:hyprwm/Hyprland";
+    split-monitor-workspaces = {
+      url = "github:Duckonaut/split-monitor-workspaces";
+      inputs.hyprland.follows = "hyprland";
+    };
   };
 
-  outputs = { nixpkgs, home-manager, emacs, hyprland, wallpapers, ... }:
+  outputs = { nixpkgs, home-manager, emacs, hyprland, split-monitor-workspaces
+    , wallpapers, ... }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -41,7 +46,9 @@
         "miko@desktop" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           modules = [ ./home/miko/desktop hyprland.homeManagerModules.default ];
-          extraSpecialArgs = { inherit emacs wallpapers; };
+          extraSpecialArgs = {
+            inherit emacs wallpapers split-monitor-workspaces;
+          };
         };
         "miko@laptop" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
