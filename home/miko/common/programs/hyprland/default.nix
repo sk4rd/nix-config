@@ -25,6 +25,7 @@ in {
        (builtins.readFile ./waybar-launcher.sh)
      }/bin/waybar-launcher
      exec-once = ${pkgs.networkmanagerapplet}/bin/nm-applet
+     exec-once = ${pkgs.mako}/bin/mako;
 
      # Keybindings
      $mod = SUPER
