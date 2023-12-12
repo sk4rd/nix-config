@@ -18,8 +18,7 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, emacs, split-monitor-workspaces, wallpapers
-    , ... }@inputs:
+  outputs = { nixpkgs, home-manager, emacs, wallpapers, ... }@inputs:
     let
       # Default system architecture
       system = "x86_64-linux";
@@ -43,9 +42,7 @@
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           modules = [ ./home/${user}/${host} ];
-          extraSpecialArgs = {
-            inherit (inputs) emacs wallpapers split-monitor-workspaces;
-          };
+          extraSpecialArgs = { inherit (inputs) emacs wallpapers; };
         };
     in {
       # NixOS configurations for different hosts
