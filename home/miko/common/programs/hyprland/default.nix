@@ -16,11 +16,11 @@ in {
      # Autostart settings
      exec-once = ${polkitAgent}
      exec-once = ${pkgs.emacs29-pgtk}/bin/emacs --daemon
-     exec = ${
+     exec-once = ${
        pkgs.writeShellScriptBin "change-wallpaper"
        (builtins.readFile ./change-wallpaper.sh)
      }/bin/change-wallpaper ${wallpapers}/gruvbox
-     exec = ${
+     exec-once = ${
        pkgs.writeShellScriptBin "waybar-launcher"
        (builtins.readFile ./waybar-launcher.sh)
      }/bin/waybar-launcher
