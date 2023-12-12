@@ -23,7 +23,7 @@
   };
 
   outputs = { nixpkgs, home-manager, emacs, hyprland, split-monitor-workspaces
-    , wallpapers, ... }:
+    , wallpapers, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -31,30 +31,30 @@
         config.allowUnfree = true;
         overlays = [ ];
       };
-    in {
-      nixosConfigurations = {
-        desktop = nixpkgs.lib.nixosSystem {
+      # Function for creating a host configuration
+      mkHostConfig = host:
+        nixpkgs.lib.nixosSystem {
           inherit pkgs;
-          modules = [ ./hosts/desktop ];
+          modules = [ ./hosts/${host} ];
         };
-        laptop = nixpkgs.lib.nixosSystem {
+      # Function for creating a home configuration
+      mkHomeConfig = user: host:
+        home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          modules = [ ./hosts/laptop ];
-        };
-      };
-      homeConfigurations = {
-        "miko@desktop" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          modules = [ ./home/miko/desktop hyprland.homeManagerModules.default ];
+          modules =
+            [ ./home/${user}/${host} hyprland.homeManagerModules.default ];
           extraSpecialArgs = {
-            inherit emacs wallpapers split-monitor-workspaces;
+            inherit (inputs) emacs wallpapers split-monitor-workspaces;
           };
         };
-        "miko@laptop" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          modules = [ ./home/miko/laptop hyprland.homeManagerModules.default ];
-          extraSpecialArgs = { inherit emacs wallpapers; };
-        };
+    in {
+      nixosConfigurations = {
+        desktop = mkHostConfig "desktop";
+        laptop = mkHostConfig "laptop";
+      };
+      homeConfigurations = {
+        "miko@desktop" = mkHomeConfig "miko" "desktop";
+        "miko@laptop" = mkHomeConfig "miko" "laptop";
       };
     };
 }
