@@ -16,15 +16,10 @@
       url = "github:sk4rd/wallpapers";
       flake = false;
     };
-    hyprland.url = "github:hyprwm/Hyprland";
-    split-monitor-workspaces = {
-      url = "github:Duckonaut/split-monitor-workspaces";
-      inputs.hyprland.follows = "hyprland";
-    };
   };
 
-  outputs = { nixpkgs, home-manager, emacs, hyprland, split-monitor-workspaces
-    , wallpapers, ... }@inputs:
+  outputs = { nixpkgs, home-manager, emacs, split-monitor-workspaces, wallpapers
+    , ... }@inputs:
     let
       # Default system architecture
       system = "x86_64-linux";
@@ -47,8 +42,7 @@
       mkHomeConfig = user: host:
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          modules =
-            [ ./home/${user}/${host} hyprland.homeManagerModules.default ];
+          modules = [ ./home/${user}/${host} ];
           extraSpecialArgs = {
             inherit (inputs) emacs wallpapers split-monitor-workspaces;
           };

@@ -1,145 +1,153 @@
-{ wallpapers, pkgs, split-monitor-workspaces, ... }:
+{ wallpapers, pkgs, ... }:
 
 let
-  terminal = "${pkgs.kitty}/bin/kitty";
-  browser = "${pkgs.firefox}/bin/firefox";
-  launcher = "${pkgs.rofi-wayland}/bin/rofi -show run";
-  editor = "${pkgs.emacs29-pgtk}/bin/emacsclient -a '' -c";
+  # PolicyKit authentication daemon
   polkitAgent =
     "${pkgs.polkit-kde-agent}/libexec/polkit-kde-authentication-agent-1";
+
+  # Wallpaper slideshow daemon
+  wallpaperTheme = "gruvbox";
+  wallpaperChanger = "${
+      pkgs.writeShellScriptBin "change-wallpaper"
+      (builtins.readFile ./change-wallpaper.sh)
+    }/bin/change-wallpaper ${wallpapers}/${wallpaperTheme}";
+
+  # Emacs daemon and client for editing files
+  emacsDaemon = "${pkgs.emacs29-pgtk}/bin/emacs --daemon";
+  emacsClient = "${pkgs.emacs29-pgtk}/bin/emacsclient -a '' -c";
+
+  # Wayland status bar
+  waybar = "${pkgs.waybar}/bin/waybar";
+
+  # Notification daemon
+  mako = "${pkgs.mako}/bin/mako";
+
+  # Network manager applet
+  nm-applet = "${pkgs.networkmanagerapplet}/bin/nm-applet";
+
+  # Programs
+  kitty = "${pkgs.kitty}/bin/kitty";
+  firefox = "${pkgs.firefox}/bin/firefox";
+  rofi = "${pkgs.rofi-wayland}/bin/rofi -show run";
 in {
-  wayland.windowManager.hyprland.enable = true;
-  wayland.windowManager.hyprland.plugins = [
-    split-monitor-workspaces.packages.${pkgs.system}.split-monitor-workspaces
-  ];
-  wayland.windowManager.hyprland.extraConfig = ''
-     # Autostart settings
-     exec-once = ${polkitAgent}
-     exec-once = ${pkgs.emacs29-pgtk}/bin/emacs --daemon
-     exec-once = ${
-       pkgs.writeShellScriptBin "change-wallpaper"
-       (builtins.readFile ./change-wallpaper.sh)
-     }/bin/change-wallpaper ${wallpapers}/gruvbox
-     exec-once = ${
-       pkgs.writeShellScriptBin "waybar-launcher"
-       (builtins.readFile ./waybar-launcher.sh)
-     }/bin/waybar-launcher
-     exec-once = ${pkgs.networkmanagerapplet}/bin/nm-applet
-     exec-once = ${pkgs.mako}/bin/mako;
+  wayland.windowManager.hyprland = {
+    enable = true;
+    systemd.enable = true;
+    settings = {
+      # Autostarted programs
+      exec-once =
+        [ polkitAgent emacsDaemon wallpaperChanger waybar mako nm-applet ];
 
-     # Keybindings
-     $mod = SUPER
-     bind = $mod, Q, exec, ${terminal}
-     bind = $mod, W, exec, ${browser}
-     bind = $mod, R, exec, ${launcher}
-     bind = $mod, E, exec, ${editor}
+      # Modifier key set to SUPER
+      "$mod" = "SUPER";
 
-     bind = $mod SHIFT, C, killactive
-     bind = $mod, V, togglefloating,
+      # Keybindings
+      bind = [
+        # Programs
+        "$mod, Q, exec, ${kitty}"
+        "$mod, R, exec, ${rofi}"
+        "$mod, W, exec, ${firefox}"
+        "$mod, E, exec, ${emacsClient}"
 
-     bind = $mod, h, movefocus, l
-     bind = $mod, l, movefocus, r
-     bind = $mod, k, movefocus, u
-     bind = $mod, j, movefocus, d
+        # Workspace navigation/window movement
+        "$mod, 1, workspace, 1"
+        "$mod, 2, workspace, 2"
+        "$mod, 3, workspace, 3"
+        "$mod, 4, workspace, 4"
+        "$mod, 5, workspace, 5"
+        "$mod, 6, workspace, 6"
+        "$mod, 7, workspace, 7"
+        "$mod, 8, workspace, 8"
+        "$mod, 9, workspace, 9"
+        "$mod, 0, workspace, 10"
+        "$mod, S, togglespecialworkspace, magic"
 
-     bind = $mod SHIFT, h, movewindow, l
-     bind = $mod SHIFT, l, movewindow, r
-     bind = $mod SHIFT, k, movewindow, u
-     bind = $mod SHIFT, j, movewindow, d
+        "$mod SHIFT, 1, movetoworkspace, 1"
+        "$mod SHIFT, 2, movetoworkspace, 2"
+        "$mod SHIFT, 3, movetoworkspace, 3"
+        "$mod SHIFT, 4, movetoworkspace, 4"
+        "$mod SHIFT, 5, movetoworkspace, 5"
+        "$mod SHIFT, 6, movetoworkspace, 6"
+        "$mod SHIFT, 7, movetoworkspace, 7"
+        "$mod SHIFT, 8, movetoworkspace, 8"
+        "$mod SHIFT, 9, movetoworkspace, 9"
+        "$mod SHIFT, 0, movetoworkspace, 10"
+        "$mod SHIFT, S, movetoworkspace, special:magic"
 
-     bind = $mod, 1, workspace, 1
-     bind = $mod, 2, workspace, 2
-     bind = $mod, 3, workspace, 3
-     bind = $mod, 4, workspace, 4
-     bind = $mod, 5, workspace, 5
-     bind = $mod, 6, workspace, 6
-     bind = $mod, 7, workspace, 7
-     bind = $mod, 8, workspace, 8
-     bind = $mod, 9, workspace, 9
-     bind = $mod, 0, workspace, 10
+        # Window navigation/movement
+        "$mod, h, movefocus, l"
+        "$mod, l, movefocus, r"
+        "$mod, k, movefocus, u"
+        "$mod, j, movefocus, d"
 
-     bind = $mod SHIFT, 1, movetoworkspace, 1
-     bind = $mod SHIFT, 2, movetoworkspace, 2
-     bind = $mod SHIFT, 3, movetoworkspace, 3
-     bind = $mod SHIFT, 4, movetoworkspace, 4
-     bind = $mod SHIFT, 5, movetoworkspace, 5
-     bind = $mod SHIFT, 6, movetoworkspace, 6
-     bind = $mod SHIFT, 7, movetoworkspace, 7
-     bind = $mod SHIFT, 8, movetoworkspace, 8
-     bind = $mod SHIFT, 9, movetoworkspace, 9
-     bind = $mod SHIFT, 0, movetoworkspace, 10
+        "$mod SHIFT, h, movewindow, l"
+        "$mod SHIFT, l, movewindow, r"
+        "$mod SHIFT, k, movewindow, u"
+        "$mod SHIFT, j, movewindow, d"
 
-     bind = $mod, RETURN, layoutmsg, swapwithmaster
+        # Window management
+        "$mod SHIFT, C, killactive"
+        "$mod, V, togglefloating,"
+        "$mod, RETURN, layoutmsg, swapwithmaster"
+      ];
 
-     bind = $mod, S, togglespecialworkspace, magic
-     bind = $mod SHIFT, S, movetoworkspace, special:magic
+      # Mouse bindings
+      bindm = [
+        # Window resizing
+        "$mod, mouse:272, movewindow"
+        "$mod, mouse:273, resizewindow"
+      ];
 
-     bindm = $mod, mouse:272, movewindow
-     bindm = $mod, mouse:273, resizewindow
+      # Input device configuration
+      input = {
+        kb_layout = "us,de";
+        kb_options = "grp:win_space_toggle"; # Toggle layout with SUPER + Space
+        follow_mouse = 1;
+        accel_profile = "flat"; # Disable pointer acceleration
+      };
 
-     # Input device settings
-     input {
-       kb_layout = us,de
-       kb_options=grp:win_space_toggle
-       follow_mouse = 1
-       accel_profile = flat
-     }
+      # Settings regarding looks
+      general = {
+        gaps_in = 5;
+        gaps_out = 20;
+        border_size = 3;
+        "col.active_border" = "rgba(8ec07cee)";
+        "col.inactive_border" = "rgba(282828aa)";
+        cursor_inactive_timeout = 5;
+        layout = "master";
+        allow_tearing = false;
+      };
 
-    # General Hyprland variables
-    general {
-      gaps_in = 5
-      gaps_out = 20
-      border_size = 3
-      col.active_border = rgba(8ec07cee)
-      col.inactive_border = rgba(282828aa)
-      cursor_inactive_timeout = 5
-      layout = master
-      allow_tearing = false
-    }
+      # Settings regarding decoration
+      decoration = {
+        rounding = 10;
 
-    # Decoration and blur settings
-    decoration {
-      rounding = 10
+        # Enable blurring of transparent elements
+        blur = {
+          enabled = true;
+          size = 4;
+          passes = 1;
+          vibrancy = "0.17";
+        };
+      };
 
-      blur {
-        enabled = true
-        size = 4
-        passes = 1
-        vibrancy = 0.17
-      }
-    }
+      # Settings regarding animation
+      animations = {
+        enabled = true;
+        # Bezier curve definition
+        bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
 
-    # Animation settings
-    animations {
-      enabled = true
-      bezier = myBezier, 0.05, 0.9, 0.1, 1.05
-
-      animation = windows, 1, 7, myBezier
-      animation = windowsOut, 1, 7, default, popin 80%
-      animation = border, 1, 10, default
-      animation = borderangle, 1, 8, default
-      animation = fade, 1, 7, default
-      animation = workspaces, 1, 6, default
-    }
-
-    plugin {
-      split-monitor-workspaces {
-          count = 3
-      }
-    }
-
-    # Switch workspaces with mod + [1-3]
-    bind = $mod, 1, split-workspace, 1
-    bind = $mod, 2, split-workspace, 2
-    bind = $mod, 3, split-workspace, 3
-
-    # Move active window to a workspace with mod + SHIFT + [1-3]
-    bind = $mod SHIFT, 1, split-movetoworkspacesilent, 1
-    bind = $mod SHIFT, 2, split-movetoworkspacesilent, 2
-    bind = $mod SHIFT, 3, split-movetoworkspacesilent, 3
-
-    # Send window to the next monitor in line
-    bind = $mod SHIFT, period, split-changemonitor, next
-  '';
+        # Animation defintions
+        animation = [
+          "windows, 1, 7, myBezier"
+          "windowsOut, 1, 7, default, popin 80%"
+          "border, 1, 10, default"
+          "borderangle, 1, 8, default"
+          "fade, 1, 7, default"
+          "workspaces, 1, 6, default"
+        ];
+      };
+    };
+  };
 }
 
