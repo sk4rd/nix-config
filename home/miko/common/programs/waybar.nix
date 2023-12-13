@@ -14,6 +14,8 @@
         modules-center = [ "clock" ];
         modules-right = [ "cpu" "temperature" ];
 
+        "hyprland/window" = { max-length = 40; };
+
         "clock" = {
           format = "{:%H:%M %d.%m %a}";
           tooltip = true;
