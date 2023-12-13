@@ -10,10 +10,11 @@
         position = "top";
         height = 30;
 
-        modules-left =
-          [ "hyprland/workspaces" "wlr/taskbar" "hyprland/window" ];
+        modules-left = [ "hyprland/workspaces" "hyprland/window" ];
         modules-center = [ "clock" ];
         modules-right = [ "cpu" "temperature" ];
+
+        "hyprland/window" = { max-length = 40; };
 
         "clock" = {
           format = "{:%H:%M %d.%m %a}";
@@ -55,6 +56,11 @@
         color: rgba(235, 219, 178, 1);
         border-bottom: 4px solid rgba(142, 192, 124, 1);
         border-radius: 0px;
+      }
+
+      #window {
+        padding-left: 10px;
+        padding-right: 10px;
       }
 
       #clock {
