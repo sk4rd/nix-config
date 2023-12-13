@@ -58,6 +58,11 @@
         border-radius: 0px;
       }
 
+      #window {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
       #clock {
         border: 2px solid white;
         border-radius: 12px 12px 0px 0px;
