@@ -12,6 +12,7 @@
     ./filesystems.nix
     ./ssh.nix
     ./printing.nix
+    ./greeter.nix
   ];
 
   time.timeZone = "Europe/Berlin";
