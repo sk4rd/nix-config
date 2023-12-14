@@ -11,6 +11,7 @@
     ./virtualisation.nix
     ./filesystems.nix
     ./ssh.nix
+    ./printing.nix
   ];
 
   time.timeZone = "Europe/Berlin";
