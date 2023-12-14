@@ -28,7 +28,7 @@
     monero-gui # Cryptocurrency wallet for Monero
     prismlauncher # Launcher for Minecraft
     protonup-qt # Proton version manager
-    xournalpp # App for taking handwritten notes
+    rnote # App for taking handwritten notes
     swww # Wallpaper switcher
     wayshot # Screenshot tool for wlroots
     slurp # Area selection tool for wlroots
