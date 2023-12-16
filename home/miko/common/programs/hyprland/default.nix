@@ -147,6 +147,12 @@ in {
           "workspaces, 1, 6, default"
         ];
       };
+
+      # Window rules
+      windowrule = [
+        "float,^(steam)$"
+        "float,^(org.kde.polkit-kde-authentication-agent-1)$"
+      ];
     };
   };
 }
