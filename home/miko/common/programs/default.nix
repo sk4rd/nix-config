@@ -6,14 +6,13 @@
     ./firefox.nix
     ./git.nix
     ./github.nix
+    ./hyprland
     ./kitty.nix
     ./lf
     ./mangohud.nix
     ./neofetch
-    ./shell.nix
-    ./syncthing.nix
     ./rofi.nix
-    ./hyprland
+    ./shell.nix
     ./waybar.nix
   ];
 
