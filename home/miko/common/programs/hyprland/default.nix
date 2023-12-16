@@ -29,6 +29,7 @@ let
   kitty = "${pkgs.kitty}/bin/kitty";
   firefox = "${pkgs.firefox}/bin/firefox";
   rofi = "${pkgs.rofi-wayland}/bin/rofi -show run";
+  thunar = "${pkgs.xfce.thunar}/bin/thunar";
 in {
   wayland.windowManager.hyprland = {
     enable = true;
@@ -48,6 +49,7 @@ in {
         "$mod, R, exec, ${rofi}"
         "$mod, W, exec, ${firefox}"
         "$mod, E, exec, ${emacsClient}"
+        "$mod, F, exec, ${thunar}"
 
         # Workspace navigation/window movement
         "$mod, 1, workspace, 1"
