@@ -30,6 +30,9 @@ let
   firefox = "${pkgs.firefox}/bin/firefox";
   rofi = "${pkgs.rofi-wayland}/bin/rofi -show run";
   thunar = "${pkgs.xfce.thunar}/bin/thunar";
+  wl-copy = "${pkgs.wl-clipboard}/bin/wl-copy";
+  wayshot = "${pkgs.wayshot}/bin/wayshot";
+  slurp = "${pkgs.slurp}/bin/slurp";
 in {
   wayland.windowManager.hyprland = {
     enable = true;
@@ -50,6 +53,9 @@ in {
         "$mod, W, exec, ${firefox}"
         "$mod, E, exec, ${emacsClient}"
         "$mod, F, exec, ${thunar}"
+
+        # Screenshot
+        ''$mod SHIFT, S, exec, ${wayshot} -s "$(${slurp})" --stdout | ${wl-copy}''
 
         # Workspace navigation/window movement
         "$mod, 1, workspace, 1"
