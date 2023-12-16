@@ -6,13 +6,9 @@
     ./hardware
     ./networking.nix
     ./programs
-    ./sound.nix
+    ./services
     ./users.nix
     ./virtualisation.nix
-    ./filesystems.nix
-    ./ssh.nix
-    ./printing.nix
-    ./greeter.nix
   ];
 
   time.timeZone = "Europe/Berlin";

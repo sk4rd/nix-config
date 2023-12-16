@@ -55,7 +55,8 @@ in {
         "$mod, F, exec, ${thunar}"
 
         # Screenshot
-        ''$mod SHIFT, S, exec, ${wayshot} -s "$(${slurp})" --stdout | ${wl-copy}''
+        ''
+          $mod SHIFT, S, exec, ${wayshot} -s "$(${slurp})" --stdout | ${wl-copy}''
 
         # Workspace navigation/window movement
         "$mod, 1, workspace, 1"

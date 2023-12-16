@@ -7,4 +7,7 @@
     editor = false;
     configurationLimit = 50;
   };
+
+  # Supported filesystems on boot
+  boot.supportedFilesystems = [ "ntfs" ];
 }

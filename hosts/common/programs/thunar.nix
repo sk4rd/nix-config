@@ -10,8 +10,5 @@
       thunar-media-tags-plugin
     ];
   };
-
-  # Thumbnail support for images  
-  services.tumbler.enable = true;
 }
 

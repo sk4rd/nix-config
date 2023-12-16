@@ -19,7 +19,5 @@
     # USB redirection support
     spiceUSBRedirection.enable = true;
   };
-
-  # Enable Spice vdagent
-  services.spice-vdagentd.enable = true;
 }
+
