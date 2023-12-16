@@ -15,7 +15,6 @@
     ./rofi.nix
     ./hyprland
     ./waybar.nix
-    ./mako.nix
   ];
 
   # Programs without configuration

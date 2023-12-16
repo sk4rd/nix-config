@@ -1,5 +1,5 @@
 { ... }:
 
 {
-  imports = [ ../common ./hyprland.nix ./waybar.nix ./ssh.nix ];
+  imports = [ ../common ./programs.nix ];
 }

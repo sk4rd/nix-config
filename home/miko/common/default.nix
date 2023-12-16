@@ -1,16 +1,15 @@
 { ... }:
 
 {
-  imports = [ ./programs ./xdg.nix ./cursor.nix ./gtk.nix ];
+  # Imports for all common config directories
+  imports = [ ./misc ./programs ./services ];
 
+  # Default home configuration
   home = {
     username = "miko";
     homeDirectory = "/home/miko";
     stateVersion = "23.11";
   };
-
-  # Enable the ssh-agent
-  services.ssh-agent.enable = true;
 
   # Let fonts be managed by home-manager
   fonts.fontconfig.enable = true;
