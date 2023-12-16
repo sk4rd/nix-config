@@ -6,6 +6,7 @@
     ./hardware
     ./networking.nix
     ./programs
+    ./security.nix
     ./services
     ./users.nix
     ./virtualisation.nix
