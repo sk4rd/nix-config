@@ -12,7 +12,7 @@
 
         modules-left = [ "hyprland/workspaces" "hyprland/window" ];
         modules-center = [ "clock" ];
-        modules-right = [ "cpu" "temperature" ];
+        modules-right = [ "cpu" "temperature" "disk" ];
 
         "hyprland/window" = { max-length = 40; };
 
@@ -31,6 +31,12 @@
           critical-threshold = 90;
           format = "{icon} {temperatureC}°C";
           format-icons = [ "󱃃" "󰔏" "󱃂" ];
+        };
+
+        "disk" = {
+          format = "{free} @ /";
+          interval = 60;
+          path = "/";
         };
 
         "tray" = {
@@ -68,7 +74,7 @@
         border-radius: 12px 12px 0px 0px;
       }
 
-      #tray, #temperature, #clock, #cpu, #workspaces, #battery {
+      #tray, #temperature, #clock, #cpu, #workspaces, #battery, #disk {
         padding: 0px 20px;
         background: rgba(40, 40, 40, 1);
         border-bottom: 4px solid rgba(142, 192, 124, 1);
@@ -84,6 +90,10 @@
 
       #temperature {
         border-color: rgba(131, 165, 152, 1);
+      }
+
+      #disk {
+        border-color: rgba(104, 157, 106, 1);
       }
 
       #battery {
