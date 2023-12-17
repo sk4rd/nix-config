@@ -34,7 +34,7 @@
         };
 
         "disk" = {
-          format = "{free} @ /";
+          format = "󰋊 {free} @ /";
           interval = 60;
           path = "/";
         };
