@@ -2,6 +2,6 @@
 
 {
   # Imports for all service configurations
-  imports = [ ./mako.nix ./ssh-agent.nix ./syncthing.nix ];
+  imports = [ ./mako.nix ./ssh-agent.nix ./swayidle.nix ./syncthing.nix ];
 }
 
