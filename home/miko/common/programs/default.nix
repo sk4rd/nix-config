@@ -13,6 +13,7 @@
     ./neofetch
     ./rofi.nix
     ./shell.nix
+    ./swaylock.nix
     ./waybar.nix
   ];
 
