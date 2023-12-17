@@ -1,5 +1,5 @@
 { ... }:
 
 {
-  imports = [ ../common ./programs.nix ];
+  imports = [ ../common ./programs ];
 }
