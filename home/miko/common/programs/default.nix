@@ -33,6 +33,7 @@
     slurp # Area selection tool for wlroots
     imv # Wayland image viewer
     mpv # Minimal video player
+    mullvad-browser # Mullvad firefox based browser
   ];
 }
 
