@@ -4,7 +4,7 @@
   # GitHub CLI configuration
   programs.gh = {
     enable = true;
-    extensions = with pkgs; [ gh-dash gh-markdown-preview gh-eco ];
+    extensions = with pkgs; [ gh-dash gh-eco gh-markdown-preview ];
     settings = {
       git_protocol = "ssh";
       prompt = "enabled";

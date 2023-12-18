@@ -22,18 +22,18 @@
     discord # Internet messaging platform
     element-desktop # Secure messaging app
     gimp # Advanced image editing tool
+    imv # Wayland image viewer
     keepassxc # Secure password management
     lutris # Game launcher
     monero-gui # Cryptocurrency wallet for Monero
+    mpv # Minimal video player
+    mullvad-browser # Mullvad firefox based browser
     prismlauncher # Launcher for Minecraft
     protonup-qt # Proton version manager
     rnote # App for taking handwritten notes
+    slurp # Area selection tool for wlroots
     swww # Wallpaper switcher
     wayshot # Screenshot tool for wlroots
-    slurp # Area selection tool for wlroots
-    imv # Wayland image viewer
-    mpv # Minimal video player
-    mullvad-browser # Mullvad firefox based browser
   ];
 }
 
