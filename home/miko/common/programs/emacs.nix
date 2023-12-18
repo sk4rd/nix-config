@@ -9,8 +9,8 @@
 
   # Install some optional dependencies
   home.packages = with pkgs; [
-    iosevka # Sleek, monospaced font optimized for coding
     fortune # Random quotation display
+    iosevka # Sleek, monospaced font optimized for coding
     nil # Nix language server
     nixfmt # Nix formatter
   ];

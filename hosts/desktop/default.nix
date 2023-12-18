@@ -1,5 +1,5 @@
 { ... }:
 
 {
-  imports = [ ../common ./hardware ./networking.nix ./boot.nix ./ssh.nix ];
+  imports = [ ../common ./boot.nix ./hardware ./networking.nix ./ssh.nix ];
 }

@@ -2,7 +2,7 @@
 
 {
   # Dependencies for the shell
-  home.packages = with pkgs; [ fortune lolcat fzf thefuck ];
+  home.packages = with pkgs; [ fortune fzf lolcat thefuck ];
 
   # ZSH configuration
   programs.zsh = {

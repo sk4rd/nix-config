@@ -1,6 +1,6 @@
-{ lib, ... }:
+{ ... }:
 
 {
   imports =
-    [ ../common ./power-management.nix ./networking.nix ./hardware ./boot.nix ];
+    [ ../common ./boot.nix ./hardware ./networking.nix ./power-management.nix ];
 }

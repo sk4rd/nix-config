@@ -9,7 +9,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     emacs = {
-      url = "github:sk4rd/emacs.d/dev";
+      url = "github:sk4rd/emacs.d";
       flake = false;
     };
     wallpapers = {
@@ -18,7 +18,7 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, emacs, wallpapers, ... }@inputs:
+  outputs = { emacs, home-manager, nixpkgs, wallpapers, ... }@inputs:
     let
       # Default system architecture
       system = "x86_64-linux";
