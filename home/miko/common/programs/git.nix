@@ -16,13 +16,12 @@
 
     aliases = {
       a = "add";
-      br = "branch";
-      ci = "commit";
-      co = "checkout";
-      ps = "push";
+      b = "branch";
+      c = "commit";
+      ch = "checkout";
+      p = "push";
       pl = "pull";
-      rs = "restore";
-      rst = "reset";
+      res = "restore";
       s = "status";
     };
   };
