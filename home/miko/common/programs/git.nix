@@ -5,12 +5,15 @@
     enable = true;
     lfs.enable = true;
     package = pkgs.gitFull;
-    userName = "Mikolaj Bajtkiewicz";
+
     userEmail = "mikolaj.bajtkiewicz@tutanota.de";
+    userName = "Mikolaj Bajtkiewicz";
+
     signing = {
-      key = "013305C22DC1923F";
       signByDefault = true;
+      key = "013305C22DC1923F";
     };
+
     aliases = {
       a = "add";
       br = "branch";
