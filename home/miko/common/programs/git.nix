@@ -7,6 +7,10 @@
     package = pkgs.gitFull;
     userName = "Mikolaj Bajtkiewicz";
     userEmail = "mikolaj.bajtkiewicz@tutanota.de";
+    signing = {
+      key = "013305C22DC1923F";
+      signByDefault = true;
+    };
     aliases = {
       a = "add";
       br = "branch";
