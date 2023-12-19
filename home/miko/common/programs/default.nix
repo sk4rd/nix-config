@@ -6,6 +6,7 @@
     ./firefox.nix
     ./git.nix
     ./github.nix
+    ./gpg.nix
     ./hyprland
     ./kitty.nix
     ./lf
