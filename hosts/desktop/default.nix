@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   imports = [
@@ -8,6 +8,7 @@
     ./programs.nix
     ./networking.nix
     ./services.nix
+    ./virtualisation.nix
   ];
 
   time.timeZone = "Europe/Berlin";
@@ -31,12 +32,15 @@
     extraGroups = [
       "networkmanager"
       "wheel"
+      "docker"
     ];
   };
 
   environment.systemPackages = with pkgs; [
     brave
     vscode
+    freerdp
+    inputs.winboat.packages.x86_64-linux.winboat
   ];
 
   environment.shellInit = ''

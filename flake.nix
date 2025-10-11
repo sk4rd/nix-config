@@ -1,10 +1,16 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    winboat.url = "github:TibixDev/winboat";
+    winboat.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
-    { self, nixpkgs }:
+    {
+      self,
+      nixpkgs,
+      winboat,
+    }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -18,6 +24,7 @@
         modules = [
           ./hosts/desktop
         ];
+        specialArgs.inputs = inputs;
       };
 
       formatter.${system} = pkgs.nixfmt;
