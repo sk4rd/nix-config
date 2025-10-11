@@ -38,6 +38,7 @@
 
   environment.systemPackages = with pkgs; [
     brave
+    vesktop
     vscode
     freerdp
     inputs.winboat.packages.x86_64-linux.winboat
