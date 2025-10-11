@@ -18,7 +18,28 @@
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "winboat": "winboat"
+      }
+    },
+    "winboat": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1760183562,
+        "narHash": "sha256-lauscAI61WXjLTuGiRDMUAEeTqvOTSWhRoHDaor5sfE=",
+        "owner": "TibixDev",
+        "repo": "winboat",
+        "rev": "ae60de6c2cba7a2001fef1027d5c2e06614e6904",
+        "type": "github"
+      },
+      "original": {
+        "owner": "TibixDev",
+        "repo": "winboat",
+        "type": "github"
       }
     }
   },
