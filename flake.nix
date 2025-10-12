@@ -1,6 +1,8 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
     winboat.url = "github:TibixDev/winboat";
     winboat.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -9,6 +11,7 @@
     {
       self,
       nixpkgs,
+      home-manager,
       winboat,
     }@inputs:
     let
@@ -23,6 +26,7 @@
         inherit pkgs;
         modules = [
           ./hosts/desktop
+          ./home/miko
         ];
         specialArgs.inputs = inputs;
       };
