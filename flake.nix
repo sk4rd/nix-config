@@ -22,13 +22,24 @@
       };
     in
     {
-      nixosConfigurations."desktop" = nixpkgs.lib.nixosSystem {
-        inherit pkgs;
-        modules = [
-          ./hosts/desktop
-          ./home/miko
-        ];
-        specialArgs.inputs = inputs;
+      nixosConfigurations = {
+        "desktop" = nixpkgs.lib.nixosSystem {
+          inherit pkgs;
+          modules = [
+            ./hosts/desktop
+            ./home/miko
+          ];
+          specialArgs.inputs = inputs;
+        };
+
+        "laptop" = nixpkgs.lib.nixosSystem {
+          inherit pkgs;
+          modules = [
+            ./hosts/laptop
+            ./home/miko
+          ];
+          specialArgs.inputs = inputs;
+        };
       };
 
       formatter.${system} = pkgs.nixfmt;
