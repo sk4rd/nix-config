@@ -6,11 +6,14 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
+    extraPackages = with pkgs; [
+      nixd
+      nixfmt
+    ];
     plugins = with pkgs.vimPlugins; [
       coc-tsserver
       coc-prettier
     ];
-
     coc = {
       enable = true;
       settings = {
@@ -18,7 +21,21 @@
           "css"
           "markdown"
           "javascript"
+	  "nix"
         ];
+        languageserver = {
+          nixd = {
+            command = "nixd";
+            rootPatterns = [ ".nixd.json" ];
+            filetypes = [ "nix" ];
+          };
+        };
+        "coc.preferences.formatters" = {
+          nix = {
+            command = "nixfmt";
+            args = [ "-" ];
+          };
+        };
       };
       pluginConfig = ''
         inoremap <silent><expr> <cr> coc#pum#visible() ? coc#_select_confirm() : "\<C-g>u\<CR>"
