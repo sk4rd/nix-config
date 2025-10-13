@@ -41,6 +41,7 @@
     vesktop
     vscode
     freerdp
+    wireguard-tools
     inputs.winboat.packages.x86_64-linux.winboat
   ];
 
