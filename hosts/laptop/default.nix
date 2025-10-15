@@ -33,6 +33,7 @@
       "networkmanager"
       "wheel"
       "docker"
+      "scanner"
     ];
   };
 
