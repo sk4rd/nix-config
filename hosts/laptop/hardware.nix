@@ -11,5 +11,6 @@
         rocmPackages.clr.icd
       ];
     };
+    sane.enable = true;
   };
 }
