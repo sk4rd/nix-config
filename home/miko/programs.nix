@@ -1,6 +1,11 @@
 { pkgs, ... }:
 
 {
+  programs.git = {
+    userEmail = "mikolaj.ba@pm.me";
+    signing.key = "047E2967169C053A";
+    extraConfig.commit.gpgsign = true;
+  };
   programs.neovim = {
     enable = true;
     defaultEditor = true;
@@ -21,7 +26,7 @@
           "css"
           "markdown"
           "javascript"
-	  "nix"
+          "nix"
         ];
         languageserver = {
           nixd = {
