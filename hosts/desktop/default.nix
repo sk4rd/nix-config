@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -41,7 +41,6 @@
     vesktop
     vscode
     freerdp
-    inputs.winboat.packages.x86_64-linux.winboat
   ];
 
   environment.shellInit = ''
