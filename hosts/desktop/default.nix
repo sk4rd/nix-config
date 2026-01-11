@@ -33,6 +33,7 @@
       "networkmanager"
       "wheel"
       "docker"
+      "libvirtd"
     ];
   };
 
@@ -40,7 +41,6 @@
     brave
     vesktop
     vscode
-    freerdp
   ];
 
   environment.shellInit = ''
