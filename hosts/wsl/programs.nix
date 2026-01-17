@@ -2,10 +2,11 @@
   inputs,
   pkgs,
   ...
-}: {
-  imports = [inputs.nvf.nixosModules.nvf];
+}:
+{
+  imports = [ inputs.nvf.nixosModules.nvf ];
 
-  environment.systemPackages = with pkgs; [tree];
+  environment.systemPackages = with pkgs; [ tree ];
 
   programs.nvf = {
     enable = true;
