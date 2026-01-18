@@ -24,39 +24,51 @@
         inherit system;
         config.allowUnfree = true;
       };
+
+      mkHost =
+        {
+          hostPath,
+          homePath ? null,
+          extraModules ? [ ],
+        }:
+        nixpkgs.lib.nixosSystem {
+          inherit pkgs;
+          modules =
+            extraModules
+            ++ [
+              hostPath
+              ./modules
+              nvf.nixosModules.nvf
+            ]
+            ++ (
+              if homePath != null then
+                [
+                  home-manager.nixosModules.home-manager
+                  homePath
+                ]
+              else
+                [ ]
+            );
+        };
     in
     {
       nixosConfigurations = {
-        "desktop" = nixpkgs.lib.nixosSystem {
-          inherit pkgs;
-          modules = [
-            ./hosts/desktop
-            ./home/miko
-            ./modules
-            nvf.nixosModules.nvf
-          ];
-          specialArgs.inputs = inputs;
+        "desktop" = mkHost {
+          hostPath = ./hosts/desktop;
+          homePath = ./home/miko;
         };
 
-        "laptop" = nixpkgs.lib.nixosSystem {
-          inherit pkgs;
-          modules = [
-            ./hosts/laptop
-            ./home/miko
-            ./modules
-          ];
-          specialArgs.inputs = inputs;
+        "laptop" = mkHost {
+          hostPath = ./hosts/laptop;
+          homePath = ./home/miko;
         };
 
-        "wsl" = nixpkgs.lib.nixosSystem {
-          inherit pkgs;
-          modules = [
-            ./hosts/wsl
-            ./home/wsl
-            ./modules
+        "wsl" = mkHost {
+          hostPath = ./hosts/wsl;
+          homePath = ./home/wsl;
+          extraModules = [
             nixos-wsl.nixosModules.default
           ];
-          specialArgs.inputs = inputs;
         };
       };
 
