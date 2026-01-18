@@ -1,11 +1,5 @@
+{ pkgs, ... }:
 {
-  inputs,
-  pkgs,
-  ...
-}:
-{
-  imports = [ inputs.nvf.nixosModules.nvf ];
-
   environment.systemPackages = with pkgs; [ tree ];
 
   programs.nvf = {
