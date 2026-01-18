@@ -2,8 +2,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
     nvf.url = "github:notashelf/nvf";
     nvf.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -30,6 +32,8 @@
           modules = [
             ./hosts/desktop
             ./home/miko
+            ./modules
+            nvf.nixosModules.nvf
           ];
           specialArgs.inputs = inputs;
         };
@@ -39,6 +43,7 @@
           modules = [
             ./hosts/laptop
             ./home/miko
+            ./modules
           ];
           specialArgs.inputs = inputs;
         };
@@ -48,6 +53,7 @@
           modules = [
             ./hosts/wsl
             ./home/wsl
+            ./modules
             nixos-wsl.nixosModules.default
           ];
           specialArgs.inputs = inputs;
