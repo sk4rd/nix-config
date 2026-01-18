@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
 {
+  profiles.editor.neovim.enable = true;
   programs = {
     ssh.startAgent = false;
     gnupg.agent = {
