@@ -3,9 +3,7 @@
   config,
   ...
 }:
-
 with lib;
-
 let
   cfg = config.profiles.editor.neovim;
 in
@@ -16,7 +14,6 @@ in
     programs.nvf = {
       enable = true;
       settings.vim = {
-
         options = {
           tabstop = 2;
           shiftwidth = 2;
@@ -49,7 +46,10 @@ in
         languages = {
           enableFormat = true;
           ts.enable = true;
-          nix.enable = true;
+          nix = {
+            enable = true;
+            format.type = [ "nixfmt" ];
+          };
         };
         autocomplete.blink-cmp.enable = true;
       };
