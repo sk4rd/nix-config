@@ -17,7 +17,7 @@
       nixos-wsl,
       home-manager,
       nvf,
-    }@inputs:
+    }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
