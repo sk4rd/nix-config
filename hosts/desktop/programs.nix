@@ -19,5 +19,10 @@
         gamemode
       ];
     };
+
+    localsend = {
+      enable = true;
+      openFirewall = true;
+    };
   };
 }
