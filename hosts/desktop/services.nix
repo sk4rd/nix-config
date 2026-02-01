@@ -15,6 +15,8 @@
 
   services.pcscd.enable = true;
 
+  services.usbmuxd.enable = true;
+
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {

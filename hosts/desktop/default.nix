@@ -45,6 +45,7 @@
     vscode
     looking-glass-client
     vial
+    ifuse
   ];
 
   services.udev.extraRules = ''
