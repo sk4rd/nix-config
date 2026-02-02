@@ -46,6 +46,7 @@
     looking-glass-client
     vial
     ifuse
+    usbutils
   ];
 
   services.udev.extraRules = ''
