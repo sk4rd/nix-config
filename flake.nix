@@ -36,8 +36,8 @@
           modules =
             extraModules
             ++ [
+              ./hosts
               hostPath
-              ./modules
               nvf.nixosModules.nvf
             ]
             ++ (
