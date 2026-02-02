@@ -53,7 +53,12 @@
                       home-manager.useGlobalPkgs = true;
                       home-manager.useUserPackages = true;
 
-                      home-manager.users.${username} = import homePath;
+                      home-manager.users.${username} = {
+                        imports = [
+                          ./home
+                          homePath
+                        ];
+                      };
 
                       home-manager.sharedModules = [ nvf.homeManagerModules.nvf ] ++ extraHMModules;
                     }
