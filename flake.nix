@@ -29,22 +29,35 @@
         {
           hostPath,
           homePath ? null,
+          username ? null,
           extraModules ? [ ],
+          extraHMModules ? [ ],
         }:
         nixpkgs.lib.nixosSystem {
           inherit pkgs;
+
           modules =
             extraModules
             ++ [
               ./hosts
               hostPath
-              nvf.nixosModules.nvf
             ]
             ++ (
               if homePath != null then
+                assert username != null;
                 [
                   home-manager.nixosModules.home-manager
-                  homePath
+                  (
+                    { ... }:
+                    {
+                      home-manager.useGlobalPkgs = true;
+                      home-manager.useUserPackages = true;
+
+                      home-manager.users.${username} = import homePath;
+
+                      home-manager.sharedModules = [ nvf.homeManagerModules.nvf ] ++ extraHMModules;
+                    }
+                  )
                 ]
               else
                 [ ]
@@ -56,11 +69,13 @@
         "desktop" = mkHost {
           hostPath = ./hosts/desktop;
           homePath = ./home/miko;
+          username = "miko";
         };
 
         "laptop" = mkHost {
           hostPath = ./hosts/laptop;
           homePath = ./home/miko;
+          username = "miko";
         };
 
         "wsl" = mkHost {
