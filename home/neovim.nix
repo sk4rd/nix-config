@@ -17,6 +17,9 @@
 
       ui.breadcrumbs.enable = true;
 
+      clipboard.enable = true;
+      clipboard.providers.wl-copy.enable = true;
+
       telescope.enable = true;
 
       autopairs.nvim-autopairs.enable = true;
