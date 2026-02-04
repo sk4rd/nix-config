@@ -86,6 +86,7 @@
         "wsl" = mkHost {
           hostPath = ./hosts/wsl;
           homePath = ./home/wsl;
+          username = "nixos";
           extraModules = [
             nixos-wsl.nixosModules.default
           ];
