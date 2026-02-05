@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 
 {
   boot = {
@@ -23,5 +23,12 @@
       "usb_storage"
       "sd_mod"
     ];
+  };
+
+  specialisation.gpu.configuration = {
+    boot.kernelParams = lib.mkForce [
+      "iommu=pt"
+    ];
+    boot.initrd.kernelModules = lib.mkForce [ ];
   };
 }
