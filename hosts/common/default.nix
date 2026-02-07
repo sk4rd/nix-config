@@ -36,4 +36,28 @@
     gpg-connect-agent /bye
     export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
   '';
+
+  environment.systemPackages = with pkgs; [
+    # Archives
+    unzip
+    zip
+    p7zip
+
+    # File utilities
+    tree
+    file
+    fd
+    ripgrep
+
+    # Network
+    wget
+    curl
+
+    # System monitoring
+    htop
+    btop
+
+    # JSON/data processing
+    jq
+  ];
 }
