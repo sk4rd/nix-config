@@ -4,6 +4,7 @@
   imports = [
     ./programs.nix
     ./services.nix
+    ./nas.nix
   ];
 
   time.timeZone = "Europe/Berlin";
