@@ -8,6 +8,9 @@
 
     nvf.url = "github:notashelf/nvf";
     nvf.inputs.nixpkgs.follows = "nixpkgs";
+
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -17,6 +20,7 @@
       nixos-wsl,
       home-manager,
       nvf,
+      sops-nix,
     }:
     let
       system = "x86_64-linux";
@@ -39,6 +43,7 @@
           modules =
             extraModules
             ++ [
+              sops-nix.nixosModules.sops
               ./hosts
               hostPath
             ]

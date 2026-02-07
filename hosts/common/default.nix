@@ -4,6 +4,7 @@
   imports = [
     ./programs.nix
     ./services.nix
+    ./sops.nix
     ./nas.nix
   ];
 
