@@ -5,7 +5,7 @@
     ./programs.nix
     ./services.nix
     ./sops.nix
-    ./nas.nix
+    ./mounts.nix
   ];
 
   time.timeZone = "Europe/Berlin";
