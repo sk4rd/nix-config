@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 {
   environment.systemPackages = [ pkgs.cifs-utils ];
@@ -12,7 +12,7 @@
       "x-systemd.idle-timeout=60"
       "x-systemd.device-timeout=5s"
       "x-systemd.mount-timeout=5s"
-      "credentials=/etc/nixos/smb-secrets"
+      "credentials=${config.sops.secrets."nas/credentials".path}"
       "uid=1000"
       "gid=100"
     ];
