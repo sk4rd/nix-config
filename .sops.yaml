@@ -1,8 +1,11 @@
 keys:
   - &miko 9C8FF32791159E6FB55B978CAFA1F0631CECE62F
+  - &desktop age1e2nkm4s0phlv2mqaj02f74xzut07pxppn9pwzf9gpehyg4ljjscqftvgp8
 
 creation_rules:
   - path_regex: secrets/.*\.yaml$
     key_groups:
       - pgp:
           - *miko
+        age:
+          - *desktop
