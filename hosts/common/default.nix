@@ -6,6 +6,7 @@
     ./services.nix
     ./sops.nix
     ./mounts.nix
+    ./bluetooth.nix
   ];
 
   time.timeZone = "Europe/Berlin";
