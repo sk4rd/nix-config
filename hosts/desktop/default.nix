@@ -12,12 +12,6 @@
     ./virtualisation.nix
   ];
 
-  users.users.miko.extraGroups = [
-    "libvirtd"
-    "kvm"
-    "dialout"
-  ];
-
   environment.systemPackages = with pkgs; [
     brave
     vesktop
@@ -27,10 +21,6 @@
     ifuse
     usbutils
   ];
-
-  services.udev.extraRules = ''
-    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", MODE="0660", GROUP="users", TAG+="uaccess", TAG+="udev-acl"
-  '';
 
   systemd.tmpfiles.settings = {
     "10-shmem" = {
