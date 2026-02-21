@@ -16,7 +16,7 @@
 
   services.xserver.xkb = {
     layout = "us";
-    variant = "";
+    variant = "altgr-intl";
   };
 
   services.printing.enable = true;
