@@ -8,5 +8,6 @@
     ./direnv.nix
     ./foot.nix
     ./niri
+    ./emacs
   ];
 }
