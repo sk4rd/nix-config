@@ -2,6 +2,7 @@ keys:
   - &miko 9C8FF32791159E6FB55B978CAFA1F0631CECE62F
   - &desktop age1e2nkm4s0phlv2mqaj02f74xzut07pxppn9pwzf9gpehyg4ljjscqftvgp8
   - &laptop age1ue5j233u76g8rtdfsvj7rtazhvdanhvlsnrv2jn47nzgkjjf69rq5wxf7y
+  - &nas age1fx7378dsesr74eu50ylzs3ll9q5uk3ep596psazp4w6epzz69yksupmtl5
 
 creation_rules:
   - path_regex: secrets/.*\.yaml$
@@ -11,3 +12,4 @@ creation_rules:
         age:
           - *desktop
           - *laptop
+          - *nas

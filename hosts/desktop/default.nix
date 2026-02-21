@@ -13,9 +13,6 @@
   ];
 
   environment.systemPackages = with pkgs; [
-    brave
-    vesktop
-    vscode
     looking-glass-client
     vial
     ifuse
