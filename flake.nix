@@ -96,6 +96,10 @@
             nixos-wsl.nixosModules.default
           ];
         };
+
+        "nas" = mkHost {
+          hostPath = ./hosts/nas;
+        };
       };
 
       formatter.${system} = pkgs.nixfmt-tree;

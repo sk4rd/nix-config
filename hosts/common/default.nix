@@ -9,9 +9,6 @@
     ./bluetooth.nix
   ];
 
-  time.timeZone = "Europe/Berlin";
-
-  i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "de_DE.UTF-8";
     LC_IDENTIFICATION = "de_DE.UTF-8";
@@ -48,6 +45,8 @@
     export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
   '';
 
+  virtualisation.docker.enable = true;
+
   environment.systemPackages = with pkgs; [
     # Archives
     unzip
@@ -70,5 +69,10 @@
 
     # JSON/data processing
     jq
+
+    # GUI apps
+    brave
+    vesktop
+    vscode
   ];
 }

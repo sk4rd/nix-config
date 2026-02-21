@@ -8,7 +8,6 @@
     ./boot.nix
     ./networking.nix
     ./services.nix
-    ./virtualisation.nix
   ];
 
   users.users.miko.extraGroups = [
@@ -16,9 +15,6 @@
   ];
 
   environment.systemPackages = with pkgs; [
-    brave
-    vesktop
-    vscode
     freerdp
     wireguard-tools
   ];
