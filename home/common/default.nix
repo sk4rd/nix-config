@@ -7,5 +7,6 @@
     ./zsh.nix
     ./direnv.nix
     ./foot.nix
+    ./niri
   ];
 }
