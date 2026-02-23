@@ -48,8 +48,9 @@
   };
 
   home.packages = with pkgs; [
-    # org-roam dependency
+    # org-roam dependencies
     sqlite
+    graphviz
 
     # LSP servers
     typescript-language-server
