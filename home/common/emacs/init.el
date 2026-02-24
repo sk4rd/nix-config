@@ -37,6 +37,10 @@
       auto-save-list-file-prefix "~/.emacs.d/auto-saves/.saves-"
       create-lockfiles nil)
 
+;;; Font
+
+(set-face-attribute 'default nil :family "FiraCode Nerd Font" :height 110)
+
 ;;; Theme
 
 (use-package modus-themes

@@ -57,8 +57,9 @@
     typescript
     nil
 
-    # Fonts for doom-modeline
+    # Fonts
     nerd-fonts.symbols-only
+    nerd-fonts.fira-code
   ];
 
   home.activation.createOrgDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
