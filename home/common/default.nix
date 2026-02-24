@@ -10,4 +10,6 @@
     ./niri
     ./emacs
   ];
+
+  fonts.fontconfig.enable = true;
 }
