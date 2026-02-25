@@ -41,6 +41,9 @@
           ]
         ))
 
+        # Editing
+        multiple-cursors
+
         # QoL
         rainbow-delimiters
         envrc

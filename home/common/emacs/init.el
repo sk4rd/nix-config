@@ -199,6 +199,15 @@
   :ensure nil
   :hook (prog-mode . rainbow-delimiters-mode))
 
+;;; Multiple cursors
+
+(use-package multiple-cursors
+  :ensure nil
+  :bind
+  (("C->" . mc/mark-next-like-this)
+   ("C-<" . mc/mark-previous-like-this)
+   ("C-c C-<" . mc/mark-all-like-this)))
+
 ;;; envrc
 
 (use-package envrc
