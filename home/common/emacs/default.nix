@@ -34,6 +34,7 @@
           grammars: with grammars; [
             tree-sitter-javascript
             tree-sitter-typescript
+            tree-sitter-tsx
             tree-sitter-json
             tree-sitter-css
             tree-sitter-nix

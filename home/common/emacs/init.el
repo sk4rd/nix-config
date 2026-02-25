@@ -165,14 +165,18 @@
 (setq major-mode-remap-alist
       '((js-mode . js-ts-mode)
         (javascript-mode . js-ts-mode)
+        (typescript-mode . typescript-ts-mode)
         (json-mode . json-ts-mode)
         (css-mode . css-ts-mode)))
+
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 
 ;;; Eglot
 
 (use-package eglot
   :ensure nil
-  :hook (js-ts-mode . eglot-ensure)
+  :hook ((js-ts-mode typescript-ts-mode tsx-ts-mode) . eglot-ensure)
   :custom
   (eglot-autoshutdown t))
 
