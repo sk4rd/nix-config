@@ -28,7 +28,9 @@
 
         # Languages
         nix-mode
-        js2-mode
+
+        # Formatters
+        apheleia
 
         # Tree-sitter grammars
         (treesit-grammars.with-grammars (
@@ -61,6 +63,9 @@
     typescript-language-server
     typescript
     nil
+
+    # Formatters
+    nixfmt-rfc-style
 
     # Fonts
     nerd-fonts.symbols-only

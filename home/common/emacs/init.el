@@ -302,7 +302,7 @@
 
 (use-package eglot
   :ensure nil
-  :hook ((js-ts-mode typescript-ts-mode tsx-ts-mode) . eglot-ensure)
+  :hook ((js-ts-mode typescript-ts-mode tsx-ts-mode nix-mode) . eglot-ensure)
   :custom
   (eglot-autoshutdown t))
 
@@ -311,13 +311,6 @@
 (use-package nix-mode
   :ensure nil
   :mode "\\.nix\\'")
-
-;;; js2-mode
-
-(use-package js2-mode
-  :ensure nil
-  :custom
-  (js2-basic-offset 2))
 
 ;;; rainbow-delimiters
 
