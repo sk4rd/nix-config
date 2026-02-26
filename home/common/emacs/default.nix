@@ -13,6 +13,10 @@
         corfu
         cape
 
+        flycheck
+        lsp-mode
+        lsp-ui
+
         # Org
         org-roam
 
