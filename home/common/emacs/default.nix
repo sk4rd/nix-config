@@ -20,6 +20,7 @@
         magit
 
         # UI
+        treemacs
         modus-themes
         doom-modeline
         nerd-icons
