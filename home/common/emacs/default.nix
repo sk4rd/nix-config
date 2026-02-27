@@ -14,7 +14,11 @@
         cape
 
         flycheck
-        lsp-mode
+        (lsp-mode.overrideAttrs (old: {
+          preBuild = (old.preBuild or "") + ''
+            export LSP_USE_PLISTS=1
+          '';
+        }))
         lsp-ui
 
         # Org
@@ -66,7 +70,7 @@
     # LSP servers
     typescript-language-server
     typescript
-    nil
+    nixd
 
     # Formatters
     nixfmt-rfc-style

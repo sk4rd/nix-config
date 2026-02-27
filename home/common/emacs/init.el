@@ -340,7 +340,8 @@
          (lsp-mode . lsp-enable-which-key-integration)
          ((tsx-ts-mode
            typescript-ts-mode
-           js-ts-mode) . lsp-deferred))
+           js-ts-mode
+           nix-mode) . lsp-deferred))
   :custom
   (lsp-keymap-prefix "C-c l")           ; Prefix for LSP actions
   (lsp-completion-provider :none)       ; Using Corfu as the provider
@@ -363,7 +364,6 @@
   (lsp-enable-suggest-server-download t) ; Useful prompt to download LSP providers
   (lsp-enable-symbol-highlighting t)     ; Shows usages of symbol at point in the current buffer
   (lsp-enable-text-document-color nil)   ; This is Treesitter's job
-
   (lsp-ui-sideline-show-hover nil)      ; Sideline used only for diagnostics
   (lsp-ui-sideline-diagnostic-max-lines 20) ; 20 lines since typescript errors can be quite big
   ;; completion
@@ -387,39 +387,16 @@
   (lsp-lens-enable nil)                 ; Optional, I don't need it
   ;; semantic
   (lsp-semantic-tokens-enable nil)      ; Related to highlighting, and we defer to treesitter
-  :preface
-  (defun lsp-booster--advice-json-parse (old-fn &rest args)
-    "Try to parse bytecode instead of json."
-    (or
-     (when (equal (following-char) ?#)
-
-       (let ((bytecode (read (current-buffer))))
-         (when (byte-code-function-p bytecode)
-           (funcall bytecode))))
-     (apply old-fn args)))
-  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-    "Prepend emacs-lsp-booster command to lsp CMD."
-    (let ((orig-result (funcall old-fn cmd test?)))
-      (if (and (not test?)                             ;; for check lsp-server-present?
-               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-               lsp-use-plists
-               (not (functionp 'json-rpc-connection))  ;; native json-rpc
-               (executable-find "emacs-lsp-booster"))
-          (progn
-            (message "Using emacs-lsp-booster for %s!" orig-result)
-            (cons "emacs-lsp-booster" orig-result))
-        orig-result)))
   :init
   (setq lsp-use-plists t)
-  ;; Initiate https://github.com/blahgeek/emacs-lsp-booster for performance
-  (advice-add (if (progn (require 'json)
-                         (fboundp 'json-parse-buffer))
-                  'json-parse-buffer
-                'json-read)
-              :around
-              #'lsp-booster--advice-json-parse)
-  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
-
+  :config
+  ;; Register nixd as the LSP server for Nix files
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection "nixd")
+    :major-modes '(nix-mode)
+    :server-id 'nixd)))
+  
 (use-package lsp-completion
   :no-require
   :hook ((lsp-mode . lsp-completion-mode)))
