@@ -20,7 +20,5 @@
         gamemode
       ];
     };
-
-    niri.enable = true;
   };
 }
