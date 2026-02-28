@@ -6,9 +6,6 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    nvf.url = "github:notashelf/nvf";
-    nvf.inputs.nixpkgs.follows = "nixpkgs";
-
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -19,7 +16,6 @@
       nixpkgs,
       nixos-wsl,
       home-manager,
-      nvf,
       sops-nix,
     }:
     let
@@ -65,7 +61,7 @@
                         ];
                       };
 
-                      home-manager.sharedModules = [ nvf.homeManagerModules.nvf ] ++ extraHMModules;
+                      home-manager.sharedModules = extraHMModules;
                     }
                   )
                 ]
