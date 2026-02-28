@@ -58,6 +58,7 @@
         # QoL
         rainbow-delimiters
         envrc
+        vterm
       ];
     extraConfig = builtins.readFile ./init.el;
   };
