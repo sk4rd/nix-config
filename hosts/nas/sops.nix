@@ -10,5 +10,15 @@
       owner = "admin";
       mode = "0600";
     };
+
+    secrets."nas/wireguard/server_key" = {
+      owner = "root";
+      mode = "0400";
+    };
+
+    secrets."nas/wireguard/phone_psk" = {
+      owner = "root";
+      mode = "0400";
+    };
   };
 }
