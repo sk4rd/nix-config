@@ -7,7 +7,9 @@
     firewall = {
       enable = true;
       allowPing = true;
-      allowedTCPPorts = [ 8080 ];
+      allowedTCPPorts = [
+        8000
+      ];
     };
     networkmanager = {
       enable = true;
