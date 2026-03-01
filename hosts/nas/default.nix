@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -11,6 +11,8 @@
   ];
 
   programs.nix-ld.enable = true;
+
+  environment.systemPackages = with pkgs; [ rclone ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
