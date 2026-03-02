@@ -73,6 +73,5 @@
     # GUI apps
     brave
     vesktop
-    vscode
   ];
 }
