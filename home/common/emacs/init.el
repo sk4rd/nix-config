@@ -1,7 +1,3 @@
-;;; init.el --- Emacs configuration -*- lexical-binding: t; -*-
-
-;;; Sane defaults
-
 ;; Disable package.el (Nix manages packages)
 (setq package-enable-at-startup nil)
 
@@ -39,18 +35,15 @@
       create-lockfiles nil)
 
 ;;; Font
-
 (set-face-attribute 'default nil :family "FiraCode Nerd Font" :height 110)
 
 ;;; Theme
-
 (use-package modus-themes
   :ensure nil
   :config
   (load-theme 'modus-vivendi-tinted t))
 
 ;;; Modeline
-
 (use-package nerd-icons
   :ensure nil)
 
@@ -60,7 +53,6 @@
   (doom-modeline-mode 1))
 
 ;;; Minibuffer completion
-
 (use-package vertico
   :ensure nil
   :init
@@ -86,7 +78,6 @@
    ("M-s r" . consult-ripgrep)))
 
 ;;; In-buffer completion
-
 (use-package corfu
   :ensure nil
   ;; Optional customizations
@@ -136,7 +127,6 @@
               ("M-p" . flycheck-previous-error)))
 
 ;;; Treemacs
-
 (use-package treemacs
   :ensure nil
   :defer t
@@ -231,7 +221,6 @@
         ("C-x t M-t" . treemacs-find-tag)))
 
 ;;; Formatting (Apheleia)
-
 (use-package apheleia
   :ensure nil
   :config
@@ -262,20 +251,17 @@
     (add-hook hook #'apheleia-mode)))
 
 ;;; which-key
-
 (use-package which-key
   :ensure nil
   :init
   (which-key-mode 1))
 
 ;;; Magit
-
 (use-package magit
   :ensure nil
   :bind ("C-x g" . magit-status))
 
 ;;; Org-mode
-
 (use-package org
   :ensure nil
   :custom
@@ -292,7 +278,6 @@
       "* %?\n  %U"))))
 
 ;;; Org-roam
-
 (use-package org-roam
   :ensure nil
   :custom
@@ -321,7 +306,6 @@
   (org-roam-db-autosync-mode 1))
 
 ;;; Tree-sitter
-
 (setq major-mode-remap-alist
       '((js-mode . js-ts-mode)
         (javascript-mode . js-ts-mode)
@@ -333,7 +317,6 @@
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 
 ;;; LSP Mode
-
 (use-package lsp-mode
   :ensure nil
   :hook ((lsp-mode . lsp-diagnostics-mode)
@@ -416,19 +399,16 @@
                 lsp-ui-doc-position 'at-point))
 
 ;;; Nix-mode
-
 (use-package nix-mode
   :ensure nil
   :mode "\\.nix\\'")
 
 ;;; rainbow-delimiters
-
 (use-package rainbow-delimiters
   :ensure nil
   :hook (prog-mode . rainbow-delimiters-mode))
 
 ;;; Multiple cursors
-
 (use-package multiple-cursors
   :ensure nil
   :bind
@@ -437,10 +417,7 @@
    ("C-c C-<" . mc/mark-all-like-this)))
 
 ;;; envrc
-
 (use-package envrc
   :ensure nil
   :init
   (envrc-global-mode 1))
-
-;;; init.el ends here
