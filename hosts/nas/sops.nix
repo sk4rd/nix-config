@@ -20,5 +20,9 @@
       owner = "root";
       mode = "0400";
     };
+    secrets."nas/wireguard/laptop_psk" = {
+      owner = "root";
+      mode = "0400";
+    };
   };
 }

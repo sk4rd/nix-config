@@ -86,6 +86,15 @@
             "fdc9:281f:04d7:9ee9::2/128"
           ];
         }
+        {
+          # laptop
+          publicKey = "qXYhv6Vbo9f86L/NiG0GlW5S23GIlvuh+vo+ypcdXSU=";
+          presharedKeyFile = config.sops.secrets."nas/wireguard/laptop_psk".path;
+          allowedIPs = [
+            "10.0.0.3/32"
+            "fdc9:281f:04d7:9ee9::3/128"
+          ];
+        }
       ];
     };
   };
