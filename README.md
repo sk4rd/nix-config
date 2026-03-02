@@ -38,7 +38,6 @@ Managed with [sops-nix](https://github.com/Mic92/sops-nix). GPG (Yubikey) for ed
 ```bash
 # Edit secrets
 sops secrets/secrets.yaml
-
 # Add new machine
 cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
 # Add key to .sops.yaml, then:
