@@ -93,6 +93,15 @@
           ];
         };
 
+        "work" = mkHost {
+          hostPath = ./hosts/work;
+          homePath = ./home/work;
+          username = "nixos";
+          extraModules = [
+            nixos-wsl.nixosModules.default
+          ];
+        };
+
         "nas" = mkHost {
           hostPath = ./hosts/nas;
         };
