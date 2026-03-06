@@ -3,7 +3,7 @@ keys:
   - &desktop age1e2nkm4s0phlv2mqaj02f74xzut07pxppn9pwzf9gpehyg4ljjscqftvgp8
   - &laptop age1ue5j233u76g8rtdfsvj7rtazhvdanhvlsnrv2jn47nzgkjjf69rq5wxf7y
   - &nas age1fx7378dsesr74eu50ylzs3ll9q5uk3ep596psazp4w6epzz69yksupmtl5
-  - &work age15dzt2sg2a8f9vlwnlrlsmmu9cvps2arz0pxjpct5jtx7g7503u8qunf342
+  - &work age10gw86wwlslj3duv6hau3qq3mdgs5w7vu7nc0yy2c3r6l6kesx9xqhhtjn3
 
 creation_rules:
   - path_regex: ^secrets/work\.yaml$
