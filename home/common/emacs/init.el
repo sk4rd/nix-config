@@ -1,423 +1,460 @@
-;; Disable package.el (Nix manages packages)
+;; Nix manages packages.
 (setq package-enable-at-startup nil)
 
-;; Clean UI
+;; Improve startup responsiveness and LSP throughput.
+(setq gc-cons-threshold (* 100 1024 1024)
+      gc-cons-percentage 0.6
+      read-process-output-max (* 1024 1024)
+      inhibit-compacting-font-caches t)
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 24 1024 1024)
+                  gc-cons-percentage 0.1)))
+
+(require 'use-package)
+(setq use-package-always-ensure nil)
+
+;; Core behavior
+(set-language-environment "UTF-8")
+(prefer-coding-system 'utf-8-unix)
+(setq inhibit-startup-message t
+      use-short-answers t
+      ring-bell-function 'ignore
+      switch-to-buffer-obey-display-actions t
+      tab-always-indent 'complete)
+
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (menu-bar-mode -1)
-(setq inhibit-startup-message t)
-(setq use-short-answers t)
+(global-hl-line-mode 1)
+(global-auto-revert-mode 1)
+(electric-pair-mode 1)
+(show-paren-mode 1)
+(save-place-mode 1)
+(savehist-mode 1)
+(recentf-mode 1)
 
-;; UTF-8 everywhere
-(set-language-environment "UTF-8")
-(prefer-coding-system 'utf-8)
-
-;; Relative line numbers in prog-mode
+(setq-default indent-tabs-mode nil
+              tab-width 2)
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (setq display-line-numbers-type 'relative)
 
-;; Quality of life
-(electric-pair-mode 1)
-(save-place-mode 1)
-(recentf-mode 1)
-(savehist-mode 1)
-(global-auto-revert-mode 1)
-(setq switch-to-buffer-obey-display-actions t)
+(let ((backup-dir (expand-file-name "backups/" user-emacs-directory))
+      (autosave-dir (expand-file-name "auto-saves/" user-emacs-directory)))
+  (make-directory backup-dir t)
+  (make-directory autosave-dir t)
+  (setq backup-directory-alist `(("." . ,backup-dir))
+        auto-save-file-name-transforms `((".*" ,autosave-dir t))
+        auto-save-list-file-prefix (concat autosave-dir ".saves-")
+        create-lockfiles nil))
 
-;; Indentation
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 2)
+(set-face-attribute 'default nil :family "FiraCode Nerd Font" :height 100)
 
-;; Keep backups and auto-saves out of the way
-(setq backup-directory-alist '(("." . "~/.emacs.d/backups"))
-      auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-saves/" t))
-      auto-save-list-file-prefix "~/.emacs.d/auto-saves/.saves-"
-      create-lockfiles nil)
+;; UI
+(use-package doom-themes
+  :custom
+  (doom-themes-enable-bold t)
+  (doom-themes-enable-italic t))
 
-;;; Font
-(set-face-attribute 'default nil :family "FiraCode Nerd Font" :height 110)
+(defvar my/theme-dark 'doom-one
+  "Primary dark theme.")
 
-;;; Theme
-(use-package modus-themes
-  :ensure nil
-  :config
-  (load-theme 'modus-vivendi-tinted t))
+(defvar my/theme-light 'doom-one-light
+  "Primary light theme.")
 
-;;; Modeline
-(use-package nerd-icons
-  :ensure nil)
+(defvar my/theme-variant 'dark
+  "Current theme variant, either `dark' or `light'.")
+
+(defun my/load-theme-variant (variant)
+  "Load theme VARIANT (`dark' or `light')."
+  (mapc #'disable-theme custom-enabled-themes)
+  (pcase variant
+    ('dark (load-theme my/theme-dark t))
+    ('light (load-theme my/theme-light t)))
+  (setq my/theme-variant variant))
+
+(defun my/toggle-theme-variant ()
+  "Toggle between dark and light themes."
+  (interactive)
+  (my/load-theme-variant (if (eq my/theme-variant 'dark) 'light 'dark)))
+
+(my/load-theme-variant 'dark)
+
+(use-package nerd-icons)
 
 (use-package doom-modeline
-  :ensure nil
-  :init
-  (doom-modeline-mode 1))
+  :hook (after-init . doom-modeline-mode)
+  :custom
+  (doom-modeline-minor-modes nil)
+  (doom-modeline-buffer-file-name-style 'truncate-upto-project))
 
-;;; Minibuffer completion
+(use-package which-key
+  :init
+  (which-key-mode 1)
+  :custom
+  (which-key-idle-delay 0.5)
+  (which-key-sort-order #'which-key-key-order-alpha))
+
+;; Minibuffer completion
+(setq completion-ignore-case t
+      read-buffer-completion-ignore-case t
+      read-file-name-completion-ignore-case t)
+
 (use-package vertico
-  :ensure nil
   :init
   (vertico-mode 1))
 
 (use-package orderless
-  :ensure nil
   :custom
   (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package marginalia
-  :ensure nil
+  :after vertico
   :init
   (marginalia-mode 1))
 
 (use-package consult
-  :ensure nil
-  :bind
-  (("C-x b" . consult-buffer)
-   ("C-s" . consult-line)
-   ("M-g g" . consult-goto-line)
-   ("M-s r" . consult-ripgrep)))
+  :bind (("C-x b" . consult-buffer)
+         ("C-s" . consult-line)
+         ("M-g g" . consult-goto-line)
+         ("M-g f" . consult-flymake)
+         ("M-s r" . consult-ripgrep)
+         ("M-y" . consult-yank-pop)
+         ("C-x C-r" . consult-recent-file)
+         ("C-c i" . consult-imenu)))
 
-;;; In-buffer completion
-(use-package corfu
-  :ensure nil
-  ;; Optional customizations
-  :custom
-  (corfu-cycle t)                 ; Allows cycling through candidates
-  (corfu-auto t)                  ; Enable auto completion
-  (corfu-auto-prefix 2)           ; Minimum length of prefix for completion
-  (corfu-auto-delay 0)            ; No delay for completion
-  (corfu-popupinfo-delay '(0.5 . 0.2))  ; Automatically update info popup after that numver of seconds
-  (corfu-preview-current 'insert) ; insert previewed candidate
-  (corfu-preselect 'prompt)
-  (corfu-on-exact-match nil)      ; Don't auto expand tempel snippets
-  ;; Optionally use TAB for cycling, default is `corfu-complete'.
-  :bind (:map corfu-map
-              ("M-SPC"      . corfu-insert-separator)
-              ("TAB"        . corfu-next)
-              ([tab]        . corfu-next)
-              ("S-TAB"      . corfu-previous)
-              ([backtab]    . corfu-previous)
-              ("S-<return>" . corfu-insert)
-              ("RET"        . corfu-insert))
-
+(use-package embark
+  :bind (("C-." . embark-act)
+         ("C-;" . embark-dwim)
+         ("C-h B" . embark-bindings))
   :init
-  (global-corfu-mode)
-  (corfu-history-mode)
-  (corfu-popupinfo-mode) ; Popup completion info
+  (setq prefix-help-command #'embark-prefix-help-command))
+
+(use-package embark-consult
+  :after (embark consult))
+
+;; In-buffer completion
+(use-package corfu
+  :init
+  (global-corfu-mode 1)
+  (corfu-history-mode 1)
+  (corfu-popupinfo-mode 1)
+  :custom
+  (corfu-auto t)
+  (corfu-auto-prefix 2)
+  (corfu-auto-delay 0.08)
+  (corfu-cycle t)
+  (corfu-preselect 'prompt)
+  (corfu-preview-current nil)
+  :bind (:map corfu-map
+              ("M-SPC" . corfu-insert-separator)
+              ("TAB" . corfu-next)
+              ([tab] . corfu-next)
+              ("S-TAB" . corfu-previous)
+              ([backtab] . corfu-previous)
+              ("RET" . corfu-insert)))
+
+(use-package nerd-icons-corfu
+  :after (nerd-icons corfu)
   :config
-  (add-hook 'eshell-mode-hook
-            (lambda () (setq-local corfu-quit-at-boundary t
-                                   corfu-quit-no-match t
-                                   corfu-auto nil)
-              (corfu-mode))
-            nil
-            t))
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package cape
-  :ensure nil
   :init
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file))
+  (defun my/add-extra-capfs ()
+    "Add generic CAPFs without overriding LSP CAPF order."
+    (add-hook 'completion-at-point-functions #'cape-file t t)
+    (add-hook 'completion-at-point-functions #'cape-dabbrev t t))
+  (add-hook 'prog-mode-hook #'my/add-extra-capfs)
+  (add-hook 'text-mode-hook #'my/add-extra-capfs))
 
-(use-package flycheck
+(use-package yasnippet
+  :init
+  (yas-global-mode 1))
+
+(use-package yasnippet-snippets
+  :after yasnippet)
+
+;; Navigation / editing QoL
+(use-package avy
+  :bind (("M-j" . avy-goto-char-timer)))
+
+(use-package ace-window
+  :bind (("M-o" . ace-window)
+         ("C-x o" . ace-window))
+  :custom
+  (aw-scope 'frame)
+  (aw-background t)
+  (aw-dispatch-always nil)
+  (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  :config
+  (set-face-attribute 'aw-leading-char-face nil :height 2.0 :weight 'bold))
+
+(use-package olivetti
+  :custom
+  (olivetti-body-width 120)
+  (olivetti-minimum-body-width 90))
+
+(defvar-local my/zen--line-numbers-were-on nil
+  "Non-nil when line numbers were enabled before entering zen mode.")
+
+(defun my/toggle-zen-mode ()
+  "Toggle centered editing for focused work."
+  (interactive)
+  (if (bound-and-true-p olivetti-mode)
+      (progn
+        (olivetti-mode -1)
+        (when my/zen--line-numbers-were-on
+          (display-line-numbers-mode 1))
+        (setq-local my/zen--line-numbers-were-on nil))
+    (setq-local my/zen--line-numbers-were-on display-line-numbers)
+    (olivetti-mode 1)
+    (display-line-numbers-mode -1)))
+
+(use-package expand-region
+  :bind (("C-=" . er/expand-region)))
+
+(use-package smartparens
+  :hook ((prog-mode org-mode) . smartparens-mode)
+  :config
+  (require 'smartparens-config))
+
+(use-package multiple-cursors
+  :bind (("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-previous-like-this)
+         ("C-c C-<" . mc/mark-all-like-this)))
+
+(use-package undo-fu
+  :bind (("C-z" . undo-fu-only-undo)
+         ("C-S-z" . undo-fu-only-redo)))
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+;; Projects and buffers
+(use-package project
   :ensure nil
-  :init (global-flycheck-mode)
-  :bind (:map flycheck-mode-map
-              ("M-n" . flycheck-next-error) ; optional but recommended error navigation
-              ("M-p" . flycheck-previous-error)))
+  :bind-keymap ("C-c p" . project-prefix-map))
 
-;;; Treemacs
+(global-set-key (kbd "C-x C-b") #'ibuffer)
+
+(tab-bar-mode 1)
+(setq tab-bar-show 1
+      tab-bar-close-button-show nil
+      tab-bar-new-button-show nil)
+
+(defun my/consult-ripgrep-project ()
+  "Run ripgrep from project root when available."
+  (interactive)
+  (if-let ((project (project-current)))
+      (consult-ripgrep (project-root project))
+    (consult-ripgrep default-directory)))
+
+;; File tree
 (use-package treemacs
-  :ensure nil
   :defer t
-  :init
-  (with-eval-after-load 'winum
-    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :bind (("C-x t t" . treemacs)
+         ("C-x t f" . treemacs-find-file))
+  :custom
+  (treemacs-width 35)
+  (treemacs-follow-after-init t)
+  (treemacs-is-never-other-window t)
+  (treemacs-show-hidden-files nil)
   :config
-  (progn
-    (setq treemacs-buffer-name-function            #'treemacs-default-buffer-name
-          treemacs-buffer-name-prefix              " *Treemacs-Buffer-"
-          treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
-          treemacs-deferred-git-apply-delay        0.5
-          treemacs-directory-name-transformer      #'identity
-          treemacs-display-in-side-window          t
-          treemacs-eldoc-display                   'simple
-          treemacs-file-event-delay                2000
-          treemacs-file-extension-regex            treemacs-last-period-regex-value
-          treemacs-file-follow-delay               0.2
-          treemacs-file-name-transformer           #'identity
-          treemacs-follow-after-init               t
-          treemacs-expand-after-init               t
-          treemacs-find-workspace-method           'find-for-file-or-pick-first
-          treemacs-git-command-pipe                ""
-          treemacs-goto-tag-strategy               'refetch-index
-          treemacs-header-scroll-indicators        '(nil . "^^^^^^")
-          treemacs-hide-dot-git-directory          t
-          treemacs-hide-dot-jj-directory           t
-          treemacs-indentation                     2
-          treemacs-indentation-string              " "
-          treemacs-is-never-other-window           nil
-          treemacs-max-git-entries                 5000
-          treemacs-missing-project-action          'ask
-          treemacs-move-files-by-mouse-dragging    t
-          treemacs-move-forward-on-expand          nil
-          treemacs-no-png-images                   nil
-          treemacs-no-delete-other-windows         t
-          treemacs-project-follow-cleanup          nil
-          treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-          treemacs-position                        'left
-          treemacs-read-string-input               'from-child-frame
-          treemacs-recenter-distance               0.1
-          treemacs-recenter-after-file-follow      nil
-          treemacs-recenter-after-tag-follow       nil
-          treemacs-recenter-after-project-jump     'always
-          treemacs-recenter-after-project-expand   'on-distance
-          treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
-          treemacs-project-follow-into-home        nil
-          treemacs-show-cursor                     nil
-          treemacs-show-hidden-files               t
-          treemacs-silent-filewatch                nil
-          treemacs-silent-refresh                  nil
-          treemacs-sorting                         'alphabetic-asc
-          treemacs-select-when-already-in-treemacs 'move-back
-          treemacs-space-between-root-nodes        t
-          treemacs-tag-follow-cleanup              t
-          treemacs-tag-follow-delay                1.5
-          treemacs-text-scale                      nil
-          treemacs-user-mode-line-format           nil
-          treemacs-user-header-line-format         nil
-          treemacs-wide-toggle-width               70
-          treemacs-width                           35
-          treemacs-width-increment                 1
-          treemacs-width-is-initially-locked       t
-          treemacs-workspace-switch-cleanup        nil)
+  (treemacs-follow-mode 1)
+  (treemacs-filewatch-mode 1)
+  (when (executable-find "git")
+    (treemacs-git-mode 'deferred)))
 
-    ;; The default width and height of the icons is 22 pixels. If you are
-    ;; using a Hi-DPI display, uncomment this to double the icon size.
-    ;;(treemacs-resize-icons 44)
+;; Language modes
+(use-package nix-mode
+  :mode "\\.nix\\'")
 
-    (treemacs-follow-mode t)
-    (treemacs-filewatch-mode t)
-    (treemacs-fringe-indicator-mode 'always)
-    (when treemacs-python-executable
-      (treemacs-git-commit-diff-mode t))
+(dolist (mode-remap '((js-mode . js-ts-mode)
+                      (javascript-mode . js-ts-mode)
+                      (typescript-mode . typescript-ts-mode)
+                      (json-mode . json-ts-mode)
+                      (css-mode . css-ts-mode)))
+  (add-to-list 'major-mode-remap-alist mode-remap))
 
-    (pcase (cons (not (null (executable-find "git")))
-                 (not (null treemacs-python-executable)))
-      (`(t . t)
-       (treemacs-git-mode 'deferred))
-      (`(t . _)
-       (treemacs-git-mode 'simple)))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 
-    (treemacs-hide-gitignored-files-mode nil))
-  :bind
-  (:map global-map
-        ("M-0"       . treemacs-select-window)
-        ("C-x t 1"   . treemacs-delete-other-windows)
-        ("C-x t t"   . treemacs)
-        ("C-x t d"   . treemacs-select-directory)
-        ("C-x t B"   . treemacs-bookmark)
-        ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)))
+;; Fast LSP client (built-in)
+(setq eglot-send-changes-idle-time 0.15)
 
-;;; Formatting (Apheleia)
-(use-package apheleia
+(use-package eglot
   :ensure nil
+  :hook ((js-ts-mode . eglot-ensure)
+         (typescript-ts-mode . eglot-ensure)
+         (tsx-ts-mode . eglot-ensure)
+         (python-mode . eglot-ensure)
+         (python-ts-mode . eglot-ensure)
+         (nix-mode . eglot-ensure))
+  :bind (:map eglot-mode-map
+              ("C-c l a" . eglot-code-actions)
+              ("C-c l r" . eglot-rename)
+              ("C-c l f" . eglot-format)
+              ("C-c l o" . eglot-code-action-organize-imports)
+              ("C-c l q" . eglot-shutdown))
+  :custom
+  (eglot-autoshutdown t)
+  (eglot-events-buffer-size 0)
+  (eglot-sync-connect nil)
   :config
-  ;; Use project-local prettier via npx
-  (setf (alist-get 'prettier apheleia-formatters)
-        '("npx" "prettier" "--stdin-filepath" filepath))
+  (add-to-list 'eglot-server-programs
+               '((js-ts-mode typescript-ts-mode tsx-ts-mode)
+                 . ("typescript-language-server" "--stdio")))
+  (add-to-list 'eglot-server-programs
+               '((nix-mode) . ("nixd")))
+  (add-to-list 'eglot-server-programs
+               '((python-mode python-ts-mode)
+                 . ("pyright-langserver" "--stdio"))))
 
-  ;; Map modes to prettier
+(use-package flymake
+  :ensure nil
+  :bind (("M-n" . flymake-goto-next-error)
+         ("M-p" . flymake-goto-prev-error)))
+
+(use-package envrc
+  :init
+  (envrc-global-mode 1))
+
+;; Formatting
+(use-package apheleia
+  :hook ((js-ts-mode . apheleia-mode)
+         (typescript-ts-mode . apheleia-mode)
+         (tsx-ts-mode . apheleia-mode)
+         (json-ts-mode . apheleia-mode)
+         (css-ts-mode . apheleia-mode)
+         (nix-mode . apheleia-mode))
+  :config
+  (setf (alist-get 'prettier apheleia-formatters)
+        (if (executable-find "prettier")
+            '("prettier" "--stdin-filepath" filepath)
+          '("npx" "prettier" "--stdin-filepath" filepath)))
+  (setf (alist-get 'nixfmt apheleia-formatters)
+        '("nixfmt"))
   (dolist (mode '(js-ts-mode
                   typescript-ts-mode
                   tsx-ts-mode
                   json-ts-mode
                   css-ts-mode))
     (setf (alist-get mode apheleia-mode-alist) 'prettier))
+  (setf (alist-get 'nix-mode apheleia-mode-alist) 'nixfmt))
 
-  ;; Nix formatting via nixfmt
-  (setf (alist-get 'nixfmt apheleia-formatters)
-        '("nixfmt"))
-  (setf (alist-get 'nix-mode apheleia-mode-alist) 'nixfmt)
-
-  ;; Enable format-on-save only for these modes
-  (dolist (hook '(js-ts-mode-hook
-                  typescript-ts-mode-hook
-                  tsx-ts-mode-hook
-                  json-ts-mode-hook
-                  css-ts-mode-hook
-                  nix-mode-hook))
-    (add-hook hook #'apheleia-mode)))
-
-;;; which-key
-(use-package which-key
-  :ensure nil
-  :init
-  (which-key-mode 1))
-
-;;; Magit
+;; Git
 (use-package magit
-  :ensure nil
-  :bind ("C-x g" . magit-status))
+  :bind (("C-x g" . magit-status)))
 
-;;; Org-mode
+(use-package diff-hl
+  :hook ((prog-mode . diff-hl-mode)
+         (dired-mode . diff-hl-dired-mode)
+         (magit-post-refresh . diff-hl-magit-post-refresh)))
+
+;; Notes / Org
 (use-package org
   :ensure nil
+  :bind (("C-c a" . org-agenda)
+         ("C-c c" . org-capture))
   :custom
   (org-directory "~/org")
-  (org-agenda-files '("~/org"))
-  (org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "WAITING(w@)" "|" "DONE(d!)" "CANCELLED(c@)")))
+  (org-agenda-files '("~/org/tasks.org" "~/org/notes.org" "~/org/projects.org"))
   (org-log-into-drawer t)
+  (org-hide-emphasis-markers t)
+  (org-src-fontify-natively t)
+  (org-src-tab-acts-natively t)
+  (org-confirm-babel-evaluate nil)
+  (org-todo-keywords
+   '((sequence "TODO(t)" "NEXT(n)" "WAITING(w@)" "|" "DONE(d!)" "CANCELLED(c@)")))
   (org-capture-templates
    '(("t" "Task" entry (file+headline "~/org/tasks.org" "Inbox")
       "* TODO %?\n  %U\n  %a")
      ("n" "Note" entry (file+headline "~/org/notes.org" "Notes")
       "* %?\n  %U")
      ("j" "Journal" entry (file+datetree "~/org/journal.org")
-      "* %?\n  %U"))))
-
-;;; Org-roam
-(use-package org-roam
-  :ensure nil
-  :custom
-  (org-roam-directory "~/org/roam")
-  (org-roam-capture-templates
-   '(("d" "default" plain "%?"
-      :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                         "#+title: ${title}\n")
-      :unnarrowed t)
-     ("r" "reference" plain "%?"
-      :target (file+head "reference/%<%Y%m%d%H%M%S>-${slug}.org"
-                         "#+title: ${title}\n#+filetags: :reference:\n")
-      :unnarrowed t)
-     ("p" "project" plain "%?"
-      :target (file+head "project/%<%Y%m%d%H%M%S>-${slug}.org"
-                         "#+title: ${title}\n#+filetags: :project:\n")
-      :unnarrowed t)))
-  (org-roam-dailies-directory "daily/")
-  :bind
-  (("C-c n f" . org-roam-node-find)
-   ("C-c n i" . org-roam-node-insert)
-   ("C-c n l" . org-roam-buffer-toggle)
-   ("C-c n c" . org-roam-capture)
-   ("C-c n d" . org-roam-dailies-goto-today))
+      "* %?\n  %U")))
   :config
-  (org-roam-db-autosync-mode 1))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (shell . t)
+     (python . t))))
 
-;;; Tree-sitter
-(setq major-mode-remap-alist
-      '((js-mode . js-ts-mode)
-        (javascript-mode . js-ts-mode)
-        (typescript-mode . typescript-ts-mode)
-        (json-mode . json-ts-mode)
-        (css-mode . css-ts-mode)))
-
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
-
-;;; LSP Mode
-(use-package lsp-mode
-  :ensure nil
-  :hook ((lsp-mode . lsp-diagnostics-mode)
-         (lsp-mode . lsp-enable-which-key-integration)
-         ((tsx-ts-mode
-           typescript-ts-mode
-           js-ts-mode
-           nix-mode) . lsp-deferred))
+(use-package denote
+  :bind (("C-c n n" . denote)
+         ("C-c n o" . denote-open-or-create)
+         ("C-c n l" . denote-link)
+         ("C-c n r" . denote-rename-file))
   :custom
-  (lsp-keymap-prefix "C-c l")           ; Prefix for LSP actions
-  (lsp-completion-provider :none)       ; Using Corfu as the provider
-  (lsp-diagnostics-provider :flycheck)
-  (lsp-session-file (locate-user-emacs-file ".lsp-session"))
-  (lsp-log-io nil)                      ; IMPORTANT! Use only for debugging! Drastically affects performance
-  (lsp-keep-workspace-alive nil)        ; Close LSP server if all project buffers are closed
-  (lsp-idle-delay 0.5)                  ; Debounce timer for `after-change-function'
-  ;; core
-  (lsp-enable-xref t)                   ; Use xref to find references
-  (lsp-auto-configure t)                ; Used to decide between current active servers
-  (lsp-eldoc-enable-hover t)            ; Display signature information in the echo area
-  (lsp-enable-dap-auto-configure t)     ; Debug support
-  (lsp-enable-file-watchers nil)
-  (lsp-enable-folding nil)              ; I disable folding since I use origami
-  (lsp-enable-imenu t)
-  (lsp-enable-indentation nil)          ; I use prettier
-  (lsp-enable-links nil)                ; No need since we have `browse-url'
-  (lsp-enable-on-type-formatting nil)   ; Prettier handles this
-  (lsp-enable-suggest-server-download t) ; Useful prompt to download LSP providers
-  (lsp-enable-symbol-highlighting t)     ; Shows usages of symbol at point in the current buffer
-  (lsp-enable-text-document-color nil)   ; This is Treesitter's job
-  (lsp-ui-sideline-show-hover nil)      ; Sideline used only for diagnostics
-  (lsp-ui-sideline-diagnostic-max-lines 20) ; 20 lines since typescript errors can be quite big
-  ;; completion
-  (lsp-completion-enable t)
-  (lsp-completion-enable-additional-text-edit t) ; Ex: auto-insert an import for a completion candidate
-  (lsp-enable-snippet t)                         ; Important to provide full JSX completion
-  (lsp-completion-show-kind t)                   ; Optional
-  ;; headerline
-  (lsp-headerline-breadcrumb-enable t)  ; Optional, I like the breadcrumbs
-  (lsp-headerline-breadcrumb-enable-diagnostics nil) ; Don't make them red, too noisy
-  (lsp-headerline-breadcrumb-enable-symbol-numbers nil)
-  (lsp-headerline-breadcrumb-icons-enable nil)
-  ;; modeline
-  (lsp-modeline-code-actions-enable nil) ; Modeline should be relatively clean
-  (lsp-modeline-diagnostics-enable nil)  ; Already supported through `flycheck'
-  (lsp-modeline-workspace-status-enable nil) ; Modeline displays "LSP" when lsp-mode is enabled
-  (lsp-signature-doc-lines 1)                ; Don't raise the echo area. It's distracting
-  (lsp-ui-doc-use-childframe t)              ; Show docs for symbol at point
-  (lsp-eldoc-render-all nil)            ; This would be very useful if it would respect `lsp-signature-doc-lines', currently it's distracting
-  ;; lens
-  (lsp-lens-enable nil)                 ; Optional, I don't need it
-  ;; semantic
-  (lsp-semantic-tokens-enable nil)      ; Related to highlighting, and we defer to treesitter
-  :init
-  (setq lsp-use-plists t)
+  (denote-directory (expand-file-name "~/org/denote"))
+  (denote-known-keywords '("emacs" "nix" "typescript" "project" "notes"))
+  (denote-infer-keywords t)
+  (denote-sort-keywords t)
   :config
-  ;; Register nixd as the LSP server for Nix files
-  (lsp-register-client
-   (make-lsp-client
-    :new-connection (lsp-stdio-connection "nixd")
-    :major-modes '(nix-mode)
-    :server-id 'nixd)))
-  
-(use-package lsp-completion
-  :no-require
-  :hook ((lsp-mode . lsp-completion-mode)))
+  (denote-rename-buffer-mode 1))
 
-(use-package lsp-ui
-  :ensure nil
-  :commands
-  (lsp-ui-doc-show
-   lsp-ui-doc-glance)
-  :bind (:map lsp-mode-map
-              ("C-c C-d" . 'lsp-ui-doc-glance))
-  :after (lsp-mode evil)
-  :config (setq lsp-ui-doc-enable t
-                evil-lookup-func #'lsp-ui-doc-glance ; Makes K in evil-mode toggle the doc for symbol at point
-                lsp-ui-doc-show-with-cursor nil      ; Don't show doc when cursor is over symbol - too distracting
-                lsp-ui-doc-include-signature t       ; Show signature
-                lsp-ui-doc-position 'at-point))
+;; Leader key: C-c m
+(defvar my/leader-map (make-sparse-keymap))
+(define-key global-map (kbd "C-c m") my/leader-map)
 
-;;; Nix-mode
-(use-package nix-mode
-  :ensure nil
-  :mode "\\.nix\\'")
+(defun my/leader-prefix (key)
+  "Create and register a sub-keymap under `my/leader-map'."
+  (let ((map (make-sparse-keymap)))
+    (define-key my/leader-map (kbd key) map)
+    map))
 
-;;; rainbow-delimiters
-(use-package rainbow-delimiters
-  :ensure nil
-  :hook (prog-mode . rainbow-delimiters-mode))
+(let ((file-map (my/leader-prefix "f"))
+      (buffer-map (my/leader-prefix "b"))
+      (project-map (my/leader-prefix "p"))
+      (git-map (my/leader-prefix "g"))
+      (notes-map (my/leader-prefix "n"))
+      (workspace-map (my/leader-prefix "w"))
+      (toggle-map (my/leader-prefix "t")))
+  (define-key file-map (kbd "f") #'find-file)
+  (define-key file-map (kbd "r") #'consult-recent-file)
+  (define-key file-map (kbd "s") #'save-buffer)
 
-;;; Multiple cursors
-(use-package multiple-cursors
-  :ensure nil
-  :bind
-  (("C->" . mc/mark-next-like-this)
-   ("C-<" . mc/mark-previous-like-this)
-   ("C-c C-<" . mc/mark-all-like-this)))
+  (define-key buffer-map (kbd "b") #'consult-buffer)
+  (define-key buffer-map (kbd "k") #'kill-current-buffer)
+  (define-key buffer-map (kbd "i") #'ibuffer)
 
-;;; envrc
-(use-package envrc
-  :ensure nil
-  :init
-  (envrc-global-mode 1))
+  (define-key project-map (kbd "p") #'project-switch-project)
+  (define-key project-map (kbd "f") #'project-find-file)
+  (define-key project-map (kbd "g") #'my/consult-ripgrep-project)
+  (define-key project-map (kbd "t") #'treemacs)
+
+  (define-key git-map (kbd "g") #'magit-status)
+
+  (define-key notes-map (kbd "c") #'org-capture)
+  (define-key notes-map (kbd "a") #'org-agenda)
+  (define-key notes-map (kbd "n") #'denote)
+  (define-key notes-map (kbd "o") #'denote-open-or-create)
+
+  (define-key workspace-map (kbd "n") #'tab-bar-new-tab)
+  (define-key workspace-map (kbd "c") #'tab-bar-close-tab)
+  (define-key workspace-map (kbd "l") #'tab-bar-switch-to-next-tab)
+  (define-key workspace-map (kbd "h") #'tab-bar-switch-to-prev-tab)
+  (define-key workspace-map (kbd "r") #'tab-bar-rename-tab)
+  (define-key workspace-map (kbd "w") #'ace-window)
+
+  (define-key toggle-map (kbd "t") #'treemacs)
+  (define-key toggle-map (kbd "l") #'display-line-numbers-mode)
+  (define-key toggle-map (kbd "h") #'my/toggle-theme-variant)
+  (define-key toggle-map (kbd "z") #'my/toggle-zen-mode))
+
+(with-eval-after-load 'which-key
+  (which-key-add-key-based-replacements
+    "C-c m f" "files"
+    "C-c m b" "buffers"
+    "C-c m p" "projects"
+    "C-c m g" "git"
+    "C-c m n" "notes"
+    "C-c m w" "workspace"
+    "C-c m t" "toggles"
+    "C-c m t h" "theme toggle"
+    "C-c m t z" "zen mode"))
+
+(provide 'init)

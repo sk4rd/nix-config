@@ -10,26 +10,23 @@
         orderless
         marginalia
         consult
+        embark
+        embark-consult
         corfu
         cape
+        nerd-icons-corfu
 
-        flycheck
-        (lsp-mode.overrideAttrs (old: {
-          preBuild = (old.preBuild or "") + ''
-            export LSP_USE_PLISTS=1
-          '';
-        }))
-        lsp-ui
-
-        # Org
-        org-roam
+        # Snippets
+        yasnippet
+        yasnippet-snippets
 
         # Git
         magit
+        diff-hl
 
         # UI
         treemacs
-        modus-themes
+        doom-themes
         doom-modeline
         nerd-icons
         which-key
@@ -40,6 +37,9 @@
         # Formatters
         apheleia
 
+        # Notes
+        denote
+
         # Tree-sitter grammars
         (treesit-grammars.with-grammars (
           grammars: with grammars; [
@@ -49,32 +49,39 @@
             tree-sitter-json
             tree-sitter-css
             tree-sitter-nix
+            tree-sitter-python
           ]
         ))
 
         # Editing
         multiple-cursors
+        expand-region
+        smartparens
+        avy
+        ace-window
+        olivetti
+        undo-fu
 
         # QoL
         rainbow-delimiters
         envrc
-        vterm
       ];
     extraConfig = builtins.readFile ./init.el;
   };
 
   home.packages = with pkgs; [
-    # org-roam dependencies
-    sqlite
-    graphviz
-
     # LSP servers
     typescript-language-server
     typescript
     nixd
+    pyright
 
     # Formatters
     nixfmt-rfc-style
+    nodePackages.prettier
+
+    # Search tools
+    ripgrep
 
     # Fonts
     nerd-fonts.symbols-only
@@ -82,6 +89,7 @@
   ];
 
   home.activation.createOrgDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    mkdir -p "$HOME/org/roam"
+    mkdir -p "$HOME/org/denote"
+    touch "$HOME/org/tasks.org" "$HOME/org/notes.org" "$HOME/org/projects.org" "$HOME/org/journal.org"
   '';
 }
