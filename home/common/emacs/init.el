@@ -50,6 +50,268 @@
 
 (set-face-attribute 'default nil :family "FiraCode Nerd Font" :height 100)
 
+;; Welcome screen
+(setq inhibit-startup-screen t
+      initial-scratch-message nil)
+
+(defconst my/welcome-buffer-name "*Welcome*"
+  "Name of the startup welcome buffer.")
+
+(defface my/welcome-title-face
+  '((t (:inherit default :weight bold :height 1.0)))
+  "Face used for the welcome title.")
+
+(defface my/welcome-subtitle-face
+  '((t (:inherit shadow :height 1.0)))
+  "Face used for small startup metadata.")
+
+(defface my/welcome-section-face
+  '((t (:inherit default :weight bold :height 1.1)))
+  "Face used for section headers.")
+
+(defface my/welcome-key-face
+  '((t (:inherit font-lock-keyword-face :weight bold)))
+  "Face used for displayed keybindings.")
+
+(defconst my/welcome-title-art
+  '("• ▌ ▄ ·. ▪  ▄ •▄       .▄▄ ·     ▄▄▄ .• ▌ ▄ ·.  ▄▄▄·  ▄▄· .▄▄ ·  "
+    "·██ ▐███▪██ █▌▄▌▪▪     ▐█ ▀.     ▀▄.▀··██ ▐███▪▐█ ▀█ ▐█ ▌▪▐█ ▀.  "
+    "▐█ ▌▐▌▐█·▐█·▐▀▀▄· ▄█▀▄ ▄▀▀▀█▄    ▐▀▀▪▄▐█ ▌▐▌▐█·▄█▀▀█ ██ ▄▄▄▀▀▀█▄ "
+    "██ ██▌▐█▌▐█▌▐█.█▌▐█▌.▐▌▐█▄▪▐█    ▐█▄▄▌██ ██▌▐█▌▐█ ▪▐▌▐███▌▐█▄▪▐█ "
+    "▀▀  █▪▀▀▀▀▀▀·▀  ▀ ▀█▄▀▪ ▀▀▀▀      ▀▀▀ ▀▀  █▪▀▀▀ ▀  ▀ ·▀▀▀  ▀▀▀▀  ")
+  "ASCII art title rendered in the welcome buffer.")
+
+(defconst my/welcome-key-groups
+  '(("Leader map (custom): C-c m"
+     ("C-c m f f" "find file")
+     ("C-c m f r" "recent files")
+     ("C-c m b b" "switch buffer")
+     ("C-c m p p" "switch project")
+     ("C-c m p g" "project ripgrep")
+     ("C-c m g g" "magit status")
+     ("C-c m n c" "org capture")
+     ("C-c m w n" "new tab")
+     ("C-c m t h" "toggle theme")
+     ("C-c m t z" "toggle zen mode"))
+    ("Search and navigation"
+     ("C-s" "search in buffer")
+     ("M-s r" "ripgrep")
+     ("C-c i" "imenu")
+     ("M-j" "avy jump")
+     ("M-o" "ace-window")
+     ("C-x t t" "treemacs")
+     ("C-x t f" "treemacs find file"))
+    ("LSP and diagnostics"
+     ("C-c l a" "code actions")
+     ("C-c l r" "rename symbol")
+     ("C-c l f" "format buffer")
+     ("C-c l o" "organize imports")
+     ("M-n / M-p" "next/previous diagnostic"))
+    ("Notes and knowledge"
+     ("C-c a" "org agenda")
+     ("C-c c" "org capture")
+     ("C-c n n" "new denote note")
+     ("C-c n o" "open or create denote")
+     ("C-c n l" "denote link")
+     ("C-c n r" "rename denote note"))
+    ("Editing and buffers"
+     ("C-=" "expand region")
+     ("C-> / C-<" "next/previous multi-cursor")
+     ("C-z / C-S-z" "undo / redo")
+     ("C-x b" "consult buffer")
+     ("C-x C-b" "ibuffer")
+     ("C-x C-r" "recent file")
+     ("C-x g" "magit status")))
+  "Keybinding groups rendered in the startup welcome screen.")
+
+(defconst my/welcome-quick-actions
+  '(("[f] Find file" . find-file)
+    ("[r] Recent files" . consult-recent-file)
+    ("[b] Switch buffer" . consult-buffer)
+    ("[p] Switch project" . project-switch-project)
+    ("[i] Open init.el" . my/welcome-open-user-init))
+  "Quick actions rendered near the top of the welcome screen.")
+
+(defconst my/welcome-tips-text
+  "Tips: use which-key after prefixes (e.g. C-c m), and press g to refresh this screen."
+  "Tips text rendered at the bottom of the welcome screen.")
+
+(defun my/welcome--doom-color (name fallback)
+  "Return Doom color NAME when available, otherwise FALLBACK."
+  (if (fboundp 'doom-color)
+      (or (doom-color name) fallback)
+    fallback))
+
+(defun my/welcome--lerp (a b ratio)
+  "Linearly blend A to B by RATIO."
+  (+ (* (- 1.0 ratio) a) (* ratio b)))
+
+(defun my/welcome--blend-colors (from to ratio)
+  "Blend FROM and TO colors by RATIO and return a hex color."
+  (if (require 'color nil t)
+      (let* ((from-rgb (color-name-to-rgb from))
+             (to-rgb (color-name-to-rgb to))
+             (r (my/welcome--lerp (nth 0 from-rgb) (nth 0 to-rgb) ratio))
+             (g (my/welcome--lerp (nth 1 from-rgb) (nth 1 to-rgb) ratio))
+             (b (my/welcome--lerp (nth 2 from-rgb) (nth 2 to-rgb) ratio)))
+        (color-rgb-to-hex r g b 2))
+    from))
+
+(defun my/welcome--shade-color (color percent)
+  "Return COLOR lightened or darkened by PERCENT."
+  (if (require 'color nil t)
+      (if (>= percent 0)
+          (color-lighten-name color percent)
+        (color-darken-name color (- percent)))
+    color))
+
+(defun my/welcome--insert-key-row (key description)
+  "Insert one keybinding row with KEY and DESCRIPTION."
+  (insert "  "
+          (propertize (format "%-14s" key) 'face 'my/welcome-key-face)
+          description
+          "\n"))
+
+(defun my/welcome--body-columns ()
+  "Return welcome content width in columns."
+  (cond
+   ((and (bound-and-true-p olivetti-mode)
+         (integerp olivetti-body-width))
+    olivetti-body-width)
+   ((and (bound-and-true-p olivetti-mode)
+         (null olivetti-body-width))
+    (+ fill-column 2))
+   (t
+    (window-body-width (selected-window)))))
+
+(defun my/welcome--insert-centered-line (text &optional face)
+  "Insert TEXT centered in the current window, optionally using FACE."
+  (let* ((text-width (string-width text))
+         (body-cols (my/welcome--body-columns))
+         (padding (max 0 (/ (- body-cols text-width) 2))))
+    (insert (make-string padding ?\s))
+    (insert (if face (propertize text 'face face) text))
+    (insert "\n")))
+
+(defun my/welcome--insert-key-group (title rows)
+  "Insert a group TITLE with keybinding ROWS."
+  (insert (propertize title 'face 'my/welcome-section-face)
+          "\n")
+  (dolist (row rows)
+    (my/welcome--insert-key-row (car row) (cadr row)))
+  (insert "\n"))
+
+(defun my/welcome-open-user-init ()
+  "Open the main init file."
+  (interactive)
+  (find-file-existing user-init-file))
+
+(defun my/welcome-run-command (button)
+  "Run the command attached to BUTTON."
+  (call-interactively (button-get button 'my-command)))
+
+(defun my/welcome--insert-quick-actions ()
+  "Insert interactive quick actions."
+  (insert (propertize "Quick actions\n" 'face 'my/welcome-section-face))
+  (let ((first t))
+    (dolist (entry my/welcome-quick-actions)
+      (unless first
+        (insert "   "))
+      (setq first nil)
+      (insert-text-button
+       (car entry)
+       'my-command (cdr entry)
+       'action #'my/welcome-run-command
+       'follow-link t
+       'help-echo (format "Run %s" (cdr entry)))))
+  (insert "\n\n"))
+
+(defun my/welcome-enforce-nowrap ()
+  "Keep welcome buffer lines unwrapped even with Olivetti active."
+  (visual-line-mode -1)
+  (setq-local truncate-lines t
+              word-wrap nil
+              truncate-partial-width-windows t))
+
+(defun my/welcome-render ()
+  "Render the startup welcome buffer."
+  (let ((inhibit-read-only t)
+        (recent-count (if (boundp 'recentf-list) (length recentf-list) 0))
+        (slime-base (my/welcome--doom-color 'blue "#51afef")))
+    (when (and (bound-and-true-p olivetti-mode)
+               (fboundp 'olivetti-set-buffer-windows))
+      (olivetti-set-buffer-windows))
+    (my/welcome-enforce-nowrap)
+    (erase-buffer)
+    (let* ((slime-bright (my/welcome--shade-color slime-base 14))
+           (slime-deep (my/welcome--shade-color slime-base -32))
+           (line-count (max 1 (length my/welcome-title-art)))
+           (index 0))
+      (dolist (line my/welcome-title-art)
+        (let* ((ratio (if (> line-count 1)
+                          (/ (float index) (1- line-count))
+                        0.0))
+               (color (my/welcome--blend-colors slime-bright slime-deep ratio)))
+          (my/welcome--insert-centered-line
+           line
+           `(:inherit my/welcome-title-face :foreground ,color)))
+        (setq index (1+ index))))
+    (insert "\n")
+    (my/welcome--insert-centered-line
+     (format "Ready in %s  |  %s recent files  |  %s"
+             (emacs-init-time)
+             recent-count
+             (format-time-string "%Y-%m-%d %H:%M"))
+     'my/welcome-subtitle-face)
+    (insert "\n")
+    (my/welcome--insert-quick-actions)
+    (dolist (group my/welcome-key-groups)
+      (my/welcome--insert-key-group (car group) (cdr group)))
+    (insert (propertize my/welcome-tips-text 'face 'my/welcome-subtitle-face))
+    (goto-char (point-min))))
+
+(define-derived-mode my/welcome-mode special-mode "Welcome"
+  "Major mode for the startup welcome screen."
+  (setq-local cursor-type nil)
+  (when (require 'olivetti nil t)
+    (setq-local olivetti-body-width 120
+                olivetti-minimum-body-width 90)
+    (setq olivetti-mode-on-hook nil
+          olivetti-recall-visual-line-mode-entry-state nil)
+    (olivetti-mode 1))
+  (my/welcome-enforce-nowrap)
+  (display-line-numbers-mode -1))
+
+(defun my/welcome-buffer ()
+  "Get and prepare the welcome buffer."
+  (let ((buffer (get-buffer-create my/welcome-buffer-name)))
+    (with-current-buffer buffer
+      (my/welcome-mode))
+    ;; Render only after the buffer is attached to a real window so centering
+    ;; uses final on-screen geometry on first draw.
+    (set-window-buffer (selected-window) buffer)
+    (with-current-buffer buffer
+      (my/welcome-render))
+    buffer))
+
+(defun my/welcome-refresh ()
+  "Refresh the welcome screen."
+  (interactive)
+  (when (derived-mode-p 'my/welcome-mode)
+    (my/welcome-render)))
+
+(define-key my/welcome-mode-map (kbd "g") #'my/welcome-refresh)
+(define-key my/welcome-mode-map (kbd "f") #'find-file)
+(define-key my/welcome-mode-map (kbd "r") #'consult-recent-file)
+(define-key my/welcome-mode-map (kbd "b") #'consult-buffer)
+(define-key my/welcome-mode-map (kbd "p") #'project-switch-project)
+(define-key my/welcome-mode-map (kbd "i") #'my/welcome-open-user-init)
+
+(setq initial-buffer-choice
+      (lambda ()
+        (when (null command-line-args-left)
+          (my/welcome-buffer))))
+
 ;; UI
 (use-package doom-themes
   :custom
@@ -71,7 +333,11 @@
   (pcase variant
     ('dark (load-theme my/theme-dark t))
     ('light (load-theme my/theme-light t)))
-  (setq my/theme-variant variant))
+  (setq my/theme-variant variant)
+  (when-let ((buffer (get-buffer my/welcome-buffer-name)))
+    (with-current-buffer buffer
+      (when (derived-mode-p 'my/welcome-mode)
+        (my/welcome-render)))))
 
 (defun my/toggle-theme-variant ()
   "Toggle between dark and light themes."
@@ -195,7 +461,9 @@
 (use-package olivetti
   :custom
   (olivetti-body-width 120)
-  (olivetti-minimum-body-width 90))
+  (olivetti-minimum-body-width 90)
+  (olivetti-mode-on-hook nil)
+  (olivetti-recall-visual-line-mode-entry-state nil))
 
 (defvar-local my/zen--line-numbers-were-on nil
   "Non-nil when line numbers were enabled before entering zen mode.")
@@ -324,12 +592,9 @@
 
 ;; Formatting
 (use-package apheleia
-  :hook ((js-ts-mode . apheleia-mode)
-         (typescript-ts-mode . apheleia-mode)
-         (tsx-ts-mode . apheleia-mode)
-         (json-ts-mode . apheleia-mode)
-         (css-ts-mode . apheleia-mode)
-         (nix-mode . apheleia-mode))
+  :hook ((prog-mode . apheleia-mode)
+         (text-mode . apheleia-mode)
+         (conf-mode . apheleia-mode))
   :config
   (setf (alist-get 'prettier apheleia-formatters)
         (if (executable-find "prettier")
