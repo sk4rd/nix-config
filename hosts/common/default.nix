@@ -4,6 +4,7 @@
   imports = [
     ./programs.nix
     ./services.nix
+    ./mangowc.nix
     ./sops.nix
     ./mounts.nix
     ./bluetooth.nix

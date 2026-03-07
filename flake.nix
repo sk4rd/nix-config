@@ -57,6 +57,32 @@
           ];
         };
 
+      mkHome =
+        _name:
+        {
+          username,
+          path,
+          system ? "x86_64-linux",
+          homeDirectory ? "/home/${username}",
+          extraModules ? [ ],
+        }:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+
+          modules = [
+            ./home
+            path
+            {
+              home = {
+                inherit username homeDirectory;
+              };
+            }
+          ] ++ extraModules;
+        };
+
       hostDefinitions = {
         desktop = {
           hostPath = ./hosts/desktop;
@@ -97,10 +123,27 @@
         };
       };
 
+      homeDefinitions = lib.filterAttrs (_: cfg: cfg ? home && cfg.home != null) hostDefinitions;
+
       formatterPkgs = import nixpkgs { system = "x86_64-linux"; };
     in
     {
       nixosConfigurations = lib.mapAttrs mkHost hostDefinitions;
+
+      homeConfigurations = lib.mapAttrs' (
+        hostName: cfg:
+        let
+          system = cfg.system or "x86_64-linux";
+          username = cfg.home.username;
+        in
+        lib.nameValuePair "${username}@${hostName}" (
+          mkHome hostName {
+            inherit system username;
+            path = cfg.home.path;
+          }
+        )
+      ) homeDefinitions;
+
       formatter.x86_64-linux = formatterPkgs.nixfmt-tree;
     };
 }
