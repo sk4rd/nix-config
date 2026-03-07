@@ -6,11 +6,16 @@
     ./hardware.nix
     ./filesystem.nix
     ./boot.nix
-    ./programs.nix
     ./networking.nix
-    ./services.nix
     ./virtualisation.nix
   ];
+
+  programs.localsend = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  services.usbmuxd.enable = true;
 
   environment.systemPackages = with pkgs; [
     looking-glass-client

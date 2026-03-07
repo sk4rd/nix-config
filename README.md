@@ -7,21 +7,27 @@ My NixOS configurations.
 - `desktop` — GPU passthrough setup with native GPU boot specialisation
 - `laptop`
 - `wsl`
+- `work` — work-specific WSL host
+- `nas`
 
 ## Structure
 
 ```
 ├── flake.nix
 ├── hosts/
-│   ├── default.nix       # Nix settings, zsh
-│   ├── common/           # Shared desktop+laptop config
+│   ├── default.nix       # Global NixOS baseline + shared sops defaults
+│   ├── common/           # Shared desktop/laptop config
 │   ├── desktop/
 │   ├── laptop/
-│   └── wsl/
+│   ├── wsl/
+│   ├── work/
+│   └── nas/
 ├── home/
-│   ├── common/           # neovim, git, zsh, direnv
+│   ├── default.nix       # Shared Home Manager baseline
+│   ├── common/           # Shell/git/editor shared modules
 │   ├── miko/
-│   └── wsl/
+│   ├── wsl/
+│   └── work/
 └── secrets/              # Encrypted with sops
 ```
 

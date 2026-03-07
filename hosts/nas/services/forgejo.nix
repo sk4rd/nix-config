@@ -1,7 +1,6 @@
 { ... }:
 
 {
-  networking.firewall.allowedTCPPorts = [ 3000 ];
   services.forgejo = {
     enable = true;
     stateDir = "/srv/forgejo";

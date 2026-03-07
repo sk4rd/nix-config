@@ -12,101 +12,95 @@
 
   outputs =
     {
-      self,
       nixpkgs,
       nixos-wsl,
       home-manager,
       sops-nix,
+      ...
     }:
     let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
+      lib = nixpkgs.lib;
 
       mkHost =
+        _name:
         {
           hostPath,
-          homePath ? null,
-          username ? null,
+          home ? null,
           extraModules ? [ ],
           extraHMModules ? [ ],
+          system ? "x86_64-linux",
         }:
-        nixpkgs.lib.nixosSystem {
-          inherit pkgs;
+        lib.nixosSystem {
+          inherit system;
+          modules = [
+            sops-nix.nixosModules.sops
+            ./hosts
+            hostPath
+          ]
+          ++ extraModules
+          ++ lib.optionals (home != null) [
+            home-manager.nixosModules.home-manager
+            (
+              { ... }:
+              {
+                home-manager.useGlobalPkgs = true;
+                home-manager.useUserPackages = true;
 
-          modules =
-            extraModules
-            ++ [
-              sops-nix.nixosModules.sops
-              ./hosts
-              hostPath
-            ]
-            ++ (
-              if homePath != null then
-                assert username != null;
-                [
-                  home-manager.nixosModules.home-manager
-                  (
-                    { ... }:
-                    {
-                      home-manager.useGlobalPkgs = true;
-                      home-manager.useUserPackages = true;
+                home-manager.users.${home.username}.imports = [
+                  ./home
+                  home.path
+                ];
 
-                      home-manager.users.${username} = {
-                        imports = [
-                          ./home
-                          homePath
-                        ];
-                      };
-
-                      home-manager.sharedModules = extraHMModules;
-                    }
-                  )
-                ]
-              else
-                [ ]
-            );
+                home-manager.sharedModules = extraHMModules;
+              }
+            )
+          ];
         };
-    in
-    {
-      nixosConfigurations = {
-        "desktop" = mkHost {
+
+      hostDefinitions = {
+        desktop = {
           hostPath = ./hosts/desktop;
-          homePath = ./home/miko;
-          username = "miko";
+          home = {
+            username = "miko";
+            path = ./home/miko;
+          };
         };
 
-        "laptop" = mkHost {
+        laptop = {
           hostPath = ./hosts/laptop;
-          homePath = ./home/miko;
-          username = "miko";
+          home = {
+            username = "miko";
+            path = ./home/miko;
+          };
         };
 
-        "wsl" = mkHost {
+        wsl = {
           hostPath = ./hosts/wsl;
-          homePath = ./home/wsl;
-          username = "nixos";
-          extraModules = [
-            nixos-wsl.nixosModules.default
-          ];
+          home = {
+            username = "nixos";
+            path = ./home/wsl;
+          };
+          extraModules = [ nixos-wsl.nixosModules.default ];
         };
 
-        "work" = mkHost {
+        work = {
           hostPath = ./hosts/work;
-          homePath = ./home/work;
-          username = "nixos";
-          extraModules = [
-            nixos-wsl.nixosModules.default
-          ];
+          home = {
+            username = "nixos";
+            path = ./home/work;
+          };
+          extraModules = [ nixos-wsl.nixosModules.default ];
         };
 
-        "nas" = mkHost {
+        nas = {
           hostPath = ./hosts/nas;
         };
       };
 
-      formatter.${system} = pkgs.nixfmt-tree;
+      formatterPkgs = import nixpkgs { system = "x86_64-linux"; };
+    in
+    {
+      nixosConfigurations = lib.mapAttrs mkHost hostDefinitions;
+      formatter.x86_64-linux = formatterPkgs.nixfmt-tree;
     };
 }

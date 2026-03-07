@@ -4,10 +4,15 @@
   imports = [
     ./git.nix
     ./zsh.nix
-    ./direnv.nix
-    ./foot.nix
     ./emacs
   ];
+
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+
+  programs.foot.enable = true;
 
   fonts.fontconfig.enable = true;
 }

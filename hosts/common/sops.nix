@@ -1,12 +1,7 @@
 { ... }:
 
 {
-  sops = {
-    defaultSopsFile = ../../secrets/secrets.yaml;
-    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-
-    secrets."nas/credentials" = {
-      mode = "0600";
-    };
+  sops.secrets."nas/credentials" = {
+    mode = "0600";
   };
 }

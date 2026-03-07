@@ -13,7 +13,6 @@ in
 {
   sops = {
     defaultSopsFile = ../../secrets/work.yaml;
-    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     secrets."proxy_extra_hosts" = {
       owner = "root";
       mode = "0400";

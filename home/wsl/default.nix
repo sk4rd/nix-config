@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   imports = [
@@ -7,5 +7,5 @@
 
   home.packages = with pkgs; [ wl-clipboard ];
 
-  home.stateVersion = "25.05";
+  home.stateVersion = lib.mkDefault "25.05";
 }
