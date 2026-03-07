@@ -306,7 +306,7 @@
   :config
   (add-to-list 'eglot-server-programs
                '((js-ts-mode typescript-ts-mode tsx-ts-mode)
-                 . ("typescript-language-server" "--stdio")))
+                 . ("vtsls" "--stdio")))
   (add-to-list 'eglot-server-programs
                '((nix-mode) . ("nixd")))
   (add-to-list 'eglot-server-programs

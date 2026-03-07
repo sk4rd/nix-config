@@ -71,13 +71,13 @@
 
   home.packages = with pkgs; [
     # LSP servers
-    typescript-language-server
+    vtsls
     typescript
     nixd
     pyright
 
     # Formatters
-    nixfmt-rfc-style
+    nixfmt
     nodePackages.prettier
 
     # Search tools
