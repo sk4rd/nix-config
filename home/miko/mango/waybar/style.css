@@ -1,51 +1,106 @@
 * {
   border: none;
-  border-radius: 0;
-  font-family: "FiraCode Nerd Font", monospace;
+  font-family: "FiraCode Nerd Font", "JetBrainsMono Nerd Font", monospace;
   font-size: 12px;
   min-height: 0;
 }
 
 window#waybar {
-  background: rgba(17, 17, 17, 0.96);
+  background: rgba(10, 12, 16, 0.70);
   color: #d8dee9;
 }
 
+window#waybar.hidden {
+  opacity: 0.1;
+}
+
 #workspaces {
-  margin: 0 6px;
+  margin: 4px 8px 4px 10px;
+  padding: 0 6px;
+  background: rgba(24, 28, 34, 0.92);
+  border: 1px solid rgba(136, 192, 208, 0.24);
+  border-radius: 8px;
 }
 
 #workspaces button {
+  margin: 2px 2px;
   padding: 0 8px;
-  color: #a0a8b7;
+  border-radius: 6px;
+  color: #a9b1bf;
+  transition: none;
 }
 
 #workspaces button.active {
-  color: #111111;
+  color: #101317;
   background: #88c0d0;
 }
 
+#workspaces button.hidden {
+  color: #7f8896;
+}
+
 #workspaces button.urgent {
-  color: #111111;
+  color: #101317;
   background: #bf616a;
 }
 
-#window {
-  color: #cfd6e3;
+#workspaces button:hover {
+  color: #d8dee9;
+  background: rgba(136, 192, 208, 0.18);
 }
 
-#clock,
-#battery,
-#network,
+#cpu,
+#memory,
+#temperature,
 #pulseaudio,
-#tray {
-  margin: 0 8px 0 0;
+#network,
+#clock {
+  margin: 4px 0;
+  padding: 0 10px;
+  background: rgba(24, 28, 34, 0.92);
+  border-top: 1px solid rgba(136, 192, 208, 0.24);
+  border-bottom: 1px solid rgba(136, 192, 208, 0.24);
+  color: #d8dee9;
 }
 
-#battery.warning {
+#cpu {
+  margin-left: 4px;
+  border-left: 1px solid rgba(136, 192, 208, 0.24);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+}
+
+#memory,
+#temperature,
+#pulseaudio,
+#network,
+#clock {
+  border-right: none;
+  border-left: none;
+  border-radius: 0;
+}
+
+#clock {
+  margin-right: 10px;
+  border-left: none;
+  border-right: 1px solid rgba(136, 192, 208, 0.24);
+  border-radius: 0 8px 8px 0;
+  padding-right: 12px;
+}
+
+#cpu.warning,
+#memory.warning,
+#temperature.warning {
   color: #ebcb8b;
 }
 
-#battery.critical {
+#network.disconnected,
+#pulseaudio.muted {
+  color: #a9b1bf;
+}
+
+#cpu.critical,
+#memory.critical,
+#temperature.critical {
   color: #bf616a;
 }
