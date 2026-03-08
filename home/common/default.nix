@@ -12,6 +12,7 @@
     nix-direnv.enable = true;
   };
 
+  programs.home-manager.enable = true;
   programs.foot.enable = true;
 
   fonts.fontconfig.enable = true;
