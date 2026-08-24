@@ -1,0 +1,21 @@
+# Nix build outputs
+result
+result-*
+
+# Local development state
+.direnv/
+.env
+.env.*
+!.env.example
+
+# OpenCode dependencies
+.opencode/node_modules/
+
+# Plaintext secret scratch files
+secrets/*.plain.*
+secrets/*.decrypted.*
+
+# Editor and operating-system files
+*.swp
+*~
+.DS_Store

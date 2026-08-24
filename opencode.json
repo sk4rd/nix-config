@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "external_directory": "deny",
+    "edit": {
+      "*": "allow",
+      "flake.nix": "deny",
+      "AGENTS.md": "deny",
+      "Justfile": "deny",
+      "opencode.json": "deny",
+      ".opencode/*": "deny",
+      "modules/tooling/dev-shell.nix": "deny",
+      "modules/tooling/formatter.nix": "deny"
+    },
+    "bash": {
+      "*": "deny",
+
+      "git status": "allow",
+      "git status *": "allow",
+      "git diff": "allow",
+      "git diff *": "allow",
+      "git log": "allow",
+      "git log *": "allow",
+      "git show": "allow",
+      "git show *": "allow",
+      "git ls-files": "allow",
+      "git ls-files *": "allow",
+      "git grep *": "allow",
+      "git add -N *": "allow",
+
+      "nix flake check*": "allow",
+      "nix eval *": "allow",
+      "nix build *": "allow",
+
+      "just check": "allow",
+      "just eval": "allow",
+      "just lint": "allow",
+      "just format": "allow",
+      "just build *": "allow",
+      "just full": "allow"
+    }
+  }
+}
