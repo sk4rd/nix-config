@@ -1,0 +1,11 @@
+keys:
+  - &miko_yubikey "FA95BDB219EB93BF3BADC959AA31E52ED0F3255F!"
+  - &laptop age1a3mku4j7790c9xkv9rg2f9vfpfp9d5cvrr7x9gvssdsa9m9qwy7q0mrez9
+
+creation_rules:
+  - path_regex: secrets/miko-password\.yaml$
+    key_groups:
+      - pgp:
+          - *miko_yubikey
+        age:
+          - *laptop
