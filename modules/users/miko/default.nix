@@ -5,6 +5,7 @@
     includes = [
       den.batteries.define-user
       den.aspects.development
+      den.aspects.firefox
       den.aspects.zsh
     ];
 
