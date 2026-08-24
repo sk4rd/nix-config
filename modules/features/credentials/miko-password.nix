@@ -12,6 +12,7 @@
         };
       };
 
+      users.mutableUsers = false;
       users.users.miko.hashedPasswordFile = config.sops.secrets.miko-password.path;
     };
 }

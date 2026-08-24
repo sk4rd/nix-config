@@ -85,16 +85,44 @@ lsblk -o NAME,SIZE,MODEL,SERIAL,TYPE,MOUNTPOINTS
 sudo nix run .#disko -- --mode destroy,format,mount --flake .#laptop
 ```
 
-After Disko mounts the new system under `/mnt`, install and set the initial
-local password before rebooting:
+The laptop password is immutable and must decrypt before user creation. Before
+reinstalling, preserve `/etc/ssh/ssh_host_ed25519_key` outside the disk being
+erased. After Disko mounts the new system under `/mnt`, restore that identity
+and verify that its public key derives the recipient recorded in `.sops.yaml`:
 
 ```sh
+sudo install -d -m 0700 /mnt/etc/ssh
+sudo install -m 0600 /path/to/backup/ssh_host_ed25519_key \
+  /mnt/etc/ssh/ssh_host_ed25519_key
+sudo install -m 0644 /path/to/backup/ssh_host_ed25519_key.pub \
+  /mnt/etc/ssh/ssh_host_ed25519_key.pub
+nix develop -c ssh-to-age < /mnt/etc/ssh/ssh_host_ed25519_key.pub
 sudo nixos-install --flake .#laptop
-sudo nixos-enter --root /mnt -c 'passwd miko'
 ```
 
-The password remains mutable until the laptop host identity has been added to
-the SOPS recipient policy and declarative password decryption has been tested.
+If the old host identity is unavailable, generate a new one under `/mnt`, add
+its age recipient to `.sops.yaml`, and run `sops updatekeys` on the encrypted
+password using the YubiKey before installing. A manual `passwd` change is not a
+substitute because immutable-user activation will replace it.
+
+### Laptop recovery
+
+The declarative password configuration disables mutable users and intentionally
+locks password login for `root`. Preserve the LUKS passphrase, YubiKey, and
+access to the private repository. To recover from a broken credential or system
+generation, boot the installer, clone a corrected or known-good revision, and
+mount the existing encrypted layout without formatting it:
+
+```sh
+sudo nix run .#disko -- --mode mount --flake .#laptop
+findmnt /mnt
+findmnt /mnt/boot
+sudo nixos-install --flake .#laptop
+```
+
+Never use Disko's `destroy` or `format` modes during recovery. Password changes
+must be made in the encrypted SOPS secret because activation replaces mutable
+shadow state.
 
 `flake.nix` is generated from the input declarations in
 `modules/dendritic.nix`:
@@ -106,20 +134,21 @@ nix run .#write-flake
 ## Secrets bootstrap
 
 The SOPS NixOS module is available through `den.aspects.secrets`, and the
-development shell includes `sops` and `ssh-to-age`. Password management is not
-enabled until each installed host has a persistent Ed25519 SSH host key.
+development shell includes `sops` and `ssh-to-age`. The laptop password is
+encrypted to its persistent Ed25519 SSH host identity and the YubiKey OpenPGP
+encryption subkey.
 
-After installing a host, derive its non-interactive age recipient with:
+Derive a host's non-interactive age recipient with:
 
 ```sh
-ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
+nix develop -c ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
 ```
 
-The future SOPS policy should encrypt the password hash to each host recipient
-and to the YubiKey's OpenPGP encryption subkey. This lets hosts decrypt during
-activation without requiring the YubiKey, while the YubiKey remains the human
-editing and recovery identity. Enable `users.mutableUsers = false` only after
-runtime decryption and login have been tested on every host.
+Each additional host must be added to the SOPS recipient policy before it uses
+the password aspect. Hosts decrypt during activation without requiring the
+YubiKey, while the YubiKey remains the human editing and recovery identity.
+Use a staged mutable-user deployment to test decryption and the password hash
+before enabling immutable users on another host.
 
 The initial `desktop` definition expects an ext4 root filesystem labelled
 `nixos` and an EFI system partition labelled `ESP`. Before deploying, replace
