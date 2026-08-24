@@ -8,6 +8,7 @@
       den.aspects.laptop-power
       den.aspects.miko-password
       den.aspects.plasma-workstation
+      den.aspects.secure-boot
     ];
 
     nixos = { };

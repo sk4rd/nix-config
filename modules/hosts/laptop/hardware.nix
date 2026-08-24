@@ -6,10 +6,7 @@
     {
       imports = [ inputs.nixos-hardware.nixosModules.lenovo-thinkpad-z13-gen1 ];
 
-      boot.loader = {
-        systemd-boot.enable = true;
-        efi.canTouchEfiVariables = true;
-      };
+      boot.loader.efi.canTouchEfiVariables = true;
 
       boot.initrd.availableKernelModules = [
         "nvme"

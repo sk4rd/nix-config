@@ -85,10 +85,12 @@ lsblk -o NAME,SIZE,MODEL,SERIAL,TYPE,MOUNTPOINTS
 sudo nix run .#disko -- --mode destroy,format,mount --flake .#laptop
 ```
 
-The laptop password is immutable and must decrypt before user creation. Before
-reinstalling, preserve `/etc/ssh/ssh_host_ed25519_key` outside the disk being
-erased. After Disko mounts the new system under `/mnt`, restore that identity
-and verify that its public key derives the recipient recorded in `.sops.yaml`:
+The laptop password is immutable and must decrypt before user creation.
+Lanzaboote also requires its signing identity while installing boot artifacts.
+Before reinstalling, preserve `/etc/ssh/ssh_host_ed25519_key` and
+`/var/lib/sbctl` outside the disk being erased. After Disko mounts the new
+system under `/mnt`, restore both identities and verify that the SSH public key
+derives the recipient recorded in `.sops.yaml`:
 
 ```sh
 sudo install -d -m 0700 /mnt/etc/ssh
@@ -96,6 +98,8 @@ sudo install -m 0600 /path/to/backup/ssh_host_ed25519_key \
   /mnt/etc/ssh/ssh_host_ed25519_key
 sudo install -m 0644 /path/to/backup/ssh_host_ed25519_key.pub \
   /mnt/etc/ssh/ssh_host_ed25519_key.pub
+sudo install -d -m 0755 /mnt/var/lib
+sudo cp -a /path/to/backup/sbctl /mnt/var/lib/sbctl
 nix develop -c ssh-to-age < /mnt/etc/ssh/ssh_host_ed25519_key.pub
 sudo nixos-install --flake .#laptop
 ```
@@ -104,6 +108,22 @@ If the old host identity is unavailable, generate a new one under `/mnt`, add
 its age recipient to `.sops.yaml`, and run `sops updatekeys` on the encrypted
 password using the YubiKey before installing. A manual `passwd` change is not a
 substitute because immutable-user activation will replace it.
+
+If the old Lanzaboote bundle is unavailable, disable Secure Boot enforcement,
+reset the firmware to Setup Mode without clearing `dbx`, and generate replacement
+keys in the installer. Copy them into the target before `nixos-install`:
+
+```sh
+nix shell nixpkgs#sbctl -c sh -c \
+  'sudo "$(command -v sbctl)" create-keys'
+sudo install -d -m 0755 /mnt/var/lib
+sudo cp -a /var/lib/sbctl /mnt/var/lib/sbctl
+sudo nixos-install --flake .#laptop
+```
+
+Back up the replacement bundle and enroll its keys after boot; firmware that
+still trusts the lost keys cannot enforce booting artifacts signed by the new
+bundle.
 
 ### Laptop recovery
 
@@ -123,6 +143,62 @@ sudo nixos-install --flake .#laptop
 Never use Disko's `destroy` or `format` modes during recovery. Password changes
 must be made in the encrypted SOPS secret because activation replaces mutable
 shadow state.
+
+### Secure Boot
+
+Lanzaboote signs boot artifacts with owner keys stored outside the Nix store at
+`/var/lib/sbctl`. Keep Secure Boot enforcement off for the initial signed-boot
+deployment. On a ThinkPad, never select **Clear All Secure Boot Keys**, which
+can remove the forbidden-signature database (`dbx`). If necessary, enable the
+Secure Boot firmware toggle and select **Reset to Setup Mode** instead; Setup
+Mode does not enforce signatures.
+
+Confirm firmware state, create the signing keys, and back them up to encrypted
+offline storage before the first Lanzaboote switch:
+
+```sh
+bootctl status
+nix shell nixpkgs#sbctl -c sh -c \
+  'sudo "$(command -v sbctl)" create-keys'
+sudo find /var/lib/sbctl -maxdepth 3 -type f -ls
+```
+
+Build and switch while enforcement is still off, then verify that the
+bootloader and generation stubs are signed:
+
+```sh
+just build laptop
+sudo nixos-rebuild switch --flake .#laptop
+sudo sbctl verify
+findmnt /boot
+```
+
+Reboot once before enrollment to test the signed Lanzaboote generation. Then
+return to NixOS in firmware Setup Mode and preserve Microsoft UEFI certificates
+needed by common ThinkPad Option ROMs while enrolling the owner keys:
+
+```sh
+sudo sbctl enroll-keys --microsoft
+sudo sbctl status
+sudo reboot
+```
+
+After reboot, verify enforcement and perform one controlled boot-generation
+test. Do not reboot if signing or verification fails:
+
+```sh
+bootctl status
+sudo sbctl status
+sudo sbctl verify
+sudo sbctl list-enrolled-keys
+journalctl -k -b --grep='[Ss]ecure [Bb]oot'
+sudo nixos-rebuild boot --flake .#laptop
+sudo sbctl verify
+```
+
+Expected status is Secure Boot enabled in firmware User Mode. Recovery media
+may require disabling Secure Boot temporarily. After firmware updates, repeat
+the status and signature checks.
 
 `flake.nix` is generated from the input declarations in
 `modules/dendritic.nix`:
