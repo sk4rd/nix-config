@@ -1,19 +1,32 @@
+{ inputs, ... }:
+
 {
   den.aspects.laptop.nixos =
     { lib, ... }:
     {
-      # Evaluation-only placeholders. Do not deploy before replacing this file
-      # with the laptop's generated hardware configuration.
+      imports = [ inputs.nixos-hardware.nixosModules.lenovo-thinkpad-z13-gen1 ];
+
       boot.loader = {
         systemd-boot.enable = true;
         efi.canTouchEfiVariables = true;
       };
 
-      nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+      boot.initrd.availableKernelModules = [
+        "nvme"
+        "xhci_pci"
+        "thunderbolt"
+        "usb_storage"
+        "sd_mod"
+      ];
+      boot.initrd.kernelModules = [ ];
+      boot.kernelModules = [ "kvm-amd" ];
+      boot.extraModulePackages = [ ];
 
-      fileSystems."/" = {
-        device = "/dev/disk/by-label/NIXOS_ROOT";
-        fsType = "ext4";
+      hardware.bluetooth = {
+        enable = true;
+        powerOnBoot = true;
       };
+
+      nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
     };
 }

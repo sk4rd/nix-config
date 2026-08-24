@@ -28,6 +28,6 @@ build host:
 full: check lint
     nix flake check --show-trace
     nix build .#nixosConfigurations.desktop.config.system.build.toplevel --no-link
-    # Laptop is excluded until its placeholder hardware configuration is replaced.
+    nix build .#nixosConfigurations.laptop.config.system.build.toplevel --no-link
     nix build .#nixosConfigurations.vm.config.system.build.toplevel --no-link
     nix build .#homeConfigurations.miko.activationPackage --no-link

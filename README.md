@@ -7,6 +7,7 @@ flake-parts module discovered by `import-tree`.
 ## Inventory
 
 - NixOS host: `desktop` (AMD CPU, Radeon RX 7900 XT, Plasma 6)
+- NixOS host: `laptop` (ThinkPad Z13 Gen 1, Plasma 6)
 - NixOS host: `vm` (network hostname `nixos`)
 - User and standalone Home Manager configuration: `miko`
 
@@ -54,17 +55,46 @@ behavior needs to be verified against primary documentation.
 just check
 just lint
 just build desktop
+just build laptop
 just build vm
 just full
 
 nix flake check
 nix build .#nixosConfigurations.desktop.config.system.build.toplevel
+nix build .#nixosConfigurations.laptop.config.system.build.toplevel
 nix build .#nixosConfigurations.vm.config.system.build.toplevel
 sudo nixos-rebuild switch --flake .#desktop
 sudo nixos-rebuild switch --flake .#vm
 home-manager switch --flake .#miko
 nix fmt .
 ```
+
+## Laptop installation
+
+The laptop target replaces the entire internal NVMe drive at
+`/dev/disk/by-id/nvme-eui.e8238fa6bf530001001b444a481737ed` with a 1 GiB EFI
+partition and a LUKS2-encrypted ext4 root. Confirm that path resolves to the
+expected WD SN740 before running the destructive command. Secure Boot must
+remain disabled until signed boot artifacts and owner keys are configured
+after the first successful boot:
+
+```sh
+bootctl status
+readlink -f /dev/disk/by-id/nvme-eui.e8238fa6bf530001001b444a481737ed
+lsblk -o NAME,SIZE,MODEL,SERIAL,TYPE,MOUNTPOINTS
+sudo nix run .#disko -- --mode destroy,format,mount --flake .#laptop
+```
+
+After Disko mounts the new system under `/mnt`, install and set the initial
+local password before rebooting:
+
+```sh
+sudo nixos-install --flake .#laptop
+sudo nixos-enter --root /mnt -c 'passwd miko'
+```
+
+The password remains mutable until the laptop host identity has been added to
+the SOPS recipient policy and declarative password decryption has been tested.
 
 `flake.nix` is generated from the input declarations in
 `modules/dendritic.nix`:
