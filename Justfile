@@ -13,6 +13,7 @@ eval:
     nix eval --raw .#nixosConfigurations.desktop.config.system.build.toplevel.drvPath >/dev/null
     nix eval --raw .#nixosConfigurations.laptop.config.system.build.toplevel.drvPath >/dev/null
     nix eval --raw .#nixosConfigurations.vm.config.system.build.toplevel.drvPath >/dev/null
+    nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath >/dev/null
     nix eval --raw .#homeConfigurations.miko.activationPackage.drvPath >/dev/null
 
 # Static Nix analysis. Run from `nix develop` so statix/deadnix are available.
@@ -30,4 +31,5 @@ full: check lint
     nix build .#nixosConfigurations.desktop.config.system.build.toplevel --no-link
     nix build .#nixosConfigurations.laptop.config.system.build.toplevel --no-link
     nix build .#nixosConfigurations.vm.config.system.build.toplevel --no-link
+    nix build .#nixosConfigurations.wsl.config.system.build.toplevel --no-link
     nix build .#homeConfigurations.miko.activationPackage --no-link

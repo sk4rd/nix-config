@@ -9,6 +9,7 @@ flake-parts module discovered by `import-tree`.
 - NixOS host: `desktop` (AMD CPU, Radeon RX 7900 XT, Plasma 6)
 - NixOS host: `laptop` (ThinkPad Z13 Gen 1, Plasma 6)
 - NixOS host: `vm` (network hostname `nixos`)
+- NixOS host: `wsl` (NixOS-WSL with direct YubiKey attachment)
 - User and standalone Home Manager configuration: `miko`
 
 Hosts and their users are declared in `modules/inventory.nix`. Each host owns
@@ -57,17 +58,70 @@ just lint
 just build desktop
 just build laptop
 just build vm
+just build wsl
 just full
 
 nix flake check
 nix build .#nixosConfigurations.desktop.config.system.build.toplevel
 nix build .#nixosConfigurations.laptop.config.system.build.toplevel
 nix build .#nixosConfigurations.vm.config.system.build.toplevel
+nix build .#nixosConfigurations.wsl.config.system.build.toplevel
 sudo nixos-rebuild switch --flake .#desktop
 sudo nixos-rebuild switch --flake .#vm
 home-manager switch --flake .#miko
 nix fmt .
 ```
+
+## NixOS-WSL
+
+The WSL host uses native systemd and Windows interoperability, with `miko` as
+the default user. Install an upstream NixOS-WSL image, make this private
+repository available through a Windows-side checkout, then apply:
+
+```sh
+sudo nixos-rebuild switch --flake /mnt/c/path/to/nix-config#wsl
+```
+
+The YubiKey is attached directly to the shared WSL2 VM so Linux `pcscd`,
+`scdaemon`, and `gpg-agent` provide both GPG operations and outbound SSH. In an
+elevated PowerShell session, install and bind `usbipd-win` once:
+
+```powershell
+wsl --update
+winget install --interactive --exact dorssel.usbipd-win
+usbipd list
+usbipd bind --busid <BUSID>
+```
+
+Keep a WSL shell open and attach from ordinary PowerShell whenever the key is
+needed in WSL:
+
+```powershell
+usbipd attach --wsl --busid <BUSID>
+```
+
+After attachment, verify inside NixOS-WSL:
+
+```sh
+lsusb
+systemctl status pcscd
+gpgconf --kill scdaemon
+gpg --card-status
+ssh-add -L
+ssh -T git@github.com
+printf test | gpg --clearsign
+```
+
+While attached, Windows applications cannot use the YubiKey. Return ownership
+to Windows with:
+
+```powershell
+usbipd detach --busid <BUSID>
+```
+
+Attachment is deliberately manual because bus IDs can change after moving the
+device. The public OpenPGP certificate must also be imported into WSL's GPG
+keyring; the card contains private subkeys, not the full public certificate.
 
 ## Laptop installation
 

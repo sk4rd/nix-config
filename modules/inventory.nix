@@ -15,6 +15,12 @@
     users.miko = { };
   };
 
+  den.hosts.x86_64-linux.wsl = {
+    hostName = "wsl";
+    users.miko = { };
+    wsl.enable = true;
+  };
+
   # The same user aspect can also be activated outside NixOS.
   den.homes.x86_64-linux.miko = { };
 }
