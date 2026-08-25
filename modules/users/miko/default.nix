@@ -6,6 +6,7 @@
       den.batteries.define-user
       den.aspects.development
       den.aspects.firefox
+      den.aspects.lf
       den.aspects.zsh
     ];
 
