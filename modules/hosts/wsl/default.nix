@@ -9,7 +9,10 @@
 
     provides.to-users.includes = [ den.aspects.yubikey-openpgp ];
 
-    wsl.defaultUser = "miko";
+    wsl = {
+      defaultUser = "miko";
+      usbip.enable = true;
+    };
 
     nixos =
       { pkgs, ... }:
