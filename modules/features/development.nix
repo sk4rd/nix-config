@@ -5,6 +5,16 @@
       home.packages = with pkgs; [
         tree
 
+        # Terminal utilities
+        btop
+        duf
+        fd
+        jq
+        ncdu
+        ripgrep
+        yazi
+        zellij
+
         # Rust
         rustup
         gcc
