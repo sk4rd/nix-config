@@ -9,6 +9,7 @@
     den.aspects.samba
     den.aspects.jellyfin
     den.aspects.joplin
+    den.aspects.prowlarr
     den.aspects.torrenting
     den.aspects.traefik-media
     den.aspects.home-assistant

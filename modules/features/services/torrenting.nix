@@ -57,6 +57,7 @@
               ports = [
                 "127.0.0.1:18080:18080/tcp"
                 "127.0.0.1:13000:3000/tcp"
+                "127.0.0.1:9696:9696/tcp"
               ];
               capabilities.NET_ADMIN = true;
               devices = [ "/dev/net/tun:/dev/net/tun" ];
