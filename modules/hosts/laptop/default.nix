@@ -11,6 +11,8 @@
       den.aspects.secure-boot
     ];
 
-    nixos = { };
+    nixos = {
+      nix.settings.trusted-users = [ "miko" ];
+    };
   };
 }

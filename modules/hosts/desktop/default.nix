@@ -7,6 +7,8 @@
       den.aspects.plasma-workstation
     ];
 
-    nixos = { };
+    nixos = {
+      nix.settings.trusted-users = [ "miko" ];
+    };
   };
 }
