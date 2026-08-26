@@ -3,6 +3,7 @@
 {
   den.aspects.plasma-workstation = {
     includes = [
+      den.aspects.backup
       den.aspects.graphical
       den.aspects.gaming
       den.aspects.nas-cifs

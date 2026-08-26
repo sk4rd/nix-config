@@ -3,6 +3,7 @@ keys:
   - &nas_legacy_yubikey 9C8FF32791159E6FB55B978CAFA1F0631CECE62F
   - &laptop age1a3mku4j7790c9xkv9rg2f9vfpfp9d5cvrr7x9gvssdsa9m9qwy7q0mrez9
   - &desktop age1e2nkm4s0phlv2mqaj02f74xzut07pxppn9pwzf9gpehyg4ljjscqftvgp8
+  - &wsl age12kpqus47sa00ls4geyctg5hkvdufdlzny66z0xnrspzq9mls7u9sh68ty0
   - &nas age1fx7378dsesr74eu50ylzs3ll9q5uk3ep596psazp4w6epzz69yksupmtl5
 
 creation_rules:
@@ -19,6 +20,7 @@ creation_rules:
         age:
           - *desktop
           - *laptop
+          - *wsl
   - path_regex: secrets/nas\.yaml$
     key_groups:
       - pgp:
