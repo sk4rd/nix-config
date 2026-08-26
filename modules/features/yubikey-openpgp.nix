@@ -1,5 +1,3 @@
-{ den, ... }:
-
 {
   den.aspects.yubikey-openpgp = {
     nixos.services.pcscd.enable = true;

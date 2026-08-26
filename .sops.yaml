@@ -1,6 +1,9 @@
 keys:
   - &miko_yubikey "FA95BDB219EB93BF3BADC959AA31E52ED0F3255F!"
+  - &nas_legacy_yubikey 9C8FF32791159E6FB55B978CAFA1F0631CECE62F
   - &laptop age1a3mku4j7790c9xkv9rg2f9vfpfp9d5cvrr7x9gvssdsa9m9qwy7q0mrez9
+  - &desktop age1e2nkm4s0phlv2mqaj02f74xzut07pxppn9pwzf9gpehyg4ljjscqftvgp8
+  - &nas age1fx7378dsesr74eu50ylzs3ll9q5uk3ep596psazp4w6epzz69yksupmtl5
 
 creation_rules:
   - path_regex: secrets/miko-password\.yaml$
@@ -9,3 +12,16 @@ creation_rules:
           - *miko_yubikey
         age:
           - *laptop
+  - path_regex: secrets/nas-cifs\.yaml$
+    key_groups:
+      - pgp:
+          - *nas_legacy_yubikey
+        age:
+          - *desktop
+          - *laptop
+  - path_regex: secrets/nas\.yaml$
+    key_groups:
+      - pgp:
+          - *nas_legacy_yubikey
+        age:
+          - *nas

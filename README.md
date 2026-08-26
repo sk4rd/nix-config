@@ -8,9 +8,11 @@ flake-parts module discovered by `import-tree`.
 
 - NixOS host: `desktop` (AMD CPU, Radeon RX 7900 XT, Plasma 6)
 - NixOS host: `laptop` (ThinkPad Z13 Gen 1, Plasma 6)
+- NixOS host: `nas` (ZFS storage, media, automation, SMB, and WireGuard)
 - NixOS host: `vm` (network hostname `nixos`)
 - NixOS host: `wsl` (NixOS-WSL with direct YubiKey attachment)
 - User and standalone Home Manager configuration: `miko`
+- NAS administration user: `admin`
 
 Hosts and their users are declared in `modules/inventory.nix`. Each host owns
 its configuration and hardware under `modules/hosts/<host>/`, while each user
@@ -57,6 +59,7 @@ just check
 just lint
 just build desktop
 just build laptop
+just build nas
 just build vm
 just build wsl
 just full
@@ -64,6 +67,7 @@ just full
 nix flake check
 nix build .#nixosConfigurations.desktop.config.system.build.toplevel
 nix build .#nixosConfigurations.laptop.config.system.build.toplevel
+nix build .#nixosConfigurations.nas.config.system.build.toplevel
 nix build .#nixosConfigurations.vm.config.system.build.toplevel
 nix build .#nixosConfigurations.wsl.config.system.build.toplevel
 sudo nixos-rebuild switch --flake .#desktop
@@ -71,6 +75,14 @@ sudo nixos-rebuild switch --flake .#vm
 home-manager switch --flake .#miko
 nix fmt .
 ```
+
+## NAS
+
+The NAS runs Jellyfin, Home Assistant Container, authenticated Samba shares,
+Traefik, Cloudflare DDNS, WireGuard, and a Gluetun-isolated qBittorrent/Firefox
+stack. Desktop and laptop use encrypted CIFS credentials for on-demand Documents
+and Torrents automounts. Machine-specific storage, networking, and migration
+history are documented under `modules/hosts/nas/`.
 
 ## NixOS-WSL
 
@@ -285,8 +297,8 @@ The initial `desktop` definition expects an ext4 root filesystem labelled
 those low-priority defaults with the filesystem and swap declarations generated
 on the physical machine if its disk layout differs.
 
-Until the migrated configuration has enabled flakes on the running system,
-pass `--extra-experimental-features 'nix-command flakes'` to `nix` commands.
+The NAS migration is complete; its verification and rollback record is kept in
+`modules/hosts/nas/MIGRATION-2026-08-26.md`.
 
 ## Agent safety boundary
 

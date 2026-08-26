@@ -6,18 +6,21 @@
     {
       imports = [ inputs.nixos-hardware.nixosModules.lenovo-thinkpad-z13-gen1 ];
 
-      boot.loader.efi.canTouchEfiVariables = true;
-
-      boot.initrd.availableKernelModules = [
-        "nvme"
-        "xhci_pci"
-        "thunderbolt"
-        "usb_storage"
-        "sd_mod"
-      ];
-      boot.initrd.kernelModules = [ ];
-      boot.kernelModules = [ "kvm-amd" ];
-      boot.extraModulePackages = [ ];
+      boot = {
+        loader.efi.canTouchEfiVariables = true;
+        initrd = {
+          availableKernelModules = [
+            "nvme"
+            "xhci_pci"
+            "thunderbolt"
+            "usb_storage"
+            "sd_mod"
+          ];
+          kernelModules = [ ];
+        };
+        kernelModules = [ "kvm-amd" ];
+        extraModulePackages = [ ];
+      };
 
       hardware.bluetooth = {
         enable = true;

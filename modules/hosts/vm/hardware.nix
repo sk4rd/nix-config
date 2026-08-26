@@ -3,9 +3,24 @@
     { lib, ... }:
 
     {
-      boot.loader = {
-        systemd-boot.enable = true;
-        efi.canTouchEfiVariables = true;
+      boot = {
+        loader = {
+          systemd-boot.enable = true;
+          efi.canTouchEfiVariables = true;
+        };
+        initrd = {
+          availableKernelModules = [
+            "ata_piix"
+            "ohci_pci"
+            "ehci_pci"
+            "ahci"
+            "sd_mod"
+            "sr_mod"
+          ];
+          kernelModules = [ ];
+        };
+        kernelModules = [ ];
+        extraModulePackages = [ ];
       };
 
       nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
@@ -32,18 +47,6 @@
           );
         })
       ];
-
-      boot.initrd.availableKernelModules = [
-        "ata_piix"
-        "ohci_pci"
-        "ehci_pci"
-        "ahci"
-        "sd_mod"
-        "sr_mod"
-      ];
-      boot.initrd.kernelModules = [ ];
-      boot.kernelModules = [ ];
-      boot.extraModulePackages = [ ];
 
       fileSystems."/" = {
         device = "/dev/disk/by-uuid/34081e1f-fcb9-43d8-98ba-4d653cbc535f";

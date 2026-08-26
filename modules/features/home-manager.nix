@@ -1,4 +1,4 @@
-{ den, lib, ... }:
+{ lib, ... }:
 
 {
   # Den enables Home Manager only for hosts that contain a Home Manager user.
