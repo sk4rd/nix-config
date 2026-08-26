@@ -22,15 +22,15 @@
             mode = "0400";
             restartUnits = [ "docker-qbittorrent-vpn.service" ];
           };
+          "nas/joplin/admin_password" = {
+            mode = "0400";
+            restartUnits = [ "docker-joplin.service" ];
+          };
           "nas/wireguard/server_key" = {
             mode = "0400";
             restartUnits = [ "wg-quick-wg0.service" ];
           };
           "nas/wireguard/phone_psk" = {
-            mode = "0400";
-            restartUnits = [ "wg-quick-wg0.service" ];
-          };
-          "nas/wireguard/laptop_psk" = {
             mode = "0400";
             restartUnits = [ "wg-quick-wg0.service" ];
           };
@@ -59,6 +59,13 @@
               VPN_PORT_FORWARDING_DOWN_COMMAND=/scripts/portforward-down.sh
               TZ=Europe/Berlin
               FIREWALL_INPUT_PORTS=18080,3000
+            '';
+            mode = "0400";
+          };
+
+          "joplin.env" = {
+            content = ''
+              DEFAULT_ADMIN_PASSWORD=${config.sops.placeholder."nas/joplin/admin_password"}
             '';
             mode = "0400";
           };

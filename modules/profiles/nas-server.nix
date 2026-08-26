@@ -8,6 +8,7 @@
     den.aspects.zfs-storage
     den.aspects.samba
     den.aspects.jellyfin
+    den.aspects.joplin
     den.aspects.torrenting
     den.aspects.traefik-media
     den.aspects.home-assistant

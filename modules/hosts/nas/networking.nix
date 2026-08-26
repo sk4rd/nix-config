@@ -34,14 +34,9 @@
           privateKeyFile = config.sops.secrets."nas/wireguard/server_key".path;
           peers = [
             {
-              publicKey = "EckLuRfiD2Pyw0qk28miLHLBY0sT0pCB+Oks86MC7ms=";
+              publicKey = "tdO3kv2ijT2Aw2EYcZSqMfg6z+XN545s2eotEHdB2kY=";
               presharedKeyFile = config.sops.secrets."nas/wireguard/phone_psk".path;
               allowedIPs = [ "10.0.0.2/32" ];
-            }
-            {
-              publicKey = "uA1/SFzpVAEmnq4ILekYRiU0xNx+ULsLFPkIgl/3hjs=";
-              presharedKeyFile = config.sops.secrets."nas/wireguard/laptop_psk".path;
-              allowedIPs = [ "10.0.0.3/32" ];
             }
           ];
         };
