@@ -297,8 +297,8 @@ The initial `desktop` definition expects an ext4 root filesystem labelled
 those low-priority defaults with the filesystem and swap declarations generated
 on the physical machine if its disk layout differs.
 
-The NAS migration is complete; its verification and rollback record is kept in
-`modules/hosts/nas/MIGRATION-2026-08-26.md`.
+The NAS migration is complete; background and operating notes are kept in
+`modules/hosts/nas/CONTEXT.md`.
 
 ## Agent safety boundary
 
