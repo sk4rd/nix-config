@@ -22,4 +22,31 @@
 
       programs.kde-pim.enable = false;
     };
+
+  den.aspects.plasma.homeManager =
+    { lib, pkgs, ... }:
+    let
+      kdeglobals = pkgs.writeText "kdeglobals" ''
+        [General]
+        ColorScheme=BreezeDark
+        [KDE]
+        widgetStyle=Breeze
+        LookAndFeelPackage=org.kde.breezedark.desktop
+        [Icons]
+        Theme=breeze-dark
+      '';
+      kcminputrc = pkgs.writeText "kcminputrc" ''
+        [Libinput][Defaults][Touchpad]
+        NaturalScroll=true
+      '';
+    in
+    {
+      # KDE rewrites these files during the session (color scheme hash, touchpad
+      # changes), so they must be writable regular files, not read-only store
+      # symlinks. Seed them from the store at activation.
+      home.activation.seedPlasmaLook = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        ${pkgs.coreutils}/bin/install -m 0600 -D ${kdeglobals} "$HOME/.config/kdeglobals"
+        ${pkgs.coreutils}/bin/install -m 0600 -D ${kcminputrc} "$HOME/.config/kcminputrc"
+      '';
+    };
 }

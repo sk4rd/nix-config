@@ -11,6 +11,9 @@
       den.aspects.yubikey-openpgp
     ];
 
-    provides.to-users.includes = [ den.aspects.yubikey-openpgp ];
+    provides.to-users.includes = [
+      den.aspects.plasma
+      den.aspects.yubikey-openpgp
+    ];
   };
 }
