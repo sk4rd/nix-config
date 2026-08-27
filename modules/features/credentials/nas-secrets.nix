@@ -77,6 +77,39 @@
             '';
             mode = "0400";
           };
+
+          "homepage-services.yaml" = {
+            content = ''
+              - Media:
+                  - Jellyfin:
+                      href: https://media.sk4rd.com
+                      icon: sh-jellyfin
+              - Downloading:
+                  - qBittorrent:
+                      href: https://torrent.sk4rd.com
+                      icon: sh-qbittorrent
+                      widget:
+                        type: qbittorrent
+                        url: http://127.0.0.1:18080
+                        username: admin
+                        password: ${config.sops.placeholder."nas/qbittorrent/webui_password"}
+                  - Prowlarr:
+                      href: https://prowlarr.sk4rd.com
+                      icon: sh-prowlarr
+                  - Firefox:
+                      href: https://firefox.sk4rd.com
+                      icon: sh-firefox
+              - Notes:
+                  - Joplin:
+                      href: https://joplin.sk4rd.com
+                      icon: sh-joplin
+              - Smart Home:
+                  - Home Assistant:
+                      href: https://ha.sk4rd.com
+                      icon: sh-homeassistant
+            '';
+            mode = "0400";
+          };
         };
       };
     };

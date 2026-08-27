@@ -37,6 +37,7 @@ agents and operators, not a runbook.
 | `services/firefox` | `/srv/firefox` |
 | `services/traefik` | `/var/lib/traefik` |
 | `services/home-assistant` | `/srv/home-assistant` |
+| `services/homepage` | `/srv/homepage` |
 | `documents` | `/srv/samba/documents` |
 | `media` | `/srv/samba/media` |
 | `torrents` | `/srv/samba/torrents` |
