@@ -66,7 +66,7 @@
               VPN_PORT_FORWARDING_UP_COMMAND=/scripts/portforward-up.sh {{PORT}} {{VPN_INTERFACE}}
               VPN_PORT_FORWARDING_DOWN_COMMAND=/scripts/portforward-down.sh
               TZ=Europe/Berlin
-              FIREWALL_INPUT_PORTS=18080,3000,9696
+              FIREWALL_INPUT_PORTS=18080,3000,9696,8191
             '';
             mode = "0400";
           };
