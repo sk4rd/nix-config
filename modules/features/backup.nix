@@ -19,11 +19,19 @@
 
       # Scope the dedicated backup key to exactly backup@the-NAS. Interactive
       # SSH as admin is unaffected (no Match), so it keeps using the YubiKey.
-      programs.ssh.extraConfig = ''
-        Match host 192.168.178.3 user backup
-          IdentityFile /run/secrets/backup/ssh_key
-          IdentitiesOnly yes
-      '';
+      programs.ssh = {
+        extraConfig = ''
+          Match host 192.168.178.3 user backup
+            IdentityFile /run/secrets/backup/ssh_key
+            IdentitiesOnly yes
+        '';
+        # Pin the NAS host key so headless restic runs never prompt; the key is
+        # verified against this entry instead of the user's known_hosts.
+        knownHosts.nas = {
+          hostNames = [ "192.168.178.3" ];
+          publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILArnumluz/iLq+plACTbdY83uVZGw+B0T8TNeCINHD5 root@nixos";
+        };
+      };
 
       services.restic.backups.home = {
         repository = "sftp:backup@192.168.178.3:/storage-pool/backups/restic/${config.networking.hostName}";
