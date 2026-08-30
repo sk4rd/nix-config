@@ -6,6 +6,7 @@
       den.aspects.backup
       den.aspects.graphical
       den.aspects.gaming
+      den.aspects.libvirt
       den.aspects.nas-cifs
       den.aspects.openssh-key-only
       den.aspects.plasma
@@ -15,6 +16,7 @@
 
     provides.to-users.includes = [
       den.aspects.gaming
+      den.aspects.libvirt
       den.aspects.plasma
       den.aspects.yubikey-openpgp
     ];
