@@ -4,6 +4,9 @@
   den.aspects.desktop = {
     includes = [
       den.batteries.hostname
+      den.aspects.disko
+      den.aspects.secure-boot
+      den.aspects.zram
       den.aspects.plasma-workstation
       den.aspects.ai
     ];

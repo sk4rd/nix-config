@@ -20,17 +20,6 @@
       services.xserver.videoDrivers = [ "amdgpu" ];
       nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-      fileSystems."/" = lib.mkDefault {
-        device = "/dev/disk/by-label/nixos";
-        fsType = "ext4";
-      };
-
-      fileSystems."/boot" = lib.mkDefault {
-        device = "/dev/disk/by-label/ESP";
-        fsType = "vfat";
-        options = [ "umask=0077" ];
-      };
-
       swapDevices = lib.mkDefault [ ];
     };
 }

@@ -135,6 +135,86 @@ Attachment is deliberately manual because bus IDs can change after moving the
 device. The public OpenPGP certificate must also be imported into WSL's GPG
 keyring; the card contains private subkeys, not the full public certificate.
 
+## Desktop installation
+
+The desktop target replaces the entire Crucial P3 Plus 4 TB NVMe drive at
+`/dev/disk/by-id/nvme-CT4000P3PSSD8_2339E879EA19` with a 1 GiB EFI partition
+and a LUKS2-encrypted ext4 root filesystem. The Sabrent Rocket Q is not managed.
+Confirm the target model and serial before running the destructive command.
+Preserve the existing `/etc/ssh/ssh_host_ed25519_key` and its public key outside
+the target drive first; the desktop's SOPS secrets are encrypted to that
+identity. Keep Secure Boot enforcement disabled and put the firmware in Setup
+Mode without clearing `dbx` before installing.
+
+```sh
+target=/dev/disk/by-id/nvme-CT4000P3PSSD8_2339E879EA19
+readlink -f "$target"
+lsblk -d -o NAME,SIZE,MODEL,SERIAL
+lsblk "$target"
+test -d /sys/firmware/efi/efivars
+nix develop -c ssh-to-age < /path/to/backup/ssh_host_ed25519_key.pub
+sudo nix run .#disko -- --mode destroy,format,mount --flake .#desktop
+findmnt /mnt
+findmnt /mnt/boot
+sudo install -d -m 0700 /mnt/etc/ssh
+sudo install -m 0600 /path/to/backup/ssh_host_ed25519_key \
+  /mnt/etc/ssh/ssh_host_ed25519_key
+sudo install -m 0644 /path/to/backup/ssh_host_ed25519_key.pub \
+  /mnt/etc/ssh/ssh_host_ed25519_key.pub
+nix shell nixpkgs#sbctl -c sh -c \
+  'sudo "$(command -v sbctl)" create-keys'
+sudo install -d -m 0755 /mnt/var/lib
+sudo cp -a /var/lib/sbctl /mnt/var/lib/sbctl
+sudo nixos-install --flake .#desktop
+sudo nixos-enter --root /mnt -c 'passwd miko'
+```
+
+Do not continue unless the target reports serial `2339E879EA19`. The Disko
+command irreversibly destroys all existing partitions and data on that drive.
+The recipient derived from the key backed up from the old desktop installation
+must match the `desktop` key in `.sops.yaml` before running Disko. If that
+identity is unavailable, first verify that `secrets/nas-cifs.yaml` can be
+decrypted with its legacy OpenPGP recovery key
+`9C8FF32791159E6FB55B978CAFA1F0631CECE62F`. After Disko, generate a replacement
+host key under `/mnt`, replace the desktop recipient in `.sops.yaml`, and run
+`sops updatekeys secrets/nas-cifs.yaml` with that legacy key before installing.
+Back up `/var/lib/sbctl` to encrypted external storage before rebooting.
+
+### Desktop Secure Boot enrollment
+
+The first boot must remain unenforced. Verify the signed Lanzaboote artifacts,
+then reboot once before enrolling the owner keys:
+
+```sh
+sudo sbctl status
+sudo sbctl verify
+findmnt /boot
+sudo reboot
+```
+
+If the signed generation boots correctly, return to firmware Setup Mode and
+enroll the owner keys while retaining Microsoft certificates for common GPU and
+Option ROM firmware:
+
+```sh
+sudo sbctl enroll-keys --microsoft
+sudo sbctl status
+sudo sbctl list-enrolled-keys
+sudo reboot
+```
+
+Enable Secure Boot in firmware if it is not enabled automatically, then verify
+enforcement and signatures. Do not reboot after future deployments when
+signature verification fails.
+
+```sh
+bootctl status
+sudo sbctl status
+sudo sbctl verify
+sudo sbctl list-enrolled-keys
+journalctl -k -b --grep='[Ss]ecure [Bb]oot'
+```
+
 ## Laptop installation
 
 The laptop target replaces the entire internal NVMe drive at
@@ -291,11 +371,6 @@ the password aspect. Hosts decrypt during activation without requiring the
 YubiKey, while the YubiKey remains the human editing and recovery identity.
 Use a staged mutable-user deployment to test decryption and the password hash
 before enabling immutable users on another host.
-
-The initial `desktop` definition expects an ext4 root filesystem labelled
-`nixos` and an EFI system partition labelled `ESP`. Before deploying, replace
-those low-priority defaults with the filesystem and swap declarations generated
-on the physical machine if its disk layout differs.
 
 The NAS migration is complete; background and operating notes are kept in
 `modules/hosts/nas/CONTEXT.md`.
