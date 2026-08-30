@@ -8,9 +8,9 @@
         services.ollama = {
           enable = true;
           package = pkgs.ollama-rocm;
-          # Unload the model right after each request so the GPU is free for
-          # gaming and other workloads the rest of the time.
-          environmentVariables.OLLAMA_KEEP_ALIVE = "0";
+          # Unload the model after 30 minutes idle so the GPU is free for
+          # gaming, while agent sessions don't pay a cold start per request.
+          environmentVariables.OLLAMA_KEEP_ALIVE = "30m";
           # Pull on service start; not loaded into VRAM until a request arrives.
           loadModels = [ "qwen3.8:27b" ];
         };
