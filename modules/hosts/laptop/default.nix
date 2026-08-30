@@ -9,6 +9,7 @@
       den.aspects.miko-password
       den.aspects.plasma-workstation
       den.aspects.secure-boot
+      den.aspects.zram
     ];
 
     nixos = {
