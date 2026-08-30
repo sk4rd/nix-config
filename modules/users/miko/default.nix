@@ -8,6 +8,7 @@
       den.aspects.development
       den.aspects.firefox
       den.aspects.lf
+      den.aspects.media
       den.aspects.zsh
     ];
 

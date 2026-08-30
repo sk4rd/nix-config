@@ -15,12 +15,6 @@
         yazi
         zellij
 
-        # Media utilities
-        yt-dlp
-        mpv
-        ffmpeg
-        localsend
-
         # Rust
         rustup
         gcc
