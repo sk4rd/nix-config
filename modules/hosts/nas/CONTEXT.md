@@ -38,6 +38,7 @@ agents and operators, not a runbook.
 | `services/traefik` | `/var/lib/traefik` |
 | `services/home-assistant` | `/srv/home-assistant` |
 | `services/homepage` | `/srv/homepage` |
+| `services/searxng` | `/srv/searxng` |
 | `documents` | `/srv/samba/documents` |
 | `media` | `/srv/samba/media` |
 | `torrents` | `/srv/samba/torrents` |
@@ -51,7 +52,7 @@ mount fails startup rather than writing into the root filesystem.
 
 - Jellyfin, Home Assistant (Container, host network), Samba (SMB3, port 445
   only), Traefik, Cloudflare DDNS, WireGuard server, qBittorrent with
-  Gluetun/ProtonVPN and Firefox, Docker, SMART, and a monthly ZFS scrub.
+  Gluetun/ProtonVPN and Firefox, Docker, SearXNG, and a monthly ZFS scrub.
 - Internal-only HTTPS names (`ha`, `torrent`, `firefox`) resolve to
   `192.168.178.3`; `media` and `vpn` resolve to the public address.
 - Retired: Forgejo, AdGuard Home, Syncthing, WSDD, and the torrent health

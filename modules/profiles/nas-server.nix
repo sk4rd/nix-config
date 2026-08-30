@@ -14,5 +14,6 @@
     den.aspects.traefik-media
     den.aspects.home-assistant
     den.aspects.dashboard
+    den.aspects.searxng
   ];
 }

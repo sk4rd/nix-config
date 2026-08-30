@@ -42,6 +42,10 @@
             mode = "0400";
             restartUnits = [ "wg-quick-wg0.service" ];
           };
+          "nas/searxng/secret_key" = {
+            mode = "0400";
+            restartUnits = [ "docker-searxng.service" ];
+          };
         };
 
         templates = {
@@ -78,6 +82,13 @@
             mode = "0400";
           };
 
+          "searxng.env" = {
+            content = ''
+              SEARXNG_SECRET_KEY=${config.sops.placeholder."nas/searxng/secret_key"}
+            '';
+            mode = "0400";
+          };
+
           "homepage-services.yaml" = {
             content = ''
               - Media:
@@ -107,6 +118,10 @@
                   - Home Assistant:
                       href: https://ha.sk4rd.com
                       icon: sh-homeassistant
+              - Tools:
+                  - SearXNG:
+                      href: https://search.sk4rd.com
+                      icon: sh-searxng
             '';
             mode = "0400";
           };
