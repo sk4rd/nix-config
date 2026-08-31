@@ -1,4 +1,8 @@
+{ den, ... }:
+
 {
+  den.aspects.torrenting.includes = [ den.aspects.nas-ingress ];
+
   den.aspects.torrenting.nixos =
     { config, pkgs, ... }:
     let
@@ -106,6 +110,32 @@
               extraOptions = [ "--shm-size=1gb" ];
             };
           };
+        };
+      };
+
+      services.traefik.dynamicConfigOptions.http = {
+        routers = {
+          qbittorrent = {
+            rule = "Host(`torrent.sk4rd.com`)";
+            entryPoints = [ "websecure" ];
+            middlewares = [ "trustedNetworks" ];
+            service = "qbittorrent";
+            tls.certResolver = "cloudflare";
+          };
+          firefox = {
+            rule = "Host(`firefox.sk4rd.com`)";
+            entryPoints = [ "websecure" ];
+            middlewares = [ "trustedNetworks" ];
+            service = "firefox";
+            tls.certResolver = "cloudflare";
+          };
+        };
+        services = {
+          qbittorrent.loadBalancer = {
+            servers = [ { url = "http://127.0.0.1:18080"; } ];
+            passHostHeader = false;
+          };
+          firefox.loadBalancer.servers = [ { url = "http://127.0.0.1:13000"; } ];
         };
       };
 

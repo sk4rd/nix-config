@@ -1,4 +1,8 @@
+{ den, ... }:
+
 {
+  den.aspects.joplin.includes = [ den.aspects.nas-ingress ];
+
   den.aspects.joplin.nixos =
     { config, ... }:
     {
@@ -30,17 +34,27 @@
       };
 
       services.traefik.dynamicConfigOptions.http = {
-        routers.joplin = {
-          rule = "Host(`joplin.sk4rd.com`)";
-          entryPoints = [ "websecure" ];
-          middlewares = [ "trustedNetworks" ];
-          service = "joplin";
-          tls.certResolver = "cloudflare";
+        routers = {
+          joplin = {
+            rule = "Host(`joplin.sk4rd.com`)";
+            entryPoints = [ "websecure" ];
+            middlewares = [ "trustedNetworks" ];
+            service = "joplin";
+            tls.certResolver = "cloudflare";
+          };
+          joplin-sync = {
+            rule = "Host(`joplin.sk4rd.com`) && PathPrefix(`/api`)";
+            entryPoints = [ "websecure" ];
+            service = "joplin";
+            tls.certResolver = "cloudflare";
+          };
         };
         services.joplin.loadBalancer.servers = [
           { url = "http://127.0.0.1:22300"; }
         ];
       };
+
+      services.ddclient.domains = [ "joplin.sk4rd.com" ];
 
       systemd.services.docker-joplin = {
         after = [ "zfs-mount.service" ];

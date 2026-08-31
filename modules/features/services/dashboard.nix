@@ -1,4 +1,8 @@
+{ den, ... }:
+
 {
+  den.aspects.dashboard.includes = [ den.aspects.nas-ingress ];
+
   den.aspects.dashboard.nixos =
     { config, pkgs, ... }:
     let

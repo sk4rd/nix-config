@@ -1,4 +1,8 @@
+{ den, ... }:
+
 {
+  den.aspects.searxng.includes = [ den.aspects.nas-ingress ];
+
   den.aspects.searxng.nixos =
     { config, ... }:
     {

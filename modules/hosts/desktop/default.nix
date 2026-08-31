@@ -15,6 +15,7 @@
 
     nixos = {
       nix.settings.trusted-users = [ "miko" ];
+      networking.hosts."192.168.178.3" = [ "joplin.sk4rd.com" ];
     };
   };
 }

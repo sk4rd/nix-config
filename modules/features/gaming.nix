@@ -1,20 +1,19 @@
-{ lib, ... }:
+{ den, ... }:
 
 {
   den.aspects.gaming = {
+    includes = [
+      (den.batteries.unfree [
+        "steam"
+        "steam-original"
+        "steam-run"
+        "steam-unwrapped"
+      ])
+    ];
+
     nixos =
       { pkgs, ... }:
       {
-        # Steam is the only unfree package in this stack.
-        nixpkgs.config.allowUnfreePredicate =
-          pkg:
-          builtins.elem (lib.getName pkg) [
-            "steam"
-            "steam-original"
-            "steam-run"
-            "steam-unwrapped"
-          ];
-
         programs = {
           steam = {
             enable = true;

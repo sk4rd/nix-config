@@ -48,8 +48,8 @@ nix develop -c opencode
 
 OpenCode reads the repository rules from `AGENTS.md`, project permissions from
 `opencode.json`, and the Den-specific subagents from `.opencode/agents/`. The
-default workflow for non-trivial changes is **Plan → Build → `just format` →
-`just check` → `den-reviewer`**. Use `den-researcher` when current Den/Nix
+default workflow for every repository change is **Plan → Build → `just format`
+→ `just check` → `den-reviewer`**. Use `den-researcher` when current Den/Nix
 behavior needs to be verified against primary documentation.
 
 ## Commands

@@ -30,6 +30,7 @@ full: check lint
     nix flake check --show-trace
     nix build .#nixosConfigurations.desktop.config.system.build.toplevel --no-link
     nix build .#nixosConfigurations.laptop.config.system.build.toplevel --no-link
+    nix build .#nixosConfigurations.nas.config.system.build.toplevel --no-link
     nix build .#nixosConfigurations.vm.config.system.build.toplevel --no-link
     nix build .#nixosConfigurations.wsl.config.system.build.toplevel --no-link
     nix build .#homeConfigurations.miko.activationPackage --no-link

@@ -1,4 +1,8 @@
+{ den, ... }:
+
 {
+  den.aspects.home-assistant.includes = [ den.aspects.nas-ingress ];
+
   den.aspects.home-assistant.nixos = {
     virtualisation = {
       docker.enable = true;

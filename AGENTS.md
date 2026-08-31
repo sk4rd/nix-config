@@ -83,7 +83,7 @@ on entity metadata rather than constructing custom `specialArgs`.
 
 ## Change workflow
 
-For non-trivial changes:
+For every repository change, including small changes:
 
 1. Inspect the relevant existing aspects and inventory declarations.
 2. Decide whether the change is a feature, profile, host concern, user concern,
@@ -96,6 +96,11 @@ For non-trivial changes:
 7. Delegate a second pass to the `den-reviewer` subagent.
 8. Resolve substantive findings.
 9. Run `just format` and `just check` again.
+
+Never skip the `den-reviewer` pass because a change appears simple. The review
+must explicitly check the complete diff against Den's aspect-oriented design,
+the directory responsibilities above, and the distinction between reusable
+features, profiles, hosts, users, and repository tooling.
 
 For new files under `modules/`, remember that flakes backed by Git only expose
 files that are part of the Git source. If evaluation cannot see a newly created

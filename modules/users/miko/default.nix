@@ -4,11 +4,8 @@
   den.aspects.miko = {
     includes = [
       den.batteries.define-user
-      den.aspects.cad
       den.aspects.development
-      den.aspects.firefox
       den.aspects.lf
-      den.aspects.media
       den.aspects.zsh
     ];
 

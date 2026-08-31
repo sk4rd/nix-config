@@ -1,4 +1,11 @@
+{ den, ... }:
+
 {
+  den.aspects.prowlarr.includes = [
+    den.aspects.nas-ingress
+    den.aspects.torrenting
+  ];
+
   den.aspects.prowlarr.nixos =
     { pkgs, ... }:
     let
