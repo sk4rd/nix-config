@@ -1,3 +1,4 @@
+# SLOP DISCLAIMER - THIS IS MOSTLY SLOP
 # Nix configuration
 
 This is a feature-oriented [Den](https://den.denful.dev/) configuration for
