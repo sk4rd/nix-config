@@ -28,12 +28,12 @@
       virtualisation.hypervGuest.enable = true;
 
       fileSystems."/" = {
-        device = "/dev/disk/by-uuid/34081e1f-fcb9-43d8-98ba-4d653cbc535f";
+        device = "/dev/disk/by-uuid/1a06f158-7e95-498b-9c13-c7493a5412fb";
         fsType = "ext4";
       };
 
       fileSystems."/boot" = {
-        device = "/dev/disk/by-uuid/C997-5D94";
+        device = "/dev/disk/by-uuid/451C-F7C6";
         fsType = "vfat";
         options = [
           "fmask=0022"
