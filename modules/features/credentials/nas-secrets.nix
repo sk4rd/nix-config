@@ -22,10 +22,6 @@
             mode = "0400";
             restartUnits = [ "docker-qbittorrent-vpn.service" ];
           };
-          "nas/joplin/admin_password" = {
-            mode = "0400";
-            restartUnits = [ "docker-joplin.service" ];
-          };
           "nas/prowlarr/username" = {
             mode = "0400";
             restartUnits = [ "docker-prowlarr.service" ];
@@ -45,85 +41,6 @@
           "nas/searxng/secret_key" = {
             mode = "0400";
             restartUnits = [ "docker-searxng.service" ];
-          };
-        };
-
-        templates = {
-          "traefik-cloudflare.env" = {
-            content = ''
-              CF_DNS_API_TOKEN=${config.sops.placeholder."nas/cloudflare/dns_api_token"}
-            '';
-            owner = "traefik";
-            group = "traefik";
-            mode = "0400";
-          };
-
-          "qbittorrent-protonvpn.env" = {
-            content = ''
-              VPN_SERVICE_PROVIDER=protonvpn
-              VPN_TYPE=wireguard
-              WIREGUARD_PRIVATE_KEY=${config.sops.placeholder."nas/protonvpn/wireguard_private_key"}
-              SERVER_COUNTRIES=Netherlands
-              PORT_FORWARD_ONLY=on
-              VPN_PORT_FORWARDING=on
-              VPN_PORT_FORWARDING_STATUS_FILE=/gluetun/forwarded_port
-              VPN_PORT_FORWARDING_UP_COMMAND=/scripts/portforward-up.sh {{PORT}} {{VPN_INTERFACE}}
-              VPN_PORT_FORWARDING_DOWN_COMMAND=/scripts/portforward-down.sh
-              TZ=Europe/Berlin
-              FIREWALL_INPUT_PORTS=18080,3000,9696,8191
-            '';
-            mode = "0400";
-          };
-
-          "joplin.env" = {
-            content = ''
-              DEFAULT_ADMIN_PASSWORD=${config.sops.placeholder."nas/joplin/admin_password"}
-            '';
-            mode = "0400";
-          };
-
-          "searxng.env" = {
-            content = ''
-              SEARXNG_SECRET_KEY=${config.sops.placeholder."nas/searxng/secret_key"}
-            '';
-            mode = "0400";
-          };
-
-          "homepage-services.yaml" = {
-            content = ''
-              - Media:
-                  - Jellyfin:
-                      href: https://media.sk4rd.com
-                      icon: sh-jellyfin
-              - Downloading:
-                  - qBittorrent:
-                      href: https://torrent.sk4rd.com
-                      icon: sh-qbittorrent
-                      widget:
-                        type: qbittorrent
-                        url: http://127.0.0.1:18080
-                        username: admin
-                        password: ${config.sops.placeholder."nas/qbittorrent/webui_password"}
-                  - Prowlarr:
-                      href: https://prowlarr.sk4rd.com
-                      icon: sh-prowlarr
-                  - Firefox:
-                      href: https://firefox.sk4rd.com
-                      icon: sh-firefox
-              - Notes:
-                  - Joplin:
-                      href: https://joplin.sk4rd.com
-                      icon: sh-joplin
-              - Smart Home:
-                  - Home Assistant:
-                      href: https://ha.sk4rd.com
-                      icon: sh-homeassistant
-              - Tools:
-                  - SearXNG:
-                      href: https://search.sk4rd.com
-                      icon: sh-searxng
-            '';
-            mode = "0400";
           };
         };
       };

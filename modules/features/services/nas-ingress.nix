@@ -7,6 +7,15 @@
     nixos =
       { config, ... }:
       {
+        sops.templates."traefik-cloudflare.env" = {
+          content = ''
+            CF_DNS_API_TOKEN=${config.sops.placeholder."nas/cloudflare/dns_api_token"}
+          '';
+          owner = "traefik";
+          group = "traefik";
+          mode = "0400";
+        };
+
         services = {
           ddclient = {
             enable = true;

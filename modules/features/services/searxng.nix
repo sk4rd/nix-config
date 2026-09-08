@@ -6,6 +6,13 @@
   den.aspects.searxng.nixos =
     { config, ... }:
     {
+      sops.templates."searxng.env" = {
+        content = ''
+          SEARXNG_SECRET_KEY=${config.sops.placeholder."nas/searxng/secret_key"}
+        '';
+        mode = "0400";
+      };
+
       virtualisation = {
         docker.enable = true;
         oci-containers.containers.searxng = {

@@ -7,7 +7,7 @@
     den.aspects.zfs-storage
     den.aspects.samba
     den.aspects.jellyfin
-    den.aspects.joplin
+    den.aspects.silverbullet
     den.aspects.prowlarr
     den.aspects.torrenting
     den.aspects.home-assistant

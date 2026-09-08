@@ -2,9 +2,9 @@
   den.aspects.nas-service-identities.nixos.users = {
     groups = {
       miko.gid = 993;
-      joplin.gid = 1001;
       backup.gid = 1002;
       prowlarr.gid = 1003;
+      silverbullet.gid = 1004;
       qbittorrent.gid = 2001;
     };
     users = {
@@ -14,10 +14,10 @@
         group = "miko";
         extraGroups = [ "qbittorrent" ];
       };
-      joplin = {
+      silverbullet = {
         isSystemUser = true;
-        uid = 1001;
-        group = "joplin";
+        uid = 1004;
+        group = "silverbullet";
       };
       backup = {
         isSystemUser = true;

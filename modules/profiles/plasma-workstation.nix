@@ -19,7 +19,6 @@
       den.aspects.cad
       den.aspects.firefox
       den.aspects.gaming
-      den.aspects.joplin-client
       den.aspects.libvirt
       den.aspects.media
       den.aspects.plasma

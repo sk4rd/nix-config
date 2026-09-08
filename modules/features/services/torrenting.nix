@@ -40,6 +40,23 @@
     {
       boot.kernelModules = [ "tun" ];
 
+      sops.templates."qbittorrent-protonvpn.env" = {
+        content = ''
+          VPN_SERVICE_PROVIDER=protonvpn
+          VPN_TYPE=wireguard
+          WIREGUARD_PRIVATE_KEY=${config.sops.placeholder."nas/protonvpn/wireguard_private_key"}
+          SERVER_COUNTRIES=Netherlands
+          PORT_FORWARD_ONLY=on
+          VPN_PORT_FORWARDING=on
+          VPN_PORT_FORWARDING_STATUS_FILE=/gluetun/forwarded_port
+          VPN_PORT_FORWARDING_UP_COMMAND=/scripts/portforward-up.sh {{PORT}} {{VPN_INTERFACE}}
+          VPN_PORT_FORWARDING_DOWN_COMMAND=/scripts/portforward-down.sh
+          TZ=Europe/Berlin
+          FIREWALL_INPUT_PORTS=18080,3000,9696,8191
+        '';
+        mode = "0400";
+      };
+
       virtualisation = {
         docker.enable = true;
         oci-containers = {

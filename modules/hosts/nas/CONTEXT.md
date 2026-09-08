@@ -20,6 +20,7 @@ agents and operators, not a runbook.
   passwordless sudo, Nix trusted-user. Root-equivalent by design.
 - `miko` (UID 995, GID 993): system identity that owns the Samba-shared ZFS
   datasets and is the Samba account. Not a login user.
+- `silverbullet` (UID/GID 1004): SilverBullet container service identity.
 - `qbittorrent` (UID/GID 2001): container service identity.
 - Do not recursively `chown` `/srv/samba/media` or `/srv/samba/torrents`;
   the numeric identities are load-bearing.
@@ -39,6 +40,7 @@ agents and operators, not a runbook.
 | `services/home-assistant` | `/srv/home-assistant` |
 | `services/homepage` | `/srv/homepage` |
 | `services/searxng` | `/srv/searxng` |
+| `services/silverbullet` | `/srv/silverbullet` |
 | `documents` | `/srv/samba/documents` |
 | `media` | `/srv/samba/media` |
 | `torrents` | `/srv/samba/torrents` |
@@ -52,11 +54,28 @@ mount fails startup rather than writing into the root filesystem.
 
 - Jellyfin, Home Assistant (Container, host network), Samba (SMB3, port 445
   only), Traefik, Cloudflare DDNS, WireGuard server, qBittorrent with
-  Gluetun/ProtonVPN and Firefox, Docker, SearXNG, and a monthly ZFS scrub.
+  Gluetun/ProtonVPN and Firefox, Docker, SilverBullet, SearXNG, and a monthly
+  ZFS scrub.
 - Internal-only HTTPS names (`ha`, `torrent`, `firefox`) resolve to
   `192.168.178.3`; `media` and `vpn` resolve to the public address.
-- Retired: Forgejo, AdGuard Home, Syncthing, WSDD, and the torrent health
-  dashboard. Their data remains on the pool.
+- Retired: Forgejo, Joplin, Logseq, AdGuard Home, Syncthing, WSDD, and the
+  torrent health dashboard. Retired note-service datasets have been removed.
+
+## SilverBullet
+
+Before deploying the SilverBullet aspect, create the
+`storage-pool/services/silverbullet` dataset with mountpoint
+`/srv/silverbullet`. The service creates `/srv/silverbullet/space` for UID/GID
+1004 and refuses to start unless the dataset is mounted.
+
+Open `https://silverbullet.sk4rd.com` and use the first-run Space Manager flow
+to create the account. The authenticated service is available through the
+public HTTPS endpoint. Install the PWA on each device for offline access.
+SilverBullet synchronizes browser replicas with the NAS-hosted space and
+creates conflict copies rather than merging simultaneous edits to one file.
+
+The authoritative space is under `/srv/silverbullet/space`. It is not
+independently backed up while automatic ZFS snapshots remain disabled.
 
 ## Rollback inventory
 

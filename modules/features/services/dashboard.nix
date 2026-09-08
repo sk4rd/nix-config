@@ -23,6 +23,44 @@
       };
     in
     {
+      sops.templates."homepage-services.yaml" = {
+        content = ''
+          - Media:
+              - Jellyfin:
+                  href: https://media.sk4rd.com
+                  icon: sh-jellyfin
+          - Downloading:
+              - qBittorrent:
+                  href: https://torrent.sk4rd.com
+                  icon: sh-qbittorrent
+                  widget:
+                    type: qbittorrent
+                    url: http://127.0.0.1:18080
+                    username: admin
+                    password: ${config.sops.placeholder."nas/qbittorrent/webui_password"}
+              - Prowlarr:
+                  href: https://prowlarr.sk4rd.com
+                  icon: sh-prowlarr
+              - Firefox:
+                  href: https://firefox.sk4rd.com
+                  icon: sh-firefox
+          - Notes:
+              - SilverBullet:
+                  href: https://silverbullet.sk4rd.com
+                  icon: sh-silverbullet
+          - Smart Home:
+              - Home Assistant:
+                  href: https://ha.sk4rd.com
+                  icon: sh-homeassistant
+          - Tools:
+              - SearXNG:
+                  href: https://search.sk4rd.com
+                  icon: sh-searxng
+        '';
+        mode = "0400";
+        restartUnits = [ "docker-homepage.service" ];
+      };
+
       virtualisation = {
         docker.enable = true;
         oci-containers.containers.homepage = {
@@ -56,7 +94,10 @@
       systemd.services = {
         homepage-config = {
           description = "Write Homepage dashboard configuration";
-          after = [ "zfs-mount.service" ];
+          after = [
+            "sops-install-secrets.service"
+            "zfs-mount.service"
+          ];
           before = [ "docker-homepage.service" ];
           requires = [ "zfs-mount.service" ];
           unitConfig = {
