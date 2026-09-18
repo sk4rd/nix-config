@@ -8,7 +8,7 @@
     {
       sops.templates."searxng.env" = {
         content = ''
-          SEARXNG_SECRET_KEY=${config.sops.placeholder."nas/searxng/secret_key"}
+          SEARXNG_SECRET=${config.sops.placeholder."nas/searxng/secret_key"}
         '';
         mode = "0400";
       };
