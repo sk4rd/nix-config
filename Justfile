@@ -1,7 +1,7 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
 # Default local quality gate for humans and agents.
-check: eval
+check: eval secrets
 
 # Format the repository. Inspect the resulting Git diff afterwards.
 format:
@@ -12,9 +12,18 @@ eval:
     nix flake check --no-build --show-trace
     nix eval --raw .#nixosConfigurations.desktop.config.system.build.toplevel.drvPath >/dev/null
     nix eval --raw .#nixosConfigurations.laptop.config.system.build.toplevel.drvPath >/dev/null
+    nix eval --raw .#nixosConfigurations.nas.config.system.build.toplevel.drvPath >/dev/null
     nix eval --raw .#nixosConfigurations.vm.config.system.build.toplevel.drvPath >/dev/null
     nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath >/dev/null
     nix eval --raw .#homeConfigurations.miko.activationPackage.drvPath >/dev/null
+
+# Build every host's sops manifest: catches a secret whose name and sops file key do not line up.
+secrets:
+    nix build .#nixosConfigurations.desktop.config.system.build.sops-nix-manifest --no-link
+    nix build .#nixosConfigurations.laptop.config.system.build.sops-nix-manifest --no-link
+    nix build .#nixosConfigurations.nas.config.system.build.sops-nix-manifest --no-link
+    nix build .#nixosConfigurations.vm.config.system.build.sops-nix-manifest --no-link
+    nix build .#nixosConfigurations.wsl.config.system.build.sops-nix-manifest --no-link
 
 # Static Nix analysis. Run from `nix develop` so statix/deadnix are available.
 lint:
