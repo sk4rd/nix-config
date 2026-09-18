@@ -77,6 +77,26 @@ creates conflict copies rather than merging simultaneous edits to one file.
 The authoritative space is under `/srv/silverbullet/space`. It is not
 independently backed up while automatic ZFS snapshots remain disabled.
 
+## SearXNG
+
+`/srv/searxng/config/settings.yml` is repository-owned: `docker-searxng`
+reinstalls it before every start from the SOPS secret `nas/searxng/secret_key`,
+so a host-side edit is discarded rather than merged. Change settings in
+`sops.templates."searxng.settings.yml"` in `modules/features/services/searxng.nix`;
+an edit there restarts the unit on switch (`restartUnits`), because a re-render
+reuses the same `/run/secrets` path.
+
+The container entrypoint only writes that file when it is missing, which it now
+never is, and a `server.secret_key` left at the image's `ultrasecretkey`
+placeholder is fatal — `searx/webapp.py` exits the worker — so the unit
+restart-loops and Traefik answers 502 instead of naming the cause. The key comes
+from SOPS; rotating it restarts the unit via `restartUnits`.
+
+The instance serves `json` alongside `html` (`search.formats`). SearXNG answers
+403 for every format that is not listed there, which is what refused API clients
+asking for `/search?format=json`. Confirm with
+`curl -o /dev/null -w '%{http_code}\n' 'https://search.sk4rd.com/search?q=test&format=json'`.
+
 ## Rollback inventory
 
 The following are retained from the 2026-08-26 migration; keep them until an
