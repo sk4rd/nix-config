@@ -19,6 +19,7 @@
       den.aspects.cad
       den.aspects.firefox
       den.aspects.gaming
+      den.aspects.hermes-desktop
       den.aspects.libvirt
       den.aspects.media
       den.aspects.plasma

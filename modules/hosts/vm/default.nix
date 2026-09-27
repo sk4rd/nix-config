@@ -7,7 +7,7 @@
       den.aspects.graphical
       den.aspects.libvirt
       den.aspects.openssh-password
-      den.aspects.xfce
+      den.aspects.plasma
     ];
 
     nixos = { };
