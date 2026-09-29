@@ -8,6 +8,7 @@
       den.aspects.secure-boot
       den.aspects.zram
       den.aspects.plasma-workstation
+      den.aspects.single-gpu-passthrough
     ];
 
     nixos = {
