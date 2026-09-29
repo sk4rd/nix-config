@@ -2,7 +2,7 @@ keys:
   - &miko_yubikey "FA95BDB219EB93BF3BADC959AA31E52ED0F3255F!"
   - &nas_legacy_yubikey 9C8FF32791159E6FB55B978CAFA1F0631CECE62F
   - &laptop age1a3mku4j7790c9xkv9rg2f9vfpfp9d5cvrr7x9gvssdsa9m9qwy7q0mrez9
-  - &desktop age15kw7p7kyvt4pushscn4ytkht54spjpz0rsr87ymtfwuddan53vcsk5kudg
+  - &desktop age1d30gh38p75un8zvx3z9ge74rd4asx5vvu0rg6l79kysqpt8t9a2slymca5
   - &wsl age12kpqus47sa00ls4geyctg5hkvdufdlzny66z0xnrspzq9mls7u9sh68ty0
   - &nas age1fx7378dsesr74eu50ylzs3ll9q5uk3ep596psazp4w6epzz69yksupmtl5
 
