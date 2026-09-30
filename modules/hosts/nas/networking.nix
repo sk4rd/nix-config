@@ -38,6 +38,11 @@
               presharedKeyFile = config.sops.secrets."nas/wireguard/phone_psk".path;
               allowedIPs = [ "10.0.0.2/32" ];
             }
+            {
+              # Laptop: private key is held by its NetworkManager profile.
+              publicKey = "YRlhBdzCIVNWv+QgLNpJ19aH/Oys6hlZmG9OdH+BsC8=";
+              allowedIPs = [ "10.0.0.3/32" ];
+            }
           ];
         };
 
