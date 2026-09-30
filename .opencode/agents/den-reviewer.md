@@ -16,7 +16,10 @@ permission:
     "just check": allow
 ---
 
-Review the current repository changes. Do not modify files.
+Review the task-specific changes and relevant dependencies supplied by the
+caller. Do not modify files. This agent is invoked according to the risk-based
+policy in AGENTS.md, not automatically for every edit. Exclude unrelated
+pre-existing working-tree changes unless they interact with the task.
 
 Evaluate the change in this order:
 
