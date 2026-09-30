@@ -1,0 +1,12 @@
+[
+  // Build. This is VS Code's own stock "Run Build Task" binding, and `cargo build`
+  // is marked as the default build task, so it works even without this entry.
+  { "key": "ctrl+shift+b", "command": "workbench.action.tasks.build" },
+
+  // Run / test / lint. Deliberately F-keys: on a German layout Ctrl+Alt+<letter>
+  // is AltGr, which the OS turns into a character instead of delivering the
+  // chord to VS Code, so Alt-based bindings silently do nothing there.
+  { "key": "f6",      "command": "workbench.action.tasks.runTask", "args": "cargo run" },
+  { "key": "f7",      "command": "workbench.action.tasks.runTask", "args": "cargo test" },
+  { "key": "ctrl+f6", "command": "workbench.action.tasks.runTask", "args": "cargo clippy" }
+]

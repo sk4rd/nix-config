@@ -13,6 +13,10 @@
       den.aspects.single-gpu-passthrough
     ];
 
+    # Adopt the existing desktop profile without moving its history/bookmarks.
+    # Fresh machines use the reusable Firefox feature's default profile path.
+    provides.to-users.homeManager.programs.firefox.profiles.default.path = "mygnli95.default";
+
     # Point each user's Hermes Agent at the local llama.cpp endpoint.
     provides.to-users.includes = [ den.aspects.llama-cpp ];
 

@@ -22,8 +22,10 @@
       den.aspects.hermes-desktop
       den.aspects.libvirt
       den.aspects.media
+      den.aspects.neon-flux-theme
       den.aspects.plasma
       den.aspects.vesktop
+      den.aspects.vscode
       den.aspects.yubikey-openpgp
     ];
   };

@@ -1,0 +1,22 @@
+
+/* Never recolor arbitrary websites. Only Firefox's built-in landing pages. */
+@-moz-document url("about:home"), url("about:newtab") {
+  @palette@
+  :root {
+    --newtab-background-color: var(--canvas) !important;
+    --newtab-background-color-secondary: var(--surface) !important;
+    --newtab-text-primary-color: var(--text) !important;
+    --newtab-text-secondary-color: var(--text) !important;
+    --newtab-element-hover-color: var(--raised) !important;
+    --newtab-element-active-color: var(--selection) !important;
+    --newtab-primary-action-background: var(--accent) !important;
+    --newtab-primary-action-background-dimmed: var(--raised) !important;
+    --newtab-border-color: var(--border) !important;
+    --newtab-search-icon-color: var(--accent) !important;
+    --newtab-search-first-row-background: var(--raised) !important;
+  }
+  body { background: var(--canvas) !important; color: var(--text) !important; }
+  .search-wrapper .search-handoff-button, .search-wrapper input { background-color: var(--raised) !important; color: var(--text) !important; border: 1px solid var(--border) !important; }
+  .top-site-outer .tile { background-color: var(--surface) !important; }
+  ::selection { background: var(--selection); color: var(--text); }
+}

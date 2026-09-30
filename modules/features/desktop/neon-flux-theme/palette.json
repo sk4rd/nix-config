@@ -1,0 +1,20 @@
+{
+  "canvas": "#070B14",
+  "surface": "#0B1020",
+  "raised": "#16213A",
+  "currentLine": "#121D33",
+  "border": "#22304F",
+  "selection": "#29345C",
+  "text": "#DCE7FF",
+  "muted": "#718096",
+  "accent": "#00E5FF",
+  "accentBright": "#62F3FF",
+  "structure": "#8B5CF6",
+  "purple": "#BB6BFF",
+  "hot": "#FF2BD6",
+  "info": "#45A9FF",
+  "success": "#4AF6C3",
+  "warning": "#FFE66D",
+  "error": "#FF5370",
+  "comment": "#55648A"
+}

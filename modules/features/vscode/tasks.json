@@ -1,0 +1,403 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "cargo build",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "build"
+      ],
+      "problemMatcher": [
+        {
+          "owner": "rustc-errors",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^error(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "error",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-warnings",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^warning(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "warning",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-panics",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^(?<message>thread .+ panicked) at (?<file>[^:]+):(?<line>\\d+):(?<column>\\d+):?$",
+              "severity": "error",
+              "message": 1,
+              "file": 2,
+              "line": 3,
+              "column": 4
+            }
+          ]
+        }
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "clear": true,
+        "close": false
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "cargo test",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "test"
+      ],
+      "problemMatcher": [
+        {
+          "owner": "rustc-errors",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^error(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "error",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-warnings",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^warning(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "warning",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-panics",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^(?<message>thread .+ panicked) at (?<file>[^:]+):(?<line>\\d+):(?<column>\\d+):?$",
+              "severity": "error",
+              "message": 1,
+              "file": 2,
+              "line": 3,
+              "column": 4
+            }
+          ]
+        }
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true,
+        "close": false
+      },
+      "group": "test"
+    },
+    {
+      "label": "cargo test (with output)",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "test",
+        "--",
+        "--nocapture"
+      ],
+      "problemMatcher": [
+        {
+          "owner": "rustc-errors",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^error(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "error",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-warnings",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^warning(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "warning",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-panics",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^(?<message>thread .+ panicked) at (?<file>[^:]+):(?<line>\\d+):(?<column>\\d+):?$",
+              "severity": "error",
+              "message": 1,
+              "file": 2,
+              "line": 3,
+              "column": 4
+            }
+          ]
+        }
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true,
+        "close": false
+      }
+    },
+    {
+      "label": "cargo clippy",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "clippy",
+        "--all-targets"
+      ],
+      "problemMatcher": [
+        {
+          "owner": "rustc-errors",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^error(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "error",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-warnings",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^warning(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "warning",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-panics",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^(?<message>thread .+ panicked) at (?<file>[^:]+):(?<line>\\d+):(?<column>\\d+):?$",
+              "severity": "error",
+              "message": 1,
+              "file": 2,
+              "line": 3,
+              "column": 4
+            }
+          ]
+        }
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true,
+        "close": false
+      }
+    },
+    {
+      "label": "cargo run",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "run"
+      ],
+      "problemMatcher": [
+        {
+          "owner": "rustc-errors",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^error(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "error",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-warnings",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^warning(\\[(?<code>[A-Za-z0-9]+)\\])?:\\s+(?<message>.*)$",
+              "severity": "warning",
+              "code": 2,
+              "message": 3
+            },
+            {
+              "regexp": "^\\s*-->\\s+(?<file>.+?):(?<line>\\d+):(?<column>\\d+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "owner": "rustc-panics",
+          "fileLocation": [
+            "relative",
+            "${workspaceFolder}"
+          ],
+          "pattern": [
+            {
+              "regexp": "^(?<message>thread .+ panicked) at (?<file>[^:]+):(?<line>\\d+):(?<column>\\d+):?$",
+              "severity": "error",
+              "message": 1,
+              "file": 2,
+              "line": 3,
+              "column": 4
+            }
+          ]
+        }
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true,
+        "close": false
+      }
+    }
+  ]
+}

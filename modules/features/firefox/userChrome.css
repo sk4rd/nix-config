@@ -1,0 +1,37 @@
+
+/* Keep native Firefox layout and controls; change colors only. */
+:root {
+  --lwt-accent-color: var(--canvas) !important;
+  --lwt-text-color: var(--text) !important;
+  --toolbar-bgcolor: var(--surface) !important;
+  --toolbar-color: var(--text) !important;
+  --toolbar-field-background-color: var(--raised) !important;
+  --toolbar-field-color: var(--text) !important;
+  --toolbar-field-border-color: var(--border) !important;
+  --toolbar-field-focus-border-color: var(--accent) !important;
+  --toolbar-field-focus-background-color: var(--raised) !important;
+  --toolbar-field-focus-color: var(--text) !important;
+  --toolbarbutton-hover-background: var(--raised) !important;
+  --toolbarbutton-active-background: var(--selection) !important;
+  --lwt-tab-text: var(--text) !important;
+  --lwt-tab-background-color: var(--raised) !important;
+  --tab-selected-bgcolor: var(--raised) !important;
+  --tab-selected-textcolor: var(--accent) !important;
+  --chrome-content-separator-color: var(--structure) !important;
+  --arrowpanel-background: var(--surface) !important;
+  --arrowpanel-color: var(--text) !important;
+  --arrowpanel-border-color: var(--border) !important;
+  --arrowpanel-dimmed: var(--raised) !important;
+  --sidebar-background-color: var(--surface) !important;
+  --sidebar-text-color: var(--text) !important;
+  --link-color: var(--accent) !important;
+  --link-color-hover: var(--accentBright) !important;
+}
+#navigator-toolbox { background: var(--canvas) !important; color: var(--text) !important; }
+#nav-bar, #PersonalToolbar, #sidebar-box { background: var(--surface) !important; color: var(--text) !important; }
+.tab-background[selected] { border-top: 2px solid var(--accent) !important; }
+#urlbar-background, #searchbar { background: var(--raised) !important; border-color: var(--border) !important; }
+#urlbar[focused] > #urlbar-background { border-color: var(--accent) !important; }
+#urlbar-results { background: var(--surface) !important; color: var(--text) !important; }
+.urlbarView-row[selected] .urlbarView-row-inner { background: var(--selection) !important; }
+.urlbarView-url { color: var(--accentBright) !important; }

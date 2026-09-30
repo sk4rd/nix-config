@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Neon Flux · Launchpad</title>
+<style>
+@palette@
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--canvas); color: var(--text); font: 17px/1.6 "JetBrainsMono NF", "JetBrains Mono", monospace; }
+::selection { background: var(--selection); }
+html, body { height: 100%; overflow: clip; }
+body { display: grid; place-items: center; }
+main { width: min(100% - 48px, 1080px); max-height: calc(100dvh - 32px); margin: 0; }
+header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 18px; gap: 20px; }
+.wordmark { color: var(--accent); letter-spacing: .18em; font-size: 14px; }
+time { font-size: 14px; color: var(--text); }
+.launch { display: grid; grid-template-columns: 1fr 230px; gap: 60px; align-items: center; margin: 70px 0 50px; }
+h1 { font-size: clamp(32px, 5vw, 58px); line-height: 1.15; letter-spacing: -.05em; margin: 0 0 18px; font-weight: 500; }
+p { margin: 0; }
+.caption { color: var(--accentBright); font-size: 14px; }
+.copilot { position: relative; }
+.cat-speech { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); width: 240px; padding: 10px 14px; border: 1px solid var(--accent); border-radius: 12px; background: var(--surface); color: var(--accentBright); font-size: 12px; line-height: 1.5; text-align: center; }
+.cat-speech::after { content: ""; position: absolute; top: 100%; left: calc(50% - 6px); width: 12px; height: 12px; background: var(--surface); border-right: 1px solid var(--accent); border-bottom: 1px solid var(--accent); transform: translateY(-6px) rotate(45deg); }
+.cat { color: var(--structure); font-size: 22px; line-height: 1.3; margin: 0; transform: rotate(-5deg); }
+.cat .eyes { color: var(--accent); }
+.cat .eye { display: inline-block; }
+.cat .star { color: var(--hot); }
+label { display: block; font-size: 14px; margin-bottom: 12px; }
+.search { display: flex; gap: 12px; }
+input { width: 100%; min-width: 0; padding: 18px 20px; color: var(--text); background: var(--raised); border: 1px solid var(--border); border-radius: 8px; font: inherit; }
+input::placeholder { color: var(--text); opacity: .7; }
+button { padding: 14px 22px; border: 1px solid var(--accent); border-radius: 8px; background: var(--surface); color: var(--accent); font: inherit; cursor: pointer; }
+button:hover { background: var(--raised); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+nav { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 42px; margin-top: 44px; }
+a { min-height: 48px; color: var(--text); text-decoration: none; border-bottom: 1px solid var(--border); padding: 14px 0; display: flex; justify-content: space-between; gap: 20px; }
+a span { color: var(--accent); }
+a:hover { color: var(--accentBright); border-color: var(--structure); }
+footer { margin-top: 48px; color: var(--text); font-size: 12px; }
+kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
+/* Keep the static composition as the default for reduced-motion users. */
+@media (prefers-reduced-motion: no-preference) {
+  header, .launch, form, nav, footer {
+    animation: arrive 600ms cubic-bezier(.2, .7, .2, 1) backwards;
+  }
+  .launch { animation-delay: 80ms; }
+  form { animation-delay: 160ms; }
+  nav { animation-delay: 240ms; }
+  footer { animation-delay: 320ms; }
+  .cat .eye { animation: blink 7s ease-in-out infinite; }
+  .cat .star { display: inline-block; animation: twinkle 4s ease-in-out infinite; }
+  .cat .star:last-child { animation-delay: -2s; }
+  input { transition: border-color 180ms ease, box-shadow 180ms ease; }
+  input:focus-visible { border-color: var(--accent); box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 15%, transparent); }
+  button { transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+  button:hover, button:focus-visible { transform: translateY(-2px); box-shadow: 0 4px 18px color-mix(in srgb, var(--accent) 15%, transparent); }
+  button:active { transform: translateY(0); }
+  a { transition: color 180ms ease, border-color 180ms ease; }
+  a span { transition: transform 180ms ease; }
+  a:hover span, a:focus-visible span { transform: translate(3px, -3px); }
+}
+@keyframes arrive {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes blink {
+  0%, 45%, 49%, 100% { transform: scaleY(1); }
+  47% { transform: scaleY(.1); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: .5; transform: scale(.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+/* Tighten the composition on short windows instead of hiding usable content. */
+@media (max-height: 800px) {
+  header { padding-bottom: 10px; }
+  .launch { margin: 24px 0; }
+  h1 { font-size: 38px; margin-bottom: 10px; }
+  .cat { font-size: 18px; }
+  nav { margin-top: 22px; gap: 4px 42px; }
+  a { padding: 8px 0; }
+  footer { margin-top: 20px; }
+}
+@media (max-width: 650px) {
+  main { width: calc(100% - 32px); }
+  .launch { grid-template-columns: 1fr; gap: 16px; margin: 20px 0; }
+  h1 { font-size: 32px; }
+  .copilot { display: none; }
+  nav { grid-template-columns: 1fr 1fr; gap: 4px 16px; margin-top: 16px; }
+  a { font-size: 13px; padding: 8px 0; gap: 8px; }
+  header { flex-wrap: wrap; gap: 4px; }
+  input { padding: 12px; }
+  button { padding: 12px; font-size: 14px; }
+  footer { margin-top: 16px; font-size: 11px; }
+}
+@media (max-height: 540px) {
+  main { max-height: calc(100dvh - 16px); }
+  .launch { margin: 10px 0; }
+  h1 { font-size: 24px; margin: 0; }
+  h1 br { display: none; }
+  .caption, .copilot, footer { display: none; }
+  label { margin-bottom: 6px; }
+  input, button { padding: 10px 12px; }
+  nav { margin-top: 10px; gap: 0 16px; }
+  a { padding: 4px 0; min-height: 44px; }
+}
+</style>
+</head>
+<body>
+<main>
+<header><div class="wordmark">NEON FLUX / LAUNCHPAD</div><time id="date"></time></header>
+<section class="launch" aria-labelledby="heading">
+<div><h1>Small tab.<br>Big universe.</h1><p class="caption">Pick a direction. The cat is copiloting.</p></div>
+<div class="copilot">
+<p class="cat-speech" id="cat-thought" hidden></p>
+<pre class="cat" aria-hidden="true">    <span class="star">✦</span>
+   /\_/\
+  ( <span class="eyes"><span class="eye">o</span>.<span class="eye">o</span></span> )
+   &gt; ^ &lt;   ·
+  /|   |\
+ (_|___|_)   <span class="star">✧</span></pre>
+</div>
+</section>
+<form action="https://search.sk4rd.com/search" method="get">
+<label for="query">Search with SearXNG</label>
+<div class="search"><input id="query" name="q" type="search" placeholder="Where are we going?" required autofocus autocomplete="off"><button type="submit">Launch ↗</button></div>
+</form>
+<nav aria-label="Quick links">
+<a href="https://github.com/">GitHub <span>↗</span></a>
+<a href="https://mail.proton.me/">Proton Mail <span>↗</span></a>
+<a href="https://search.nixos.org/packages">Nix packages <span>↗</span></a>
+<a href="https://search.nixos.org/options">NixOS options <span>↗</span></a>
+<a href="https://doc.rust-lang.org/book/">The Rust Book <span>↗</span></a>
+<a href="https://silverbullet.sk4rd.com/">SilverBullet <span>↗</span></a>
+</nav>
+<footer><kbd>/</kbd> to search · <kbd>Alt</kbd> + <kbd>Home</kbd> to return · No feeds. No noise.</footer>
+</main>
+<script>
+const date = document.getElementById('date');
+date.textContent = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'long' }).format(new Date());
+date.dateTime = new Date().toISOString().slice(0, 10);
+const catThought = document.getElementById('cat-thought');
+const thoughts = [
+  'Meow. Coordinates look purrfect.',
+  'What if the moon is a yarn ball?',
+  'All systems nominal. All boxes mine.',
+  'A little curiosity. A little chaos.',
+  'Mrrp? Oh, just a passing comet.',
+  'The stars are just laser pointers.',
+  'Next stop: a sunbeam. Meow.',
+  'I packed snacks for the void.'
+];
+let lastThought = -1;
+let thoughtTimer;
+function scheduleThought() {
+  thoughtTimer = setTimeout(() => {
+    // Pick a different thought each time without disturbing keyboard focus.
+    const next = (lastThought + 1 + Math.floor(Math.random() * (thoughts.length - 1))) % thoughts.length;
+    lastThought = next;
+    catThought.textContent = thoughts[next];
+    catThought.hidden = false;
+    thoughtTimer = setTimeout(() => {
+      catThought.hidden = true;
+      scheduleThought();
+    }, 6000);
+  }, 15000 + Math.random() * 15000);
+}
+// Let the copilot nap in background tabs rather than cycling unseen messages.
+document.addEventListener('visibilitychange', () => {
+  clearTimeout(thoughtTimer);
+  catThought.hidden = true;
+  if (!document.hidden) scheduleThought();
+});
+if (!document.hidden) scheduleThought();
+document.addEventListener('keydown', (event) => {
+  if (event.key === '/' && !event.ctrlKey && !event.altKey && !event.metaKey && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) && !document.activeElement.isContentEditable) {
+    event.preventDefault();
+    document.getElementById('query').focus();
+  }
+});
+</script>
+</body>
+</html>
