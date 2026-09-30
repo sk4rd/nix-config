@@ -3,6 +3,7 @@
 {
   den.aspects.gaming = {
     includes = [
+      den.aspects.flatpak
       (den.batteries.unfree [
         "steam"
         "steam-original"
@@ -39,6 +40,27 @@
           pkgs.protontricks
           pkgs.protonup-qt
         ];
+
+        # Keep Flathub and Bottles user-scoped; downloads happen after login,
+        # outside Home Manager activation, and retry if the network is offline.
+        systemd.user.services.bottles-flatpak = {
+          Unit.Description = "Install Bottles from Flathub";
+          Service = {
+            Type = "oneshot";
+            ExecStart = pkgs.writeShellScript "install-bottles-flatpak" ''
+              set -eu
+              ${pkgs.flatpak}/bin/flatpak remote-add --user --if-not-exists flathub \
+                https://flathub.org/repo/flathub.flatpakrepo
+              ${pkgs.flatpak}/bin/flatpak install --user --assumeyes --noninteractive \
+                flathub com.usebottles.bottles
+            '';
+            RemainAfterExit = true;
+            Restart = "on-failure";
+            RestartSec = "60s";
+            TimeoutStartSec = "15min";
+          };
+          Install.WantedBy = [ "default.target" ];
+        };
       };
   };
 }
