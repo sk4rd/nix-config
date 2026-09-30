@@ -5,11 +5,15 @@
     includes = [
       den.batteries.hostname
       den.aspects.disko
+      den.aspects.llama-cpp
       den.aspects.secure-boot
       den.aspects.zram
       den.aspects.plasma-workstation
       den.aspects.single-gpu-passthrough
     ];
+
+    # Point each user's Hermes Agent at the local llama.cpp endpoint.
+    provides.to-users.includes = [ den.aspects.llama-cpp ];
 
     nixos = {
       nix.settings.trusted-users = [ "miko" ];
