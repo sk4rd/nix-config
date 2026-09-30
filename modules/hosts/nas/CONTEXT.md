@@ -97,6 +97,19 @@ The instance serves `json` alongside `html` (`search.formats`). SearXNG answers
 asking for `/search?format=json`. Confirm with
 `curl -o /dev/null -w '%{http_code}\n' 'https://search.sk4rd.com/search?q=test&format=json'`.
 
+General search defaults to DuckDuckGo Web and Mwmbl alongside Wikipedia.
+On 2026-09-30, live requests through this instance returned results from both
+replacement engines, while Brave and Google CSE returned rate-limit errors and
+DuckDuckGo's HTML endpoint and Startpage returned CAPTCHA challenges. These are
+upstream blocks, not SearXNG's inbound limiter; short responses can also reflect
+an engine's temporary suspension after a previous failure. Mwmbl uses an
+independent, smaller index and is a fallback rather than a full coverage substitute.
+The four blocked engines are disabled by default but can be re-enabled manually.
+Existing browser engine preferences can override these defaults: reset preferences
+or select DuckDuckGo Web and Mwmbl under Preferences → Engines after deployment.
+An API request can explicitly test the selection with
+`/search?q=nixos&format=json&engines=duckduckgo%20web,mwmbl,wikipedia`.
+
 ## Rollback inventory
 
 The following are retained from the 2026-08-26 migration; keep them until an

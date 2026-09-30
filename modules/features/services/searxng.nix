@@ -38,6 +38,25 @@
             formats:
               - html
               - json
+
+          # Merge overrides by engine name, retaining the packaged category engines.
+          # The HTML DuckDuckGo endpoint and these other default web engines returned
+          # CAPTCHA/429 on this instance. DuckDuckGo's web endpoint and Mwmbl were
+          # verified to return results through the same NAS egress IP.
+          # Disabled engines remain available for manual testing in Preferences.
+          engines:
+            - name: brave
+              disabled: true
+            - name: duckduckgo
+              disabled: true
+            - name: google cse
+              disabled: true
+            - name: startpage
+              disabled: true
+            - name: duckduckgo web
+              disabled: false
+            - name: mwmbl
+              disabled: false
         '';
         mode = "0400";
         # An edit to `content` re-renders the same /run/secrets path and leaves the
