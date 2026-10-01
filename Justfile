@@ -9,37 +9,50 @@ format:
 
 # Evaluate all configurations without deploying or building their closures.
 eval:
-    nix flake check --no-build --show-trace
-    nix eval --raw .#nixosConfigurations.desktop.config.system.build.toplevel.drvPath >/dev/null
-    nix eval --raw .#nixosConfigurations.laptop.config.system.build.toplevel.drvPath >/dev/null
-    nix eval --raw .#nixosConfigurations.nas.config.system.build.toplevel.drvPath >/dev/null
-    nix eval --raw .#nixosConfigurations.vm.config.system.build.toplevel.drvPath >/dev/null
-    nix eval --raw .#nixosConfigurations.wsl.config.system.build.toplevel.drvPath >/dev/null
-    nix eval --raw .#homeConfigurations.miko.activationPackage.drvPath >/dev/null
+    #!/usr/bin/env bash
+    set -euo pipefail
+    nix flake check --no-build --show-trace --no-write-lock-file --option eval-cache false
+    hosts=$(nix eval --raw --no-write-lock-file --option eval-cache false .#nixosConfigurations --apply 'cs: builtins.concatStringsSep " " (builtins.attrNames cs)')
+    for host in $hosts; do
+        nix eval --raw --no-write-lock-file --option eval-cache false ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath" >/dev/null
+    done
+    homes=$(nix eval --raw --no-write-lock-file --option eval-cache false .#homeConfigurations --apply 'cs: builtins.concatStringsSep " " (builtins.attrNames cs)')
+    for home in $homes; do
+        nix eval --raw --no-write-lock-file --option eval-cache false ".#homeConfigurations.$home.activationPackage.drvPath" >/dev/null
+    done
 
 # Build every host's sops manifest: catches a secret whose name and sops file key do not line up.
 secrets:
-    nix build .#nixosConfigurations.desktop.config.system.build.sops-nix-manifest --no-link
-    nix build .#nixosConfigurations.laptop.config.system.build.sops-nix-manifest --no-link
-    nix build .#nixosConfigurations.nas.config.system.build.sops-nix-manifest --no-link
-    nix build .#nixosConfigurations.vm.config.system.build.sops-nix-manifest --no-link
-    nix build .#nixosConfigurations.wsl.config.system.build.sops-nix-manifest --no-link
+    #!/usr/bin/env bash
+    set -euo pipefail
+    hosts=$(nix eval --raw --no-write-lock-file --option eval-cache false .#nixosConfigurations --apply 'cs: builtins.concatStringsSep " " (builtins.attrNames cs)')
+    for host in $hosts; do
+        nix build ".#nixosConfigurations.$host.config.system.build.sops-nix-manifest" --no-link --no-write-lock-file --option eval-cache false
+    done
 
 # Static Nix analysis. Run from `nix develop` so statix/deadnix are available.
 lint:
     statix check .
     deadnix --fail .
 
+# Regression tests remain separate from the default check gate.
+test:
+    python3 -B -m unittest discover -s scripts -p 'test_*.py'
+
 # Build one NixOS host without switching to it or creating a result symlink.
 build host:
-    nix build ".#nixosConfigurations.{{host}}.config.system.build.toplevel" --no-link
+    nix build ".#nixosConfigurations.{{host}}.config.system.build.toplevel" --no-link --no-write-lock-file --option eval-cache false
 
 # Expensive pre-merge verification.
-full: check lint
-    nix flake check --show-trace
-    nix build .#nixosConfigurations.desktop.config.system.build.toplevel --no-link
-    nix build .#nixosConfigurations.laptop.config.system.build.toplevel --no-link
-    nix build .#nixosConfigurations.nas.config.system.build.toplevel --no-link
-    nix build .#nixosConfigurations.vm.config.system.build.toplevel --no-link
-    nix build .#nixosConfigurations.wsl.config.system.build.toplevel --no-link
-    nix build .#homeConfigurations.miko.activationPackage --no-link
+full: check lint test
+    #!/usr/bin/env bash
+    set -euo pipefail
+    nix flake check --show-trace --no-write-lock-file --option eval-cache false
+    hosts=$(nix eval --raw --no-write-lock-file --option eval-cache false .#nixosConfigurations --apply 'cs: builtins.concatStringsSep " " (builtins.attrNames cs)')
+    for host in $hosts; do
+        nix build ".#nixosConfigurations.$host.config.system.build.toplevel" --no-link --no-write-lock-file --option eval-cache false
+    done
+    homes=$(nix eval --raw --no-write-lock-file --option eval-cache false .#homeConfigurations --apply 'cs: builtins.concatStringsSep " " (builtins.attrNames cs)')
+    for home in $homes; do
+        nix build ".#homeConfigurations.$home.activationPackage" --no-link --no-write-lock-file --option eval-cache false
+    done

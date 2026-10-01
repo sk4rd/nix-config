@@ -9,6 +9,7 @@
 
           # Repository workflow
           just
+          python3
           git
           ripgrep
           jq
