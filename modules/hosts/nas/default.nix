@@ -3,7 +3,6 @@
 {
   den.aspects.nas = {
     includes = [
-      den.batteries.hostname
       den.aspects.nas-secrets
       den.aspects.nas-server
     ];

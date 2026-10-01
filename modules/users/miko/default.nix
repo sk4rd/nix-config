@@ -5,7 +5,6 @@
     includes = [
       den.batteries.define-user
       den.aspects.development
-      den.aspects.lf
       den.aspects.zsh
     ];
 

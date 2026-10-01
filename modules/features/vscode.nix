@@ -23,7 +23,14 @@
           enableUpdateCheck = false;
           enableExtensionUpdateCheck = false;
           userSettings = builtins.fromJSON (builtins.readFile ./vscode/settings.json);
-          userTasks = ./vscode/tasks.json;
+          userTasks =
+            let
+              taskConfig = builtins.fromJSON (builtins.readFile ./vscode/tasks.json);
+            in
+            builtins.removeAttrs taskConfig [ "problemMatcher" ]
+            // {
+              tasks = map (task: task // { inherit (taskConfig) problemMatcher; }) taskConfig.tasks;
+            };
           keybindings = ./vscode/keybindings.jsonc;
           languageSnippets.rust = builtins.fromJSON (builtins.readFile ./vscode/rust-snippets.json);
           # remote-wsl is Windows-only; the other personal-profile extensions are portable.

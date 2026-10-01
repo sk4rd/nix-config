@@ -4,11 +4,7 @@
     {
       environment.systemPackages = [
         pkgs.lm_sensors
-        pkgs.openrgb
       ];
 
-      services.hardware.openrgb = {
-        enable = true;
-      };
     };
 }

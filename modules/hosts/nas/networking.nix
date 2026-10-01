@@ -69,13 +69,13 @@
         };
       };
 
-      services.openssh.openFirewall = false;
-
-      services.ddclient.domains = [ "vpn.sk4rd.com" ];
-
-      services.samba.settings.global = {
-        "hosts allow" = "192.168.178.0/24 10.0.0.0/24 127.0.0.1";
-        "hosts deny" = "0.0.0.0/0";
+      services = {
+        openssh.openFirewall = false;
+        ddclient.domains = [ "vpn.sk4rd.com" ];
+        samba.settings.global = {
+          "hosts allow" = "192.168.178.0/24 10.0.0.0/24 127.0.0.1";
+          "hosts deny" = "0.0.0.0/0";
+        };
       };
     };
 }

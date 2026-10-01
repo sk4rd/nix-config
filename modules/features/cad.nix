@@ -1,5 +1,3 @@
-{ den, ... }:
-
 {
   den.aspects.cad = {
     homeManager =

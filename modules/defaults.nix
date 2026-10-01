@@ -3,6 +3,7 @@
 {
   den.default = {
     includes = [
+      den.batteries.hostname
       den.aspects.base
       den.aspects.locale
       den.aspects.secrets

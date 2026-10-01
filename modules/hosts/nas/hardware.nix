@@ -12,7 +12,7 @@
           "usbhid"
           "sd_mod"
         ];
-        kernelModules = [ "kvm-intel" ];
+
         loader = {
           systemd-boot.enable = true;
           efi.canTouchEfiVariables = true;

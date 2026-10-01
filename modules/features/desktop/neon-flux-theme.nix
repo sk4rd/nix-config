@@ -150,9 +150,9 @@ let
   );
 
   # Profile keys and their groups come from Profile.cpp in the Konsole sources.
-  # The font family is installed by the vscode aspect (nerd-fonts.blex-mono),
-  # which plasma-workstation composes next to this one; Konsole falls back
-  # silently if it is missing.
+  # This theme's NixOS component installs the font (nerd-fonts.blex-mono);
+  # Konsole falls back silently if only the Home Manager component is used
+  # without the font installed separately.
   konsoleProfile = lib.generators.toINI { } {
     General = {
       Name = "Neon Flux";

@@ -1,5 +1,3 @@
-{ den, ... }:
-
 {
   # The host normally owns the GPU; libvirt detaches it only while the guest runs.
   den.aspects.single-gpu-passthrough.nixos =

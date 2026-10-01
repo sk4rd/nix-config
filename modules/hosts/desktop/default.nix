@@ -3,7 +3,6 @@
 {
   den.aspects.desktop = {
     includes = [
-      den.batteries.hostname
       den.aspects.disko
       den.aspects.llama-cpp
       den.aspects.secure-boot

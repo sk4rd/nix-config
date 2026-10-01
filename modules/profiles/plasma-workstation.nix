@@ -23,6 +23,7 @@
       den.aspects.hermes-desktop
       den.aspects.libvirt
       den.aspects.media
+      den.aspects.localsend
       den.aspects.neon-flux-theme
       den.aspects.plasma
       den.aspects.super-productivity

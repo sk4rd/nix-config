@@ -31,5 +31,11 @@
           pull.rebase = true;
         };
       };
+
+      programs.lazygit = {
+        enable = true;
+        # Reviewing local changes should not automatically fetch remotes.
+        settings.git.autoFetch = false;
+      };
     };
 }
