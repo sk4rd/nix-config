@@ -14,6 +14,7 @@
 
     nixos = {
       nix.settings.trusted-users = [ "miko" ];
+      networking.hosts."10.0.0.1" = [ "hermes.sk4rd.com" ];
     };
   };
 }

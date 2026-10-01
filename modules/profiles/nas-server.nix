@@ -13,5 +13,6 @@
     den.aspects.home-assistant
     den.aspects.dashboard
     den.aspects.searxng
+    den.aspects.hermes-shared
   ];
 }

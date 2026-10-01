@@ -40,21 +40,55 @@ class FeatureCompositionTests(unittest.TestCase):
             "allowedTCPPorts": [53317], "allowedUDPPorts": [53317],
         })
 
-    def test_local_model_metadata_matches_server_context(self):
+    def test_hermes_uses_hosted_default_and_repository_workflow_settings(self):
         result = evaluate(f'''let
           c = (builtins.getFlake "{ROOT}").nixosConfigurations.desktop.config;
           s = c.home-manager.users.miko.services.hermes-agent.settings;
         in {{
-          qwenServer = c.services.llama-cpp.settings.ctx-size;
-          qwenMetadata = s.providers.llama-cpp.models.qwen3-30b-a3b.context_length;
-          ossCommand = c.systemd.services.llama-cpp-oss.serviceConfig.ExecStart;
-          ossMetadata = s.providers.llama-cpp-oss.models.gpt-oss-20b.context_length;
-          ossOverride = s.model_overrides.llama-cpp-oss.gpt-oss-20b.context_window;
+          modelProvider = s.model.provider;
+          defaultModel = s.model.default;
+          apiMode = s.model.api_mode;
+          reasoningEffort = s.agent.reasoning_effort;
+          workerLimit = s.delegation.max_concurrent_children;
+          spawnDepth = s.delegation.max_spawn_depth;
+          orchestration = s.delegation.orchestrator_enabled;
+          reviewProvider = s.auxiliary.review.provider;
+          reviewModel = s.auxiliary.review.model;
+          trustedProjects = s.skills.trusted_project_dirs;
+          llamaCppEnabled = c.services.llama-cpp.enable;
+          llamaCppOssUnit = c.systemd.services ? llama-cpp-oss;
         }}''')
-        self.assertEqual(result["qwenServer"], result["qwenMetadata"])
-        self.assertEqual(result["ossMetadata"], result["ossOverride"])
-        command = result["ossCommand"].split()
-        self.assertEqual(int(command[command.index("--ctx-size") + 1]), result["ossMetadata"])
+        self.assertEqual(result["modelProvider"], "openai-codex")
+        self.assertEqual(result["defaultModel"], "gpt-6-luna")
+        self.assertEqual(result["apiMode"], "codex_responses")
+        self.assertEqual(result["reasoningEffort"], "medium")
+        self.assertEqual(result["workerLimit"], 2)
+        self.assertEqual(result["spawnDepth"], 1)
+        self.assertFalse(result["orchestration"])
+        self.assertEqual(result["reviewProvider"], "openai-codex")
+        self.assertEqual(result["reviewModel"], "gpt-6-sol")
+        self.assertEqual(
+            result["trustedProjects"], ["/home/miko/Documents/nix-config"]
+        )
+        self.assertFalse(result["llamaCppEnabled"])
+        self.assertFalse(result["llamaCppOssUnit"])
+
+    def test_shared_hermes_creates_workspace_after_valid_mount_cwd(self):
+        result = evaluate(f'''let
+          c = (builtins.getFlake "{ROOT}").nixosConfigurations.nas.config;
+        in {{ unit = c.systemd.units."hermes-serve.service".text; }}''')
+        unit = result["unit"]
+        self.assertRegex(unit, r"(?m)^WorkingDirectory=/srv/hermes$")
+        self.assertRegex(unit, r"(?m)^AssertPathIsMountPoint=/srv/hermes$")
+        self.assertRegex(unit, r"(?m)^RequiresMountsFor=/srv/hermes$")
+        self.assertIn(
+            "install -d -o hermes -g hermes -m 0750 /srv/hermes/workspace", unit
+        )
+        self.assertRegex(
+            unit, r"(?m)^ExecStart=/nix/store/.+-hermes-serve/bin/hermes-serve$"
+        )
+        source = (ROOT / "modules/features/services/hermes-shared.nix").read_text()
+        self.assertIn("cd ${workspaceDir}", source)
 
 
 if __name__ == "__main__":
