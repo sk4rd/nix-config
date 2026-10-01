@@ -47,38 +47,35 @@ Start the repository-scoped coding agent with:
 nix develop -c opencode
 ```
 
-OpenCode reads the repository rules from `AGENTS.md`, project permissions from
-`opencode.json`, and the Den-specific subagents from `.opencode/agents/`. The
-configuration-change workflow is **Plan → Build → `just format` → `just check`
-→ targeted verification → self-review**. Invoke `den-reviewer` for higher-risk
-changes or unresolved concerns, according to the risk-based policy in `AGENTS.md`,
-not for every routine edit. Documentation-only edits need diff and consistency
-checks rather than Nix builds. Use `den-researcher` when current Den/Nix behavior
-needs to be verified against primary documentation.
+Repository architecture, safety rules, and review policy live in [`AGENTS.md`](AGENTS.md).
+OpenCode uses `opencode.json` and the subagents in `.opencode/agents/`.
 
 ## Commands
 
 ```sh
 just check
 just lint
-just build desktop
-just build laptop
-just build nas
-just build vm
-just build wsl
+just format
+just build desktop  # replace desktop with laptop, nas, vm, or wsl
 just full
 
-nix flake check
-nix build .#nixosConfigurations.desktop.config.system.build.toplevel
-nix build .#nixosConfigurations.laptop.config.system.build.toplevel
-nix build .#nixosConfigurations.nas.config.system.build.toplevel
-nix build .#nixosConfigurations.vm.config.system.build.toplevel
-nix build .#nixosConfigurations.wsl.config.system.build.toplevel
 sudo nixos-rebuild switch --flake .#desktop
-sudo nixos-rebuild switch --flake .#vm
 home-manager switch --flake .#miko
-nix fmt .
 ```
+
+## Regression tests
+
+Run the GPU XML/template and evaluated configuration regression tests separately
+from `just check`:
+
+```sh
+just test
+```
+
+Configuration tests require `nix`; they do not build, deploy, or write the lockfile.
+GPU tests do not exercise privileged shutdown/recovery.
+
+For Git review, run `lazygit` inside any repository. Automatic remote fetching is disabled.
 
 ## NAS
 
@@ -376,12 +373,4 @@ YubiKey, while the YubiKey remains the human editing and recovery identity.
 Use a staged mutable-user deployment to test decryption and the password hash
 before enabling immutable users on another host.
 
-The NAS migration is complete; background and operating notes are kept in
-`modules/hosts/nas/CONTEXT.md`.
-
-## Agent safety boundary
-
-The checked-in OpenCode configuration allows ordinary inspection, evaluation,
-formatting, and builds, while deployment and destructive Git operations are
-blocked. `git commit`, `git push`, `nixos-rebuild switch`, `home-manager switch`,
-and `nh os switch` must remain explicit human actions.
+Deployment and Git commits are manual actions; see `AGENTS.md` for the safety boundary.

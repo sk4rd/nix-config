@@ -41,14 +41,19 @@ agents and operators, not a runbook.
 | `services/homepage` | `/srv/homepage` |
 | `services/searxng` | `/srv/searxng` |
 | `services/silverbullet` | `/srv/silverbullet` |
+| `services/prowlarr` | `/srv/prowlarr` |
 | `documents` | `/srv/samba/documents` |
 | `media` | `/srv/samba/media` |
 | `torrents` | `/srv/samba/torrents` |
-| `git` | `/srv/forgejo` |
+| `git` (retained data from retired Forgejo) | `/srv/forgejo` |
 | `public` | `/srv/samba/public` |
 
 Service units assert their dataset mountpoints before starting; a missing ZFS
 mount fails startup rather than writing into the root filesystem.
+
+The retired Forgejo dataset remains mounted and contains data; retirement of
+the service is not authorization to delete the dataset. Keep it and the migration
+rollback inventory below until an independent backup and deletion policy exist.
 
 ## Services
 
@@ -86,29 +91,10 @@ so a host-side edit is discarded rather than merged. Change settings in
 an edit there restarts the unit on switch (`restartUnits`), because a re-render
 reuses the same `/run/secrets` path.
 
-The container entrypoint only writes that file when it is missing, which it now
-never is, and a `server.secret_key` left at the image's `ultrasecretkey`
-placeholder is fatal — `searx/webapp.py` exits the worker — so the unit
-restart-loops and Traefik answers 502 instead of naming the cause. The key comes
-from SOPS; rotating it restarts the unit via `restartUnits`.
-
-The instance serves `json` alongside `html` (`search.formats`). SearXNG answers
-403 for every format that is not listed there, which is what refused API clients
-asking for `/search?format=json`. Confirm with
-`curl -o /dev/null -w '%{http_code}\n' 'https://search.sk4rd.com/search?q=test&format=json'`.
-
-General search defaults to DuckDuckGo Web and Mwmbl alongside Wikipedia.
-On 2026-09-30, live requests through this instance returned results from both
-replacement engines, while Brave and Google CSE returned rate-limit errors and
-DuckDuckGo's HTML endpoint and Startpage returned CAPTCHA challenges. These are
-upstream blocks, not SearXNG's inbound limiter; short responses can also reflect
-an engine's temporary suspension after a previous failure. Mwmbl uses an
-independent, smaller index and is a fallback rather than a full coverage substitute.
-The four blocked engines are disabled by default but can be re-enabled manually.
-Existing browser engine preferences can override these defaults: reset preferences
-or select DuckDuckGo Web and Mwmbl under Preferences → Engines after deployment.
-An API request can explicitly test the selection with
-`/search?q=nixos&format=json&engines=duckduckgo%20web,mwmbl,wikipedia`.
+The secret must not remain at the image's `ultrasecretkey` placeholder, which
+prevents startup. Enabled response formats include `html` and `json`; unlisted
+formats return 403. Browser engine preferences can override repository defaults;
+reset them after changing the configured engines.
 
 ## Rollback inventory
 
@@ -124,10 +110,6 @@ external backup exists and a retention period is chosen:
 Automatic ZFS snapshots are disabled. The legacy retention was 24 hourly, 30
 daily, 8 weekly, and 12 monthly; re-enable only with an explicit policy that
 will not prune the retained migration snapshots.
-
-## D-Bus
-
-The NAS uses the repository default `dbus-broker`.
 
 ## Clean installation
 
