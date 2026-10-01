@@ -19,12 +19,12 @@ in
         hermesHome = "${dataDir}/home";
         workspaceDir = "${dataDir}/workspace";
         hermes = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
-        hermesServe = pkgs.writeShellApplication {
-          name = "hermes-serve";
+        hermesDashboard = pkgs.writeShellApplication {
+          name = "hermes-dashboard";
           runtimeInputs = [ hermes ];
           text = ''
             cd ${workspaceDir}
-            exec hermes serve --host 127.0.0.1 --port 9119 --skip-build
+            exec hermes dashboard --host 0.0.0.0 --port 9119 --skip-build --no-open
           '';
         };
       in
@@ -51,7 +51,7 @@ in
             HERMES_DASHBOARD_BASIC_AUTH_SECRET=${config.sops.placeholder."hermes/basic_auth/signing_secret"}
           '';
           mode = "0400";
-          restartUnits = [ "hermes-serve.service" ];
+          restartUnits = [ "hermes-dashboard.service" ];
         };
 
         users.groups.hermes = { };
@@ -73,15 +73,16 @@ in
           exposure = "trustedNetworks";
         };
 
-        systemd.services.hermes-serve = lib.mkMerge [
+        systemd.services.hermes-dashboard = lib.mkMerge [
           (mountSafety [ dataDir ])
           {
-            description = "Shared Hermes Agent backend";
+            description = "Shared Hermes Agent dashboard and backend";
             wantedBy = [ "multi-user.target" ];
             after = [
               "network-online.target"
               "sops-install-secrets.service"
             ];
+            requires = [ "sops-install-secrets.service" ];
             wants = [ "network-online.target" ];
             unitConfig.ConditionPathExists = config.sops.templates."hermes.env".path;
             serviceConfig = {
@@ -97,14 +98,15 @@ in
               Environment = [
                 "HOME=${hermesHome}"
                 "HERMES_HOME=${hermesHome}"
-                "HERMES_DASHBOARD_HOST=127.0.0.1"
+                "HERMES_DASHBOARD_HOST=0.0.0.0"
                 "HERMES_DASHBOARD_PORT=9119"
                 "HERMES_DASHBOARD_PUBLIC_URL=https://hermes.sk4rd.com"
               ];
               EnvironmentFile = config.sops.templates."hermes.env".path;
-              ExecStart = lib.getExe hermesServe;
+              ExecStart = lib.getExe hermesDashboard;
               Restart = "on-failure";
               RestartSec = 5;
+              RestartPreventExitStatus = "78";
               UMask = "0077";
               NoNewPrivileges = true;
               PrivateTmp = true;

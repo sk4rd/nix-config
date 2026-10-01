@@ -5,13 +5,14 @@ authentication state, and workspace on a dedicated ZFS dataset mounted at
 `/srv/hermes`. Desktop and laptop connect to that backend; terminal tools
 execute on the NAS in `/srv/hermes/workspace`.
 
-The backend listens on loopback TCP 9119, behind Traefik's HTTPS route. Hermes is
-configured with that HTTPS public URL so its auth gate remains enabled despite
-its loopback bind. The route allows only the home LAN and existing WireGuard
-subnet; the Hermes port itself is not opened to the LAN or internet. Do not
-create a public route for Hermes. Its Basic Auth environment file is rendered
-from the encrypted `secrets/hermes.yaml` by SOPS; it is not stored on the data
-dataset or checked in as plaintext.
+Hermes runs its authenticated dashboard and backend on TCP 9119. The process
+binds to `0.0.0.0` so Hermes Desktop's remote-gateway WebSocket checks accept
+remote clients; the NAS firewall does not open port 9119, and the proxy connects
+to it through loopback only. Traefik serves the dashboard over HTTPS and allows
+only the home LAN and existing WireGuard subnet. Do not create a public route or
+open port 9119. Hermes' Basic Auth environment file is rendered from the
+encrypted `secrets/hermes.yaml` by SOPS; it is not stored on the data dataset or
+checked in as plaintext.
 
 ## First-time setup (after the NAS rebuild)
 
@@ -33,13 +34,15 @@ dataset or checked in as plaintext.
    Then run `sudo -u hermes -H hermes model` to select either OpenAI Codex or
    Nous as the active model provider. Don't add API keys, local-model endpoints,
    or other providers.
-4. Start the service with `sudo systemctl start hermes-serve` and check
-   `sudo systemctl status hermes-serve`.
-5. On desktop, open **Settings → Gateways → Remote gateway** and add
-   `https://hermes.sk4rd.com`. The Nix host entries resolve that name to the NAS
-   LAN address on desktop and to `10.0.0.1` on the laptop. Connect WireGuard
-   before using the laptop backend. On each device, sign in with the backend
-   credentials from step 2, then save/reconnect.
+4. Start the service with `sudo systemctl start hermes-dashboard` and check
+   `sudo systemctl status hermes-dashboard`.
+5. Open `https://hermes.sk4rd.com` in a browser and sign in with the dashboard
+   username/password from step 2. The dashboard can manage configuration,
+   credentials, sessions, and run chats/tools on the NAS.
+6. In Hermes Desktop, open **Settings → Gateways → Remote gateway**, add
+   `https://hermes.sk4rd.com`, and sign in with the same dashboard credentials.
+   The Nix host entries resolve that name to the NAS LAN address on desktop and
+   to `10.0.0.1` on the laptop. Connect WireGuard before using the laptop backend.
 
 The NixOS configuration creates the service account, SOPS-rendered Basic Auth
 environment file, service directories, Traefik's trusted-network HTTPS route, and

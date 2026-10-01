@@ -73,22 +73,73 @@ class FeatureCompositionTests(unittest.TestCase):
         self.assertFalse(result["llamaCppEnabled"])
         self.assertFalse(result["llamaCppOssUnit"])
 
-    def test_shared_hermes_creates_workspace_after_valid_mount_cwd(self):
+    def test_shared_hermes_dashboard_is_authenticated_and_proxy_only(self):
         result = evaluate(f'''let
           c = (builtins.getFlake "{ROOT}").nixosConfigurations.nas.config;
-        in {{ unit = c.systemd.units."hermes-serve.service".text; }}''')
+          f = c.networking.firewall;
+          unit = c.systemd.units."hermes-dashboard.service".text;
+        in {{
+          inherit unit;
+          firewall = {{
+            enable = f.enable;
+            trustedInterfaces = f.trustedInterfaces;
+            allowedTCPPorts = f.allowedTCPPorts;
+            allowedTCPPortRanges = f.allowedTCPPortRanges;
+            allInterfaces = builtins.mapAttrs (_: v: {{
+              allowedTCPPorts = v.allowedTCPPorts;
+              allowedTCPPortRanges = v.allowedTCPPortRanges;
+            }}) f.allInterfaces;
+            interfaces = builtins.mapAttrs (_: v: {{
+              allowedTCPPorts = v.allowedTCPPorts;
+              allowedTCPPortRanges = v.allowedTCPPortRanges;
+            }}) f.interfaces;
+            extraInputRules = f.extraInputRules;
+            extraCommands = f.extraCommands;
+          }};
+          route = c.services.traefik.dynamicConfigOptions.http.routers.hermes;
+          trustedNetworks =
+            c.services.traefik.dynamicConfigOptions.http.middlewares.trustedNetworks.ipAllowList.sourceRange;
+          upstream = c.services.traefik.dynamicConfigOptions.http.services.hermes.loadBalancer.servers;
+        }}''')
         unit = result["unit"]
         self.assertRegex(unit, r"(?m)^WorkingDirectory=/srv/hermes$")
         self.assertRegex(unit, r"(?m)^AssertPathIsMountPoint=/srv/hermes$")
         self.assertRegex(unit, r"(?m)^RequiresMountsFor=/srv/hermes$")
+        self.assertRegex(unit, r"(?m)^Requires=.*sops-install-secrets.service")
         self.assertIn(
             "install -d -o hermes -g hermes -m 0750 /srv/hermes/workspace", unit
         )
         self.assertRegex(
-            unit, r"(?m)^ExecStart=/nix/store/.+-hermes-serve/bin/hermes-serve$"
+            unit, r"(?m)^ExecStart=/nix/store/.+-hermes-dashboard/bin/hermes-dashboard$"
         )
         source = (ROOT / "modules/features/services/hermes-shared.nix").read_text()
+        self.assertIn(
+            "hermes dashboard --host 0.0.0.0 --port 9119 --skip-build --no-open",
+            source,
+        )
+        self.assertIn("HERMES_DASHBOARD_BASIC_AUTH_USERNAME", source)
         self.assertIn("cd ${workspaceDir}", source)
+        self.assertRegex(unit, r"(?m)^RestartPreventExitStatus=78$")
+
+        firewall = result["firewall"]
+        self.assertTrue(firewall["enable"])
+        self.assertEqual(firewall["trustedInterfaces"], ["lo"])
+        self.assertNotIn(9119, firewall["allowedTCPPorts"])
+        self.assertEqual(firewall["allowedTCPPortRanges"], [])
+        self.assertEqual(firewall["extraInputRules"], "")
+        self.assertNotIn("9119", firewall["extraCommands"])
+        interfaces = list(firewall["allInterfaces"].values()) + list(
+            firewall["interfaces"].values()
+        )
+        for interface in interfaces:
+            self.assertNotIn(9119, interface["allowedTCPPorts"])
+            self.assertEqual(interface["allowedTCPPortRanges"], [])
+
+        self.assertEqual(result["route"]["middlewares"], ["trustedNetworks"])
+        self.assertEqual(
+            result["trustedNetworks"], ["192.168.178.0/24", "10.0.0.0/24"]
+        )
+        self.assertEqual(result["upstream"], [{"url": "http://127.0.0.1:9119"}])
 
 
 if __name__ == "__main__":
