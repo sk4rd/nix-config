@@ -179,81 +179,125 @@ let
   };
 in
 {
-  den.aspects.neon-flux-theme.homeManager = { pkgs, ... }: {
-    # Apply through Plasma's supported API, rather than hardcoding mutable
-    # containment/monitor IDs in plasma-org.kde.plasma.desktop-appletsrc.
-    # The user unit runs after plasmashell on every graphical login; its store
-    # image path also changes the unit when a new wallpaper is generated.
-    systemd.user.services.neon-flux-wallpaper = {
-      Unit = {
-        Description = "Neon Flux desktop wallpaper";
-        After = [ "plasma-plasmashell.service" ];
-        Requisite = [ "plasma-plasmashell.service" ];
-        PartOf = [ "graphical-session.target" ];
-      };
-      Service = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = "${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-wallpaperimage --fill-mode preserveAspectCrop ${./neon-flux-theme/neon-flux-desktop-3840x2160.png}";
-      };
-      Install.WantedBy = [ "plasma-workspace.target" ];
+  den.aspects.neon-flux-theme.nixos = { pkgs, ... }: {
+    services.displayManager.sddm = {
+      theme = "neon-flux";
+      extraPackages = [ pkgs.qt6.qtdeclarative ];
     };
-
-    xdg.dataFile = {
-      "wallpapers/NeonFlux/neon-flux-desktop-3840x2160.png".source =
-        ./neon-flux-theme/neon-flux-desktop-3840x2160.png;
-      "color-schemes/NeonFlux.colors".text = lib.generators.toINI { } colorScheme;
-
-      # Konsole reads its terminal palette and its profiles from
-      # ~/.local/share/konsole, and in Konsole a colour scheme's name *is* its
-      # file name — so this artifact is "Neon Flux" while the application scheme
-      # above is "NeonFlux". Both files are generated from palette.json and are
-      # named the way Konsole names them itself ("<Name>.profile"), so they stay
-      # theme artifacts: the profile editor writes its own copy to these paths,
-      # and force keeps the module's copy authoritative instead of failing the
-      # next activation over a clobbered file.
-      "konsole/Neon Flux.colorscheme" = {
-        force = true;
-        text = konsoleScheme;
-      };
-      "konsole/Neon Flux.profile" = {
-        force = true;
-        text = konsoleProfile;
-      };
-    };
-
-    # Modify only these keys via Home Manager's kwriteconfig6 activation, not
-    # immutable config symlinks. KDE can keep writing unrelated preferences.
-    # Install the palette as well as its name: activation may run without Plasma.
-    qt.kde.settings = {
-      kdeglobals = (builtins.removeAttrs colorScheme [ "General" ]) // {
-        General = {
-          ColorScheme = "NeonFlux";
-          AccentColor = rgb.accent;
-          shadeSortColumn = true;
-        };
-        KDE = colorScheme.KDE // {
-          widgetStyle = "Breeze";
-        };
-      };
-
-      # Adaptive Breeze follows kdeglobals; breeze-dark has fixed upstream colors.
-      plasmarc.Theme.name = "default";
-      kwinrc."org.kde.kdecoration2" = {
-        library = "org.kde.breeze";
-        theme = "Breeze";
-      };
-
-      # The hostname indicator lives in the tab title, so the tab bar must not
-      # hide itself in a single-tab window. The window caption is the tab title.
-      konsolerc = {
-        "Desktop Entry".DefaultProfile = "Neon Flux.profile";
-        TabBar = {
-          TabBarVisibility = "AlwaysShowTabBar";
-          TabBarPosition = "Top";
-        };
-        KonsoleWindow.ShowWindowTitleOnTitleBar = false;
-      };
-    };
+    environment.systemPackages = [
+      (pkgs.runCommand "sddm-neon-flux" { } ''
+        theme="$out/share/sddm/themes/neon-flux"
+        mkdir -p "$theme"
+        cp ${./neon-flux-theme/sddm/Main.qml} "$theme/Main.qml"
+        cp ${./neon-flux-theme/sddm/metadata.desktop} "$theme/metadata.desktop"
+        cp ${./neon-flux-theme/neon-flux-desktop-3840x2160.png} "$theme/background.png"
+        cp ${
+          pkgs.writeText "neon-flux-sddm.conf" (lib.generators.toINI { } { General = palette; })
+        } "$theme/theme.conf"
+      '')
+    ];
+    fonts.packages = [ pkgs.nerd-fonts.blex-mono ];
   };
+
+  den.aspects.neon-flux-theme.homeManager =
+    { pkgs, ... }:
+    let
+      # A mirrored composition distinguishes the lock screen from the desktop.
+      lockscreenWallpaper =
+        pkgs.runCommand "neon-flux-lockscreen.png"
+          {
+            nativeBuildInputs = [ (pkgs.python3.withPackages (ps: [ ps.pillow ])) ];
+          }
+          ''
+            python -c 'from PIL import Image, ImageOps; import sys; ImageOps.mirror(Image.open(sys.argv[1])).save(sys.argv[2], format="PNG")' ${./neon-flux-theme/neon-flux-desktop-3840x2160.png} "$out"
+          '';
+    in
+    {
+      # Apply through Plasma's supported API, rather than hardcoding mutable
+      # containment/monitor IDs in plasma-org.kde.plasma.desktop-appletsrc.
+      # The user unit runs after plasmashell on every graphical login; its store
+      # image path also changes the unit when a new wallpaper is generated.
+      systemd.user.services.neon-flux-wallpaper = {
+        Unit = {
+          Description = "Neon Flux desktop wallpaper";
+          After = [ "plasma-plasmashell.service" ];
+          Requisite = [ "plasma-plasmashell.service" ];
+          PartOf = [ "graphical-session.target" ];
+        };
+        Service = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-wallpaperimage --fill-mode preserveAspectCrop ${./neon-flux-theme/neon-flux-desktop-3840x2160.png}";
+        };
+        Install.WantedBy = [ "plasma-workspace.target" ];
+      };
+
+      xdg.dataFile = {
+        "wallpapers/NeonFlux/neon-flux-desktop-3840x2160.png".source =
+          ./neon-flux-theme/neon-flux-desktop-3840x2160.png;
+        "wallpapers/NeonFlux/neon-flux-lockscreen-3840x2160.png".source = lockscreenWallpaper;
+        "color-schemes/NeonFlux.colors".text = lib.generators.toINI { } colorScheme;
+
+        # Konsole reads its terminal palette and its profiles from
+        # ~/.local/share/konsole, and in Konsole a colour scheme's name *is* its
+        # file name — so this artifact is "Neon Flux" while the application scheme
+        # above is "NeonFlux". Both files are generated from palette.json and are
+        # named the way Konsole names them itself ("<Name>.profile"), so they stay
+        # theme artifacts: the profile editor writes its own copy to these paths,
+        # and force keeps the module's copy authoritative instead of failing the
+        # next activation over a clobbered file.
+        "konsole/Neon Flux.colorscheme" = {
+          force = true;
+          text = konsoleScheme;
+        };
+        "konsole/Neon Flux.profile" = {
+          force = true;
+          text = konsoleProfile;
+        };
+      };
+
+      # Modify only these keys via Home Manager's kwriteconfig6 activation, not
+      # immutable config symlinks. KDE can keep writing unrelated preferences.
+      # Install the palette as well as its name: activation may run without Plasma.
+      qt.kde.settings = {
+        # Keep KDE's stock secure unlock UI, which inherits the Complementary
+        # palette below. Only appearance keys are touched: no Daemon/PAM changes.
+        kscreenlockerrc = {
+          Greeter.WallpaperPlugin = "org.kde.image";
+          Greeter.Wallpaper."org.kde.image".General = {
+            Image = "file://${lockscreenWallpaper}";
+            FillMode = 2; # PreserveAspectCrop
+          };
+        };
+
+        kdeglobals = (builtins.removeAttrs colorScheme [ "General" ]) // {
+          General = {
+            ColorScheme = "NeonFlux";
+            AccentColor = rgb.accent;
+            shadeSortColumn = true;
+          };
+          KDE = colorScheme.KDE // {
+            widgetStyle = "Breeze";
+          };
+        };
+
+        # Adaptive Breeze follows kdeglobals; breeze-dark has fixed upstream colors.
+        plasmarc.Theme.name = "default";
+        kwinrc."org.kde.kdecoration2" = {
+          library = "org.kde.breeze";
+          theme = "Breeze";
+        };
+
+        # The hostname indicator lives in the tab title, so the tab bar must not
+        # hide itself in a single-tab window. The window caption is the tab title.
+        konsolerc = {
+          "Desktop Entry".DefaultProfile = "Neon Flux.profile";
+          TabBar = {
+            TabBarVisibility = "AlwaysShowTabBar";
+            TabBarPosition = "Top";
+          };
+          KonsoleWindow.ShowWindowTitleOnTitleBar = false;
+        };
+      };
+    };
 }

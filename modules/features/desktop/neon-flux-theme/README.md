@@ -17,4 +17,41 @@ screen. A Home Manager user service runs after plasmashell at Plasma login.
 This avoids machine-specific containment IDs and leaves panel settings alone.
 
 Scope is inherited from the existing `plasma-workstation` profile: desktop and
-laptop only. Lock-screen settings are not changed.
+laptop only.
+
+## Plasma lock screen
+
+The Home Manager section builds a horizontally mirrored 3840 × 2160 version
+of the desktop artwork and installs it beside the original as
+`neon-flux-lockscreen-3840x2160.png`. `qt.kde.settings` selects the stock
+`org.kde.image` wallpaper plugin and its store-path image with aspect-preserving
+crop. Nested groups use nested Nix attributes:
+`Greeter.Wallpaper."org.kde.image".General`.
+
+KDE's standard unlock UI inherits the existing Neon Flux Complementary palette.
+No custom unlock implementation is installed. Lock timeout, password requirements,
+lock-on-resume, and fingerprint authentication are left unchanged. Validate the
+render with `kscreenlocker_greet --testing` and isolated XDG config paths on a
+separate virtual X server; never invoke a real lock to take a preview screenshot.
+
+## SDDM login screen
+
+The same aspect's NixOS section installs `sddm/Main.qml` as the Qt 6
+`neon-flux` SDDM theme. `theme.conf` is generated from the palette beside this
+README; the login screen reuses the wallpaper above. It provides username and
+masked password entry, session selection, login failure feedback, and the power
+operations SDDM reports as available. No user-session configuration is read by
+the greeter. The host-level profile inclusion applies it on desktop and laptop;
+VM keeps Breeze.
+
+The Plasma aspect separately disables fingerprint authentication **only for
+SDDM**, retaining the login stack's other enabled authentication rules and its
+account/password/session includes. TTY login, sudo, and screen-lock authentication
+are not changed.
+
+Build the theme package and test with `sddm-greeter-qt6 --test-mode --theme
+<package>/share/sddm/themes/neon-flux`. Set `QT_FORCE_STDERR_LOGGING=1` to see
+loader diagnostics; the socket error in test mode is expected because no SDDM
+server is connected. Test mode does not prove real authentication: that needs a
+manual login after deployment. Never restart the display manager during an
+active session just to preview the theme.
