@@ -10,7 +10,6 @@ flake-parts module discovered by `import-tree`.
 - NixOS host: `desktop` (AMD CPU, Radeon RX 7900 XT, Plasma 6)
 - NixOS host: `laptop` (ThinkPad Z13 Gen 1, Plasma 6)
 - NixOS host: `nas` (ZFS storage, media, automation, SMB, and WireGuard)
-- NixOS host: `vm` (network hostname `nixos`)
 - NixOS host: `wsl` (NixOS-WSL with direct YubiKey attachment)
 - User and standalone Home Manager configuration: `miko`
 - NAS administration user: `admin`
@@ -34,21 +33,23 @@ modules/
 
 ## Development shell
 
-Repository tooling, including OpenCode, `just`, Nix language tools, and static
-analysis tools, is available through the flake:
+The flake provides `just`, Python, Git, Nix language tools, and static analysis
+utilities:
 
 ```sh
 nix develop
 ```
 
-Start the repository-scoped coding agent with:
+## Hermes workflow
 
-```sh
-nix develop -c opencode
-```
+Hermes Agent is installed with the user profile. Run `hermes` from the repository
+root to start a session with this checkout as its working directory. The
+repository's architectural rules are in [`AGENTS.md`](AGENTS.md), and its
+trusted Hermes project skills live under `.hermes/skills/`.
 
-Repository architecture, safety rules, and review policy live in [`AGENTS.md`](AGENTS.md).
-OpenCode uses `opencode.json` and the subagents in `.opencode/agents/`.
+The Home Manager configuration trusts only this checkout for project skills;
+Hermes scans those skills before making them available. High-risk Nix/Den
+changes use Hermes `/review` with the repository's `nix-review` skill.
 
 ## Commands
 
@@ -56,7 +57,7 @@ OpenCode uses `opencode.json` and the subagents in `.opencode/agents/`.
 just check
 just lint
 just format
-just build desktop  # replace desktop with laptop, nas, vm, or wsl
+just build desktop  # replace desktop with laptop, nas, or wsl
 just full
 
 sudo nixos-rebuild switch --flake .#desktop

@@ -4,9 +4,6 @@
     {
       devShells.default = pkgs.mkShellNoCC {
         packages = with pkgs; [
-          # Agent harness
-          opencode
-
           # Repository workflow
           just
           python3

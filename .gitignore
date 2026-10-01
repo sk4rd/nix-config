@@ -4,12 +4,11 @@ result-*
 
 # Local development state
 .direnv/
+__pycache__/
+*.py[cod]
 .env
 .env.*
 !.env.example
-
-# OpenCode dependencies
-.opencode/node_modules/
 
 # Plaintext secret scratch files
 secrets/*.plain.*

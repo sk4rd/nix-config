@@ -14,11 +14,6 @@
         users.admin.classes = [ "user" ];
         zfs.pools = [ "storage-pool" ];
       };
-      vm = {
-        # Preserve the current network identity while using `vm` as the flake target.
-        hostName = "nixos";
-        users.miko = { };
-      };
       wsl = {
         hostName = "wsl";
         users.miko = { };

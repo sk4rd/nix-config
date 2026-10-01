@@ -69,10 +69,10 @@ class ConfigurationCleanupTests(unittest.TestCase):
         )
         cls.homes = json.loads(result.stdout)
 
-    def test_hostnames_preserve_vm_override(self):
+    def test_hostnames_match_flake_configuration_names(self):
         for name, host in self.hosts.items():
             with self.subTest(host=name):
-                self.assertEqual(host["hostname"], "nixos" if name == "vm" else name)
+                self.assertEqual(host["hostname"], name)
 
     def test_standalone_development_homes(self):
         self.assertIn("miko", self.homes)
@@ -119,9 +119,9 @@ class ConfigurationCleanupTests(unittest.TestCase):
                 with self.subTest(host=name, user=user):
                     self.assertEqual(key in keys, expected.get(name) == user)
 
-    def test_git_review_available_in_all_development_homes(self):
+    def test_lazygit_available_without_review_wrapper(self):
         self.assertEqual(self.hosts["nas"]["homes"], {})
-        for name in ("desktop", "laptop", "vm", "wsl"):
+        for name in ("desktop", "laptop", "wsl"):
             with self.subTest(host=name):
                 home = self.hosts[name]["homes"]["miko"]
                 self.assertTrue(home["lazygit"])
