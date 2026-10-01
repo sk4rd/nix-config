@@ -1,6 +1,11 @@
 
 /* Keep native Firefox layout and controls; change colors only. */
 :root {
+  /* Firefox uses these urlbar-specific tokens while the address bar is focused. */
+  --urlbar-box-bgcolor: var(--raised) !important;
+  --urlbar-box-focused-bgcolor: var(--raised) !important;
+  --urlbar-box-hover-bgcolor: var(--raised) !important;
+  --urlbar-box-text-color: var(--text) !important;
   --lwt-accent-color: var(--canvas) !important;
   --lwt-text-color: var(--text) !important;
   --toolbar-bgcolor: var(--surface) !important;
@@ -31,7 +36,7 @@
 #nav-bar, #PersonalToolbar, #sidebar-box { background: var(--surface) !important; color: var(--text) !important; }
 .tab-background[selected] { border-top: 2px solid var(--accent) !important; }
 #urlbar-background, #searchbar { background: var(--raised) !important; border-color: var(--border) !important; }
-#urlbar[focused] > #urlbar-background { border-color: var(--accent) !important; }
+#urlbar[focused] > #urlbar-background { background-color: var(--raised) !important; border-color: var(--accent) !important; }
 #urlbar-results { background: var(--surface) !important; color: var(--text) !important; }
 .urlbarView-row[selected] .urlbarView-row-inner { background: var(--selection) !important; }
 .urlbarView-url { color: var(--accentBright) !important; }

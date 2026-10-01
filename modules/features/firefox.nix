@@ -43,6 +43,9 @@ in
             "browser.startup.page" = 1;
             "browser.startup.homepage" = startPage;
             "browser.uidensity" = 0;
+            "general.autoScroll" = true;
+            "media.ffmpeg.vaapi.enabled" = true;
+            "media.hardware-video-decoding.enabled" = true;
             "browser.theme.content-theme" = 0;
             "browser.theme.toolbar-theme" = 0;
             "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
