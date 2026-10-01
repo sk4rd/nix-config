@@ -1,5 +1,8 @@
 { den, ... }:
 
+let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety httpsRoute;
+in
 {
   den.aspects.jellyfin.includes = [ den.aspects.nas-ingress ];
 
@@ -12,30 +15,20 @@
         cacheDir = "/srv/jellyfin/cache";
         openFirewall = false;
       };
-      traefik.dynamicConfigOptions.http = {
-        routers.jellyfin = {
-          rule = "Host(`media.sk4rd.com`)";
-          entryPoints = [ "websecure" ];
-          service = "jellyfin";
-          tls.certResolver = "cloudflare";
-        };
-        services.jellyfin.loadBalancer.servers = [ { url = "http://127.0.0.1:8096"; } ];
+      traefik.dynamicConfigOptions.http = httpsRoute {
+        router = "jellyfin";
+        backend = "jellyfin";
+        domain = "media.sk4rd.com";
+        url = "http://127.0.0.1:8096";
+        exposure = "public";
       };
     };
 
     users.users.jellyfin.extraGroups = [ "miko" ];
 
-    systemd.services.jellyfin = {
-      after = [ "zfs-mount.service" ];
-      requires = [ "zfs-mount.service" ];
-      unitConfig.RequiresMountsFor = [
-        "/srv/jellyfin"
-        "/srv/samba/media"
-      ];
-      unitConfig.AssertPathIsMountPoint = [
-        "/srv/jellyfin"
-        "/srv/samba/media"
-      ];
-    };
+    systemd.services.jellyfin = mountSafety [
+      "/srv/jellyfin"
+      "/srv/samba/media"
+    ];
   };
 }

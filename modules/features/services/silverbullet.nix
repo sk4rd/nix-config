@@ -1,5 +1,8 @@
 { den, ... }:
 
+let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety httpsRoute;
+in
 {
   den.aspects.silverbullet.includes = [ den.aspects.nas-ingress ];
 
@@ -15,7 +18,6 @@
     in
     {
       virtualisation = {
-        docker.enable = true;
         oci-containers = {
           backend = "docker";
           containers.silverbullet = {
@@ -29,23 +31,17 @@
         };
       };
 
-      services.traefik.dynamicConfigOptions.http = {
-        routers.silverbullet = {
-          rule = "Host(`silverbullet.sk4rd.com`)";
-          entryPoints = [ "websecure" ];
-          service = "silverbullet";
-          tls.certResolver = "cloudflare";
-        };
-        services.silverbullet.loadBalancer.servers = [
-          { url = "http://127.0.0.1:13001"; }
-        ];
+      services.traefik.dynamicConfigOptions.http = httpsRoute {
+        router = "silverbullet";
+        backend = "silverbullet";
+        domain = "silverbullet.sk4rd.com";
+        url = "http://127.0.0.1:13001";
+        exposure = "public";
       };
 
       services.ddclient.domains = [ "silverbullet.sk4rd.com" ];
 
-      systemd.services.docker-silverbullet = {
-        after = [ "zfs-mount.service" ];
-        requires = [ "zfs-mount.service" ];
+      systemd.services.docker-silverbullet = mountSafety [ "/srv/silverbullet" ] // {
         serviceConfig.ExecStartPre = [
           "+${pkgs.coreutils}/bin/install -d -o silverbullet -g silverbullet /srv/silverbullet/space"
           # The Space Manager stores each space below spaces/<name>, not at /space.
@@ -54,10 +50,6 @@
           "+${pkgs.util-linux}/bin/runuser -u silverbullet -- ${pkgs.coreutils}/bin/test -d /srv/silverbullet/space/spaces/notes"
           "+${pkgs.util-linux}/bin/runuser -u silverbullet -- ${pkgs.coreutils}/bin/install -m 0644 ${theme} '/srv/silverbullet/space/spaces/notes/Neon Flux.md'"
         ];
-        unitConfig = {
-          RequiresMountsFor = [ "/srv/silverbullet" ];
-          AssertPathIsMountPoint = [ "/srv/silverbullet" ];
-        };
       };
     };
 }

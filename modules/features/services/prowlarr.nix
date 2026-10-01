@@ -1,5 +1,8 @@
 { den, ... }:
 
+let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety httpsRoute;
+in
 {
   den.aspects.prowlarr.includes = [
     den.aspects.nas-ingress
@@ -18,8 +21,16 @@
       };
     in
     {
+      sops.secrets."nas/prowlarr/username" = {
+        mode = "0400";
+        restartUnits = [ "docker-prowlarr.service" ];
+      };
+      sops.secrets."nas/prowlarr/password" = {
+        mode = "0400";
+        restartUnits = [ "docker-prowlarr.service" ];
+      };
+
       virtualisation = {
-        docker.enable = true;
         oci-containers = {
           backend = "docker";
           containers.prowlarr = {
@@ -51,40 +62,38 @@
         };
       };
 
-      services.traefik.dynamicConfigOptions.http = {
-        routers.prowlarr = {
-          rule = "Host(`prowlarr.sk4rd.com`)";
-          entryPoints = [ "websecure" ];
-          middlewares = [ "trustedNetworks" ];
-          service = "prowlarr";
-          tls.certResolver = "cloudflare";
-        };
-        services.prowlarr.loadBalancer.servers = [
-          { url = "http://127.0.0.1:9696"; }
-        ];
+      services.traefik.dynamicConfigOptions.http = httpsRoute {
+        router = "prowlarr";
+        backend = "prowlarr";
+        domain = "prowlarr.sk4rd.com";
+        url = "http://127.0.0.1:9696";
+        exposure = "trustedNetworks";
       };
 
-      systemd.services.docker-prowlarr = {
-        after = [ "zfs-mount.service" ];
-        requires = [ "zfs-mount.service" ];
-        unitConfig = {
-          RequiresMountsFor = [ "/srv/prowlarr" ];
-          AssertPathIsMountPoint = [ "/srv/prowlarr" ];
+      systemd.services = {
+        docker-prowlarr = mountSafety [ "/srv/prowlarr" ] // {
+          bindsTo = [ "docker-qbittorrent-vpn.service" ];
+          partOf = [ "docker-qbittorrent-vpn.service" ];
         };
-      };
 
-      # Applies the declarative login and qBittorrent client via the API.
-      systemd.services.prowlarr-configure = {
-        description = "Apply Prowlarr declarative configuration";
-        after = [ "docker-prowlarr.service" ];
-        requires = [ "docker-prowlarr.service" ];
-        wantedBy = [ "docker-prowlarr.service" ];
-        partOf = [ "docker-prowlarr.service" ];
-        serviceConfig = {
-          ExecStart = "${configureScript}/bin/prowlarr-configure";
-          Restart = "on-failure";
-          RestartSec = "10s";
-          Type = "oneshot";
+        docker-flaresolverr = {
+          bindsTo = [ "docker-qbittorrent-vpn.service" ];
+          partOf = [ "docker-qbittorrent-vpn.service" ];
+        };
+
+        # Applies the declarative login and qBittorrent client via the API.
+        prowlarr-configure = {
+          description = "Apply Prowlarr declarative configuration";
+          after = [ "docker-prowlarr.service" ];
+          requires = [ "docker-prowlarr.service" ];
+          wantedBy = [ "docker-prowlarr.service" ];
+          partOf = [ "docker-prowlarr.service" ];
+          serviceConfig = {
+            ExecStart = "${configureScript}/bin/prowlarr-configure";
+            Restart = "on-failure";
+            RestartSec = "10s";
+            Type = "oneshot";
+          };
         };
       };
     };

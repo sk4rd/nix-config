@@ -1,5 +1,8 @@
 { den, ... }:
 
+let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety;
+in
 {
   den.aspects.nas-ingress = {
     includes = [ den.aspects.nas-secrets ];
@@ -7,6 +10,14 @@
     nixos =
       { config, ... }:
       {
+        sops.secrets."nas/cloudflare/dns_api_token" = {
+          mode = "0400";
+          restartUnits = [
+            "ddclient.service"
+            "traefik.service"
+          ];
+        };
+
         sops.templates."traefik-cloudflare.env" = {
           content = ''
             CF_DNS_API_TOKEN=${config.sops.placeholder."nas/cloudflare/dns_api_token"}
@@ -62,14 +73,7 @@
           };
         };
 
-        systemd.services.traefik = {
-          after = [ "zfs-mount.service" ];
-          requires = [ "zfs-mount.service" ];
-          unitConfig = {
-            RequiresMountsFor = [ "/var/lib/traefik" ];
-            AssertPathIsMountPoint = [ "/var/lib/traefik" ];
-          };
-        };
+        systemd.services.traefik = mountSafety [ "/var/lib/traefik" ];
       };
   };
 }

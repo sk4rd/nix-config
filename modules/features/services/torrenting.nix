@@ -1,10 +1,18 @@
 { den, ... }:
 
+let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety httpsRoute;
+in
 {
   den.aspects.torrenting.includes = [ den.aspects.nas-ingress ];
 
   den.aspects.torrenting.nixos =
-    { config, pkgs, ... }:
+    {
+      config,
+      pkgs,
+      lib,
+      ...
+    }:
     let
       portForwardLib = pkgs.writeTextFile {
         name = "qbittorrent-lib.sh";
@@ -40,6 +48,11 @@
     {
       boot.kernelModules = [ "tun" ];
 
+      sops.secrets."nas/protonvpn/wireguard_private_key" = {
+        mode = "0400";
+        restartUnits = [ "docker-qbittorrent-vpn.service" ];
+      };
+
       sops.templates."qbittorrent-protonvpn.env" = {
         content = ''
           VPN_SERVICE_PROVIDER=protonvpn
@@ -58,7 +71,6 @@
       };
 
       virtualisation = {
-        docker.enable = true;
         oci-containers = {
           backend = "docker";
           containers = {
@@ -130,94 +142,55 @@
         };
       };
 
-      services.traefik.dynamicConfigOptions.http = {
-        routers = {
-          qbittorrent = {
-            rule = "Host(`torrent.sk4rd.com`)";
-            entryPoints = [ "websecure" ];
-            middlewares = [ "trustedNetworks" ];
-            service = "qbittorrent";
-            tls.certResolver = "cloudflare";
-          };
-          firefox = {
-            rule = "Host(`firefox.sk4rd.com`)";
-            entryPoints = [ "websecure" ];
-            middlewares = [ "trustedNetworks" ];
-            service = "firefox";
-            tls.certResolver = "cloudflare";
-          };
-        };
-        services = {
-          qbittorrent.loadBalancer = {
-            servers = [ { url = "http://127.0.0.1:18080"; } ];
+      services.traefik.dynamicConfigOptions.http =
+        lib.recursiveUpdate
+          (httpsRoute {
+            router = "qbittorrent";
+            backend = "qbittorrent";
+            domain = "torrent.sk4rd.com";
+            url = "http://127.0.0.1:18080";
+            exposure = "trustedNetworks";
             passHostHeader = false;
-          };
-          firefox.loadBalancer.servers = [ { url = "http://127.0.0.1:13000"; } ];
-        };
-      };
+          })
+          (httpsRoute {
+            router = "firefox";
+            backend = "firefox";
+            domain = "firefox.sk4rd.com";
+            url = "http://127.0.0.1:13000";
+            exposure = "trustedNetworks";
+          });
 
       systemd.services = {
-        docker-qbittorrent-vpn = {
-          after = [ "zfs-mount.service" ];
-          requires = [ "zfs-mount.service" ];
-          unitConfig = {
-            RequiresMountsFor = [ "/srv/qbittorrent" ];
-            AssertPathIsMountPoint = [ "/srv/qbittorrent" ];
-          };
-        };
+        docker-qbittorrent-vpn = mountSafety [ "/srv/qbittorrent" ];
 
-        docker-qbittorrent = {
-          bindsTo = [ "docker-qbittorrent-vpn.service" ];
-          partOf = [ "docker-qbittorrent-vpn.service" ];
-          restartTriggers = [ configure ];
-          after = [
-            "docker-qbittorrent-vpn.service"
-            "qbittorrent-config.service"
-            "zfs-mount.service"
-          ];
-          requires = [
-            "docker-qbittorrent-vpn.service"
-            "qbittorrent-config.service"
-            "zfs-mount.service"
-          ];
-          unitConfig.RequiresMountsFor = [
+        docker-qbittorrent =
+          mountSafety [
             "/srv/qbittorrent"
             "/srv/samba/media"
             "/srv/samba/torrents"
-          ];
-          unitConfig.AssertPathIsMountPoint = [
-            "/srv/qbittorrent"
-            "/srv/samba/media"
-            "/srv/samba/torrents"
-          ];
-        };
+          ]
+          // {
+            bindsTo = [ "docker-qbittorrent-vpn.service" ];
+            partOf = [ "docker-qbittorrent-vpn.service" ];
+            restartTriggers = [ configure ];
+            after = [
+              "qbittorrent-config.service"
+              "zfs-mount.service"
+            ];
+            requires = [
+              "qbittorrent-config.service"
+              "zfs-mount.service"
+            ];
+          };
 
-        docker-firefox = {
+        docker-firefox = mountSafety [ "/srv/firefox" ] // {
           bindsTo = [ "docker-qbittorrent-vpn.service" ];
           partOf = [ "docker-qbittorrent-vpn.service" ];
-          after = [
-            "docker-qbittorrent-vpn.service"
-            "zfs-mount.service"
-          ];
-          requires = [
-            "docker-qbittorrent-vpn.service"
-            "zfs-mount.service"
-          ];
-          unitConfig = {
-            RequiresMountsFor = [ "/srv/firefox" ];
-            AssertPathIsMountPoint = [ "/srv/firefox" ];
-          };
         };
 
-        qbittorrent-config = {
+        qbittorrent-config = mountSafety [ "/srv/qbittorrent" ] // {
           description = "Prepare qBittorrent configuration";
-          after = [ "zfs-mount.service" ];
           before = [ "docker-qbittorrent.service" ];
-          requires = [ "zfs-mount.service" ];
-          unitConfig = {
-            RequiresMountsFor = [ "/srv/qbittorrent" ];
-            AssertPathIsMountPoint = [ "/srv/qbittorrent" ];
-          };
           serviceConfig = {
             ExecStart = "${configure}/bin/qbittorrent-configure";
             Type = "oneshot";

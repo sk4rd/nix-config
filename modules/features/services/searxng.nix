@@ -1,5 +1,8 @@
 { den, ... }:
 
+let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety httpsRoute;
+in
 {
   den.aspects.searxng.includes = [ den.aspects.nas-ingress ];
 
@@ -9,6 +12,11 @@
       settingsFile = config.sops.templates."searxng.settings.yml".path;
     in
     {
+      sops.secrets."nas/searxng/secret_key" = {
+        mode = "0400";
+        restartUnits = [ "docker-searxng.service" ];
+      };
+
       # The container entrypoint only generates a `server.secret_key` when
       # /etc/searxng/settings.yml does NOT exist, and never rewrites an existing file
       # (container/entrypoint.sh, setup()). It writes container/settings.template.yml
@@ -65,21 +73,7 @@
         restartUnits = [ "docker-searxng.service" ];
       };
 
-      # Upstream reads the key as SEARXNG_SECRET and the environment OVERRIDES the
-      # settings file (searx/settings_defaults.py: `SettingsValue(str,
-      # environ_name='SEARXNG_SECRET')`, applied as "override existing value with
-      # environ"); the name carried here was SEARXNG_SECRET_KEY, which nothing
-      # consumes. Both paths now deliver the same sops value, so either one alone is
-      # enough — the file is simply the one the app is guaranteed to load.
-      sops.templates."searxng.env" = {
-        content = ''
-          SEARXNG_SECRET=${config.sops.placeholder."nas/searxng/secret_key"}
-        '';
-        mode = "0400";
-      };
-
       virtualisation = {
-        docker.enable = true;
         oci-containers.containers.searxng = {
           image = "ghcr.io/searxng/searxng@sha256:b36af7984b87191b595bc5301418ed6432c047668a4547ab531a7439b816fac3";
           pull = "missing";
@@ -88,7 +82,6 @@
           };
           # The entrypoint runs as root and FORCE_OWNERSHIP (default) chowns the
           # mounted volumes to searxng on start, so no host-side chown is needed.
-          environmentFiles = [ config.sops.templates."searxng.env".path ];
           volumes = [
             "/srv/searxng/config:/etc/searxng"
             "/srv/searxng/cache:/var/cache/searxng"
@@ -97,22 +90,15 @@
         };
       };
 
-      services.traefik.dynamicConfigOptions.http = {
-        routers.search = {
-          rule = "Host(`search.sk4rd.com`)";
-          entryPoints = [ "websecure" ];
-          middlewares = [ "trustedNetworks" ];
-          service = "searxng";
-          tls.certResolver = "cloudflare";
-        };
-        services.searxng.loadBalancer.servers = [
-          { url = "http://127.0.0.1:8080"; }
-        ];
+      services.traefik.dynamicConfigOptions.http = httpsRoute {
+        router = "search";
+        backend = "searxng";
+        domain = "search.sk4rd.com";
+        url = "http://127.0.0.1:8080";
+        exposure = "trustedNetworks";
       };
 
-      systemd.services.docker-searxng = {
-        after = [ "zfs-mount.service" ];
-        requires = [ "zfs-mount.service" ];
+      systemd.services.docker-searxng = mountSafety [ "/srv/searxng" ] // {
         # The container reads settings.yml once at startup, so the repository-owned file
         # is reinstalled before every start rather than edited on the host: the file now
         # exists at every start, which also means the entrypoint's generate-a-random-key
@@ -126,10 +112,6 @@
           "+${pkgs.coreutils}/bin/install -d -m 0750 /srv/searxng/config"
           "+${pkgs.coreutils}/bin/install -m 0600 ${settingsFile} /srv/searxng/config/settings.yml"
         ];
-        unitConfig = {
-          RequiresMountsFor = [ "/srv/searxng" ];
-          AssertPathIsMountPoint = [ "/srv/searxng" ];
-        };
       };
     };
 }

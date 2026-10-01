@@ -1,4 +1,5 @@
 let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety;
   shadowCopySettings = path: {
     "vfs objects" = "shadow_copy2";
     "shadow:mountpoint" = path;
@@ -52,21 +53,10 @@ in
         };
       };
 
-      systemd.services.samba-smbd = {
-        after = [ "zfs-mount.service" ];
-        requires = [ "zfs-mount.service" ];
-        unitConfig = {
-          RequiresMountsFor = [
-            "/srv/samba/documents"
-            "/srv/samba/media"
-            "/srv/samba/torrents"
-          ];
-          AssertPathIsMountPoint = [
-            "/srv/samba/documents"
-            "/srv/samba/media"
-            "/srv/samba/torrents"
-          ];
-        };
-      };
+      systemd.services.samba-smbd = mountSafety [
+        "/srv/samba/documents"
+        "/srv/samba/media"
+        "/srv/samba/torrents"
+      ];
     };
 }

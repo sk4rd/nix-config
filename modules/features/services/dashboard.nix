@@ -1,5 +1,8 @@
 { den, ... }:
 
+let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety httpsRoute;
+in
 {
   den.aspects.dashboard.includes = [ den.aspects.nas-ingress ];
 
@@ -62,7 +65,6 @@
       };
 
       virtualisation = {
-        docker.enable = true;
         oci-containers.containers.homepage = {
           image = "ghcr.io/gethomepage/homepage@sha256:da9dca9ec258c628146bed1445da0853f2b88f0b10bafd97c091de807c363d60";
           pull = "missing";
@@ -78,52 +80,20 @@
         };
       };
 
-      services.traefik.dynamicConfigOptions.http = {
-        routers.dashboard = {
-          rule = "Host(`dashboard.sk4rd.com`)";
-          entryPoints = [ "websecure" ];
-          middlewares = [ "trustedNetworks" ];
-          service = "homepage";
-          tls.certResolver = "cloudflare";
-        };
-        services.homepage.loadBalancer.servers = [
-          { url = "http://127.0.0.1:3000"; }
-        ];
+      services.traefik.dynamicConfigOptions.http = httpsRoute {
+        router = "dashboard";
+        backend = "homepage";
+        domain = "dashboard.sk4rd.com";
+        url = "http://127.0.0.1:3000";
+        exposure = "trustedNetworks";
       };
 
-      systemd.services = {
-        homepage-config = {
-          description = "Write Homepage dashboard configuration";
-          after = [
-            "sops-install-secrets.service"
-            "zfs-mount.service"
-          ];
-          before = [ "docker-homepage.service" ];
-          requires = [ "zfs-mount.service" ];
-          unitConfig = {
-            RequiresMountsFor = [ "/srv/homepage" ];
-            AssertPathIsMountPoint = [ "/srv/homepage" ];
-          };
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "${writeConfig}/bin/homepage-write-config";
-          };
-        };
-
-        docker-homepage = {
-          after = [
-            "zfs-mount.service"
-            "homepage-config.service"
-          ];
-          requires = [
-            "zfs-mount.service"
-            "homepage-config.service"
-          ];
-          unitConfig = {
-            RequiresMountsFor = [ "/srv/homepage" ];
-            AssertPathIsMountPoint = [ "/srv/homepage" ];
-          };
-        };
+      systemd.services.docker-homepage = mountSafety [ "/srv/homepage" ] // {
+        after = [
+          "zfs-mount.service"
+          "sops-install-secrets.service"
+        ];
+        serviceConfig.ExecStartPre = [ "${writeConfig}/bin/homepage-write-config" ];
       };
     };
 }

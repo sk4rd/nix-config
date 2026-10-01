@@ -1,11 +1,13 @@
 { den, ... }:
 
+let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety httpsRoute;
+in
 {
   den.aspects.home-assistant.includes = [ den.aspects.nas-ingress ];
 
   den.aspects.home-assistant.nixos = {
     virtualisation = {
-      docker.enable = true;
       oci-containers = {
         backend = "docker";
         containers.home-assistant = {
@@ -22,26 +24,14 @@
       };
     };
 
-    services.traefik.dynamicConfigOptions.http = {
-      routers.homeassistant = {
-        rule = "Host(`ha.sk4rd.com`)";
-        entryPoints = [ "websecure" ];
-        middlewares = [ "trustedNetworks" ];
-        service = "homeassistant";
-        tls.certResolver = "cloudflare";
-      };
-      services.homeassistant.loadBalancer.servers = [
-        { url = "http://127.0.0.1:8123"; }
-      ];
+    services.traefik.dynamicConfigOptions.http = httpsRoute {
+      router = "homeassistant";
+      backend = "homeassistant";
+      domain = "ha.sk4rd.com";
+      url = "http://127.0.0.1:8123";
+      exposure = "trustedNetworks";
     };
 
-    systemd.services.docker-home-assistant = {
-      after = [ "zfs-mount.service" ];
-      requires = [ "zfs-mount.service" ];
-      unitConfig = {
-        RequiresMountsFor = [ "/srv/home-assistant" ];
-        AssertPathIsMountPoint = [ "/srv/home-assistant" ];
-      };
-    };
+    systemd.services.docker-home-assistant = mountSafety [ "/srv/home-assistant" ];
   };
 }
