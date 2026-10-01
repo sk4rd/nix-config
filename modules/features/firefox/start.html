@@ -22,8 +22,10 @@ p { margin: 0; }
 .caption { color: var(--accentBright); font-size: 14px; }
 .copilot { position: relative; }
 .cat-speech { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); width: 240px; padding: 10px 14px; border: 1px solid var(--accent); border-radius: 12px; background: var(--surface); color: var(--accentBright); font-size: 12px; line-height: 1.5; text-align: center; }
+.cat-speech { opacity: 0; visibility: hidden; }
+.cat-speech.is-visible { opacity: 1; visibility: visible; }
 .cat-speech::after { content: ""; position: absolute; top: 100%; left: calc(50% - 6px); width: 12px; height: 12px; background: var(--surface); border-right: 1px solid var(--accent); border-bottom: 1px solid var(--accent); transform: translateY(-6px) rotate(45deg); }
-.cat { color: var(--structure); font-size: 22px; line-height: 1.3; margin: 0; transform: rotate(-5deg); }
+.cat { color: var(--structure); font-size: 22px; line-height: 1.3; margin: 0; }
 .cat .eyes { color: var(--accent); }
 .cat .eye { display: inline-block; }
 .cat .star { color: var(--hot); }
@@ -42,6 +44,7 @@ footer { margin-top: 48px; color: var(--text); font-size: 12px; }
 kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
 /* Keep the static composition as the default for reduced-motion users. */
 @media (prefers-reduced-motion: no-preference) {
+  .cat-speech { transition: opacity 400ms ease, visibility 400ms; }
   header, .launch, form, nav, footer {
     animation: arrive 600ms cubic-bezier(.2, .7, .2, 1) backwards;
   }
@@ -114,7 +117,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
 <section class="launch" aria-labelledby="heading">
 <div><h1>Small tab.<br>Big universe.</h1><p class="caption">Pick a direction. The cat is copiloting.</p></div>
 <div class="copilot">
-<p class="cat-speech" id="cat-thought" hidden></p>
+<p class="cat-speech" id="cat-thought" aria-hidden="true"></p>
 <pre class="cat" aria-hidden="true">    <span class="star">✦</span>
    /\_/\
   ( <span class="eyes"><span class="eye">o</span>.<span class="eye">o</span></span> )
@@ -160,9 +163,11 @@ function scheduleThought() {
     const next = (lastThought + 1 + Math.floor(Math.random() * (thoughts.length - 1))) % thoughts.length;
     lastThought = next;
     catThought.textContent = thoughts[next];
-    catThought.hidden = false;
+    catThought.classList.add('is-visible');
+    catThought.setAttribute('aria-hidden', 'false');
     thoughtTimer = setTimeout(() => {
-      catThought.hidden = true;
+      catThought.classList.remove('is-visible');
+      catThought.setAttribute('aria-hidden', 'true');
       scheduleThought();
     }, 6000);
   }, 15000 + Math.random() * 15000);
@@ -170,7 +175,8 @@ function scheduleThought() {
 // Let the copilot nap in background tabs rather than cycling unseen messages.
 document.addEventListener('visibilitychange', () => {
   clearTimeout(thoughtTimer);
-  catThought.hidden = true;
+  catThought.classList.remove('is-visible');
+  catThought.setAttribute('aria-hidden', 'true');
   if (!document.hidden) scheduleThought();
 });
 if (!document.hidden) scheduleThought();
