@@ -94,6 +94,14 @@ def generate(gpu, audio, disk, windows_iso=None, virtio_iso=None):
     for address in (gpu, audio):
         hostdev = add(devices, "hostdev", mode="subsystem", type="pci", managed="yes")
         add(add(hostdev, "source"), "address", **pci_address(address))
+    # Initial test set only; expand to other peripherals after handoff testing.
+    # Whole USB devices preserve all HID interfaces.
+    # Match IDs rather than ephemeral USB bus/device numbers.
+    for vendor, product in (("0x1532", "0x00c1"), ("0x6b62", "0x6869")):
+        hostdev = add(devices, "hostdev", mode="subsystem", type="usb")
+        source = add(hostdev, "source", startupPolicy="optional")
+        add(source, "vendor", id=vendor)
+        add(source, "product", id=product)
     ET.indent(vm, space="  ")
     return ET.tostring(vm, encoding="unicode", xml_declaration=False) + "\n"
 

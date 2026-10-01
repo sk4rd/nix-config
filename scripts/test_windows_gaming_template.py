@@ -34,12 +34,24 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(root.findtext("vcpu"), "16")
         self.assertEqual(root.find("os").get("firmware"), "efi")
         self.assertEqual(root.find("cpu").get("mode"), "host-passthrough")
-        hostdevs = root.findall("./devices/hostdev")
+        hostdevs = root.findall("./devices/hostdev[@type='pci']")
         self.assertEqual(len(hostdevs), 2)
         self.assertTrue(all(dev.get("managed") == "yes" for dev in hostdevs))
         self.assertEqual([dev.find("./source/address").get("function") for dev in hostdevs], ["0x0", "0x1"])
         self.assertEqual(root.find("./devices/disk/driver").get("discard"), "unmap")
         self.assertEqual(root.find("./devices/tpm/backend").get("version"), "2.0")
+
+    def test_passes_only_mouse_and_keyboard_as_whole_usb_devices(self):
+        root = ET.fromstring(template.generate("0000:09:00.0", "0000:09:00.1",
+                                               Path("/images/windows.qcow2")))
+        devices = root.findall("./devices/hostdev[@type='usb']")
+        ids = [(dev.find("./source/vendor").get("id"),
+                dev.find("./source/product").get("id")) for dev in devices]
+        self.assertEqual(ids, [("0x1532", "0x00c1"), ("0x6b62", "0x6869")])
+        self.assertTrue(all(dev.get("mode") == "subsystem" for dev in devices))
+        self.assertTrue(all(dev.find("source").get("startupPolicy") == "optional"
+                            for dev in devices))
+        self.assertTrue(all(dev.find("./source/address") is None for dev in devices))
 
     def test_refuses_unrelated_iommu_group_member(self):
         (self.group / "devices" / "0000:09:01.0").symlink_to(self.sysfs / "0000:09:00.0")
