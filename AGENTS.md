@@ -105,22 +105,25 @@ For every repository change, including small changes:
 1. Inspect the relevant existing aspects and inventory declarations.
 2. Decide whether the change is a feature, profile, host concern, user concern,
    or repository-tooling concern.
-3. For Den APIs or behavior that is unclear, delegate research to the
-   `den-researcher` subagent instead of guessing.
+3. For Den APIs or behavior that is unclear, load the `den-research` project
+   skill and research the pinned Den source instead of guessing.
 4. Implement the smallest coherent change.
 5. For configuration changes, run `just format`, then `just check`, plus
    targeted verification of generated values/files and intended host/user scope.
    Documentation-only changes need diff and consistency checks, not Nix builds.
 6. Self-review the task's diff for correctness, Den principles, battery reuse,
    and the directory responsibilities above. Evaluation alone is not sufficient.
-7. Classify the change using the review policy below. Delegate to `den-reviewer`
-   only when independent review is required or explicitly requested.
+7. Classify the change using the review policy below. For changes that require
+   independent review, invoke Hermes `/review` with the `nix-review` skill loaded;
+   do not invoke it automatically for every edit.
 8. Resolve substantive findings and rerun checks affected by any fixes. Request
    another independent pass only for substantive fixes or unresolved risks.
 
 ### Risk-based independent review
 
-Keep `den-reviewer` available, but do not invoke it automatically for every edit.
+Hermes project skills are enabled only for the trusted repository root. Load
+`den-research` for uncertain Den behavior and `nix-review` only for required or
+requested independent reviews.
 
 Independent review is required for:
 
@@ -148,20 +151,36 @@ Use `just full` for expensive pre-merge verification.
 
 ## Safety
 
-Never deploy automatically.
+Do not deploy, commit, or push without explicit user instruction for that operation
+in the current conversation. A specific request authorizes that operation, but not
+unrelated changes or other external side effects.
 
-Do not run:
+For an explicitly authorized deployment:
 
-- `nixos-rebuild switch`
-- `home-manager switch`
-- `nh os switch`
-- `git commit`
-- `git push`
-- destructive Git commands such as `git reset --hard` or `git clean`
+- Identify the target host and exact change scope. Never deploy a mixed dirty
+  checkout: isolate the requested changes in a clean worktree or otherwise
+  ensure unrelated pending changes are excluded. Do not infer that "deploy"
+  means "deploy everything in the worktree."
+- Run the required evaluation, build, and secret-manifest checks; inspect the
+  rendered artifacts and state any missing runtime prerequisites before switching.
+- After switching, verify the active generation and the specific service/config
+  effect on the target. Report partial activation accurately.
 
-Building and evaluating configurations is allowed. The checked-in OpenCode
-configuration uses a deny-by-default shell whitelist and prevents agents from
-editing the harness/control files that define those permissions.
+For an explicitly authorized commit:
+
+- Review the full diff and stage only the changes in the requested scope. When
+  asked for multiple commits, split them into small, coherent commits in logical
+  dependency order and verify each commit's contents.
+- Never commit plaintext credentials, private keys, or decrypted SOPS data.
+  Preserve unrelated user staging and working-tree changes.
+
+Do not push unless the user explicitly requests a push. Do not run destructive
+Git commands such as `git reset --hard` or `git clean` unless the user explicitly
+authorizes that exact operation.
+
+Building and evaluating configurations is allowed. Hermes approval and tool
+permissions are configured in Hermes itself; these repository instructions do
+not replace those runtime controls.
 
 Do not update `flake.lock` unless the task explicitly requires dependency
 changes.
