@@ -18,7 +18,10 @@
         LC_COLLATE = "de_DE.UTF-8";
       };
     };
-    services.xserver.xkb.layout = "us";
+    services.xserver.xkb = {
+      layout = "us";
+      variant = "intl";
+    };
     time.timeZone = "Europe/Berlin";
   };
 }
