@@ -15,6 +15,16 @@
         yazi
         zellij
 
+        # Common agent scripting, inspection, and repository checks
+        python3
+        curl
+        wget
+        file
+        unzip
+        patch
+        shellcheck
+        just
+
         # Rust
         rustup
         gcc
@@ -22,6 +32,8 @@
         # Nix
         nixd
         nixfmt
+        statix
+        deadnix
       ];
 
       programs.git = {

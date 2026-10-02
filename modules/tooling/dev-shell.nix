@@ -6,10 +6,21 @@
         packages = with pkgs; [
           # Repository workflow
           just
-          python3
+
           git
           ripgrep
+          fd
+          tree
           jq
+
+          # Common agent scripting and inspection
+          python3
+          curl
+          wget
+          file
+          unzip
+          patch
+          shellcheck
 
           # Nix development
           nixd
