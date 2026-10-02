@@ -87,6 +87,8 @@ in
             ];
             requires = [ "user@${toString hermesUid}.service" ];
             wants = [ "network-online.target" ];
+            # Terminal runners need an executable shell, not the account's nologin.
+            path = [ pkgs.bash ];
             unitConfig.ConditionPathExists = config.sops.templates."hermes.env".path;
             serviceConfig = {
               Type = "simple";
@@ -101,6 +103,7 @@ in
               Environment = [
                 "HOME=${hermesHome}"
                 "HERMES_HOME=${hermesHome}"
+                "SHELL=${pkgs.bash}/bin/bash"
                 "XDG_RUNTIME_DIR=/run/user/${toString hermesUid}"
                 "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/${toString hermesUid}/bus"
                 "HERMES_DASHBOARD_HOST=0.0.0.0"

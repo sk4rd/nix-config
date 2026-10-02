@@ -133,6 +133,8 @@ class FeatureCompositionTests(unittest.TestCase):
         self.assertRegex(result["hermesUnit"], r"(?m)^After=.*user@986\.service")
         self.assertRegex(result["hermesUnit"], r"(?m)^Requires=.*user@986\.service")
         self.assertRegex(result["hermesUnit"], r"(?m)^ProtectHome=read-only$")
+        self.assertRegex(unit, r"(?m)^Environment=.*SHELL=/nix/store/[^\s\"]+/bin/bash")
+        self.assertRegex(unit, r"(?m)^Environment=.*PATH=.*-bash[^:/\s]*/bin")
 
         firewall = result["firewall"]
         self.assertTrue(firewall["enable"])
