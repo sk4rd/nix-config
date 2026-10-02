@@ -1,0 +1,14 @@
+// The everyday recipes; the rest of the Justfile runs in
+// Zed's terminal after `nix develop` (`just` is a dev-shell dependency).
+[
+  {
+    "label": "format",
+    "command": "nix",
+    "args": ["develop", "--command", "just", "format"]
+  },
+  {
+    "label": "check",
+    "command": "nix",
+    "args": ["develop", "--command", "just", "check"]
+  }
+]

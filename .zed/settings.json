@@ -1,0 +1,31 @@
+// Project settings — the repository formats with nixfmt (`nix fmt .`), so the
+// editor uses the same binary for the buffer.
+{
+  "languages": {
+    "Nix": {
+      "formatter": {
+        "external": {
+          "command": "nixfmt",
+          "arguments": ["-"],
+        },
+      },
+      "language_servers": ["nixd", "!nil"],
+      "format_on_save": "on",
+      "tab_size": 2,
+    },
+  },
+  "lsp": {
+    "nixd": {
+      "initialization_options": {
+        "formatting": {
+          "command": ["nixfmt"],
+        },
+      },
+      "settings": {
+        "diagnostic": {
+          "suppress": ["sema-extra-with"],
+        },
+      },
+    },
+  },
+}
