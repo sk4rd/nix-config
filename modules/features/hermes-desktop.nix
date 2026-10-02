@@ -2,14 +2,23 @@
 
 {
   den.aspects.hermes-desktop.homeManager =
-    { config, pkgs, ... }:
+    { config, ... }:
     {
       imports = [ inputs.hermes-agent.homeManagerModules.default ];
 
-      home.packages = [
-        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
-        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop
-      ];
+      programs.hermes-agent = {
+        enable = true;
+        desktop = {
+          enable = true;
+          package = config.programs.hermes-agent.package.hermesDesktop.overrideAttrs (old: {
+            # Keep ownership profile-scoped via .managed, not inherited by every local backend.
+            postFixup = (old.postFixup or "") + ''
+              substituteInPlace "$out/bin/hermes-desktop" \
+                --replace-fail "export HERMES_MANAGED='home-manager'" ""
+            '';
+          });
+        };
+      };
 
       services.hermes-agent = {
         enable = true;

@@ -121,7 +121,9 @@ in
                 "+${pkgs.coreutils}/bin/install -d -o hermes -g hermes -m 0750 ${workspaceDir}"
                 # Grant SFTP workspace access as hermes, never recurse as root.
                 "${pkgs.acl}/bin/setfacl -m u:admin:--x ${dataDir}"
-                "${pkgs.acl}/bin/setfacl -m u:admin:rwx,d:u:admin:rwx,d:u:hermes:rwx ${workspaceDir}"
+                "${pkgs.acl}/bin/setfacl -m u:admin:r-X,m::r-X,d:u:admin:r-X,d:m::r-x ${workspaceDir}"
+                "${pkgs.acl}/bin/setfacl -R -m u:admin:r-X,m::r-X ${workspaceDir}"
+                "${pkgs.findutils}/bin/find ${workspaceDir} -type d -exec ${pkgs.acl}/bin/setfacl -m d:u:admin:r-X,d:m::r-x {} +"
               ];
               Environment = [
                 "HOME=${hermesHome}"

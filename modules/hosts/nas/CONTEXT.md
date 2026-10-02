@@ -74,10 +74,20 @@ Before deploying the SilverBullet aspect, create the
 1004 and refuses to start unless the dataset is mounted.
 
 Open `https://silverbullet.sk4rd.com` and use the first-run Space Manager flow
-to create the account. The authenticated service is available through the
-public HTTPS endpoint. Install the PWA on each device for offline access.
+to create the account and a space named `notes`. The authenticated service is
+available through the public HTTPS endpoint. Install the PWA on each device for
+offline access.
 SilverBullet synchronizes browser replicas with the NAS-hosted space and
 creates conflict copies rather than merging simultaneous edits to one file.
+
+Theme installation runs separately as `silverbullet-theme.service`, guarded by
+the same dataset mount assertion and running as UID/GID 1004. A missing `notes`
+space is logged and skipped; it does not prevent the first-run UI from starting.
+The theme unit never creates or registers a space. After creating `notes` through
+Space Manager, install or refresh the managed theme on the NAS with
+`sudo systemctl restart silverbullet-theme.service`. Check
+`journalctl -u silverbullet-theme.service` for skipped installs or write failures.
+Let `Neon Flux.md` sync, then reload the client or run **System: Reload**.
 
 The authoritative space is under `/srv/silverbullet/space`. It is not
 independently backed up while automatic ZFS snapshots remain disabled.

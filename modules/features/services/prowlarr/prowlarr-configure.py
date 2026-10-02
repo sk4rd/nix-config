@@ -3,17 +3,18 @@
 # and the qBittorrent download client. Runs after the Prowlarr container has
 # created its config and database, using Prowlarr's own API.
 import json
+import os
 import time
 import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 config_xml = Path("/srv/prowlarr/config/config.xml")
-prowlarr_username = Path("/run/secrets/nas/prowlarr/username").read_text().strip()
-prowlarr_password = Path("/run/secrets/nas/prowlarr/password").read_text().strip()
+prowlarr_username = Path(os.environ["PROWLARR_USERNAME_FILE"]).read_text().strip()
+prowlarr_password = Path(os.environ["PROWLARR_PASSWORD_FILE"]).read_text().strip()
 qb_username = "admin"
-qb_password = Path("/run/secrets/nas/qbittorrent/webui_password").read_text().strip()
-if not prowlarr_password or not qb_password:
+qb_password = Path(os.environ["QBITTORRENT_PASSWORD_FILE"]).read_text().strip()
+if not prowlarr_username or not prowlarr_password or not qb_password:
     raise SystemExit("prowlarr credentials must not be empty")
 
 

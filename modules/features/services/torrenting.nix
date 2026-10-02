@@ -48,9 +48,15 @@ in
     {
       boot.kernelModules = [ "tun" ];
 
-      sops.secrets."nas/protonvpn/wireguard_private_key" = {
-        mode = "0400";
-        restartUnits = [ "docker-qbittorrent-vpn.service" ];
+      sops.secrets = {
+        "nas/qbittorrent/webui_password" = {
+          mode = "0400";
+          restartUnits = [ "docker-qbittorrent-vpn.service" ];
+        };
+        "nas/protonvpn/wireguard_private_key" = {
+          mode = "0400";
+          restartUnits = [ "docker-qbittorrent-vpn.service" ];
+        };
       };
 
       sops.templates."qbittorrent-protonvpn.env" = {
@@ -191,6 +197,7 @@ in
         qbittorrent-config = mountSafety [ "/srv/qbittorrent" ] // {
           description = "Prepare qBittorrent configuration";
           before = [ "docker-qbittorrent.service" ];
+          environment.QBITTORRENT_PASSWORD_FILE = config.sops.secrets."nas/qbittorrent/webui_password".path;
           serviceConfig = {
             ExecStart = "${configure}/bin/qbittorrent-configure";
             Type = "oneshot";

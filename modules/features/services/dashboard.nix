@@ -4,7 +4,10 @@ let
   inherit (import ../../../lib/nas-service-helpers.nix) mountSafety httpsRoute;
 in
 {
-  den.aspects.dashboard.includes = [ den.aspects.nas-ingress ];
+  den.aspects.dashboard.includes = [
+    den.aspects.nas-ingress
+    den.aspects.torrenting
+  ];
 
   den.aspects.dashboard.nixos =
     { config, pkgs, ... }:

@@ -2,6 +2,17 @@
   den.aspects.nas.nixos =
     { config, ... }:
     {
+      sops.secrets = {
+        "nas/wireguard/server_key" = {
+          mode = "0400";
+          restartUnits = [ "wg-quick-wg0.service" ];
+        };
+        "nas/wireguard/phone_psk" = {
+          mode = "0400";
+          restartUnits = [ "wg-quick-wg0.service" ];
+        };
+      };
+
       networking = {
         enableIPv6 = false;
         useDHCP = false;

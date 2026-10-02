@@ -12,7 +12,7 @@ import re
 import sys
 
 config_path = Path(sys.argv[1])
-password_path = Path("/run/secrets/nas/qbittorrent/webui_password")
+password_path = Path(os.environ["QBITTORRENT_PASSWORD_FILE"])
 config = RawConfigParser(interpolation=None, strict=False)
 config.optionxform = str
 if config_path.exists():

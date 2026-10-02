@@ -22,7 +22,7 @@
       programs.ssh = {
         extraConfig = ''
           Match host 192.168.178.3 user backup
-            IdentityFile /run/secrets/backup/ssh_key
+            IdentityFile "${config.sops.secrets."backup/ssh_key".path}"
             IdentitiesOnly yes
         '';
         # Pin the NAS host key so headless restic runs never prompt; the key is

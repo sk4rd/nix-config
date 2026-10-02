@@ -10,7 +10,7 @@ in
   ];
 
   den.aspects.prowlarr.nixos =
-    { pkgs, ... }:
+    { config, pkgs, ... }:
     let
       configureScript = pkgs.writeShellApplication {
         name = "prowlarr-configure";
@@ -88,6 +88,11 @@ in
           requires = [ "docker-prowlarr.service" ];
           wantedBy = [ "docker-prowlarr.service" ];
           partOf = [ "docker-prowlarr.service" ];
+          environment = {
+            PROWLARR_USERNAME_FILE = config.sops.secrets."nas/prowlarr/username".path;
+            PROWLARR_PASSWORD_FILE = config.sops.secrets."nas/prowlarr/password".path;
+            QBITTORRENT_PASSWORD_FILE = config.sops.secrets."nas/qbittorrent/webui_password".path;
+          };
           serviceConfig = {
             ExecStart = "${configureScript}/bin/prowlarr-configure";
             Restart = "on-failure";

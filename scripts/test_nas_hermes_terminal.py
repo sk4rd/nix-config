@@ -2,6 +2,7 @@
 import json
 import os
 import pty
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -48,17 +49,25 @@ class WorkspaceShellTests(unittest.TestCase):
         source = (ROOT / "modules/features/services/hermes-workspace-shell.sh").read_text()
         for checkout in (False, True):
             with self.subTest(checkout=checkout), tempfile.TemporaryDirectory() as tmp:
-                base = Path(tmp)
+                # Reproduce replacement collisions regardless of the system's TMPDIR.
+                base = Path(tmp) / "srv/hermes/home"
                 workspace = base / "workspace"
-                workspace.mkdir()
+                workspace.mkdir(parents=True)
                 if checkout:
                     (workspace / "nix-config/.git").mkdir(parents=True)
                 fake = base / "id"
                 fake.write_text("#!/bin/sh\nprintf 'hermes\\n'\n")
                 fake.chmod(0o755)
                 script = base / "helper.sh"
-                script.write_text(source.replace("/srv/hermes/workspace", str(workspace)).replace("/srv/hermes/home", str(base / "home")))
-                env = dict(os.environ, PATH=tmp + os.pathsep + os.environ["PATH"])
+                paths = {
+                    "/srv/hermes/workspace": str(workspace),
+                    "/srv/hermes/home": str(base / "home"),
+                }
+                script.write_text(re.sub(
+                    r"/srv/hermes/(?:workspace|home)",
+                    lambda match: paths[match.group()], source,
+                ))
+                env = dict(os.environ, PATH=str(base) + os.pathsep + os.environ["PATH"])
                 r = subprocess.run(["bash", "-euo", "pipefail", str(script)], env=env, input="pwd; printf 'HOME=%s\\n' \"$HOME\"; printf 'PROMPT=%s\\n' \"$PS1\"; exit\n", text=True, capture_output=True)
                 self.assertEqual(r.returncode, 0, r.stderr)
                 self.assertIn(str(workspace), r.stdout)

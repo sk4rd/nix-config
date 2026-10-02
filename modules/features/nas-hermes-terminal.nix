@@ -1,4 +1,3 @@
-{ ... }:
 {
   den.aspects.nas-hermes-terminal.homeManager =
     { pkgs, ... }:

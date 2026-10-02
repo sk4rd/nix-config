@@ -17,6 +17,106 @@ def evaluate(expression):
 
 
 class FeatureCompositionTests(unittest.TestCase):
+    def test_nas_secret_declarations_belong_to_consumers(self):
+        result = evaluate(f'''let
+          policy = (import {ROOT}/modules/features/credentials/nas-secrets.nix).den.aspects.nas-secrets;
+          den.aspects.nas-secrets = policy;
+          ingress = (import {ROOT}/modules/features/services/nas-ingress.nix {{ inherit den; }}).den.aspects.nas-ingress;
+          torrenting = (import {ROOT}/modules/features/services/torrenting.nix {{ inherit den; }}).den.aspects.torrenting;
+          networking = (import {ROOT}/modules/hosts/nas/networking.nix).den.aspects.nas;
+        in {{
+          policySecrets = policy.nixos.sops.secrets or {{}};
+          ingressSecrets = builtins.foldl'
+            (secrets: aspect: secrets // (aspect.nixos.sops.secrets or {{}}))
+            (ingress.nixos {{ config = {{}}; }}).sops.secrets ingress.includes;
+          torrentSecrets = (torrenting.nixos {{ config = {{}}; pkgs = {{}}; lib = {{}}; }}).sops.secrets;
+          wireguardSecrets = (networking.nixos {{ config = {{}}; }}).sops.secrets or {{}};
+          file = toString policy.nixos.sops.defaultSopsFile;
+          sshKeyPaths = policy.nixos.sops.age.sshKeyPaths;
+        }}''')
+        self.assertEqual(result["policySecrets"], {})
+        self.assertEqual(result["ingressSecrets"], {
+            "nas/cloudflare/dns_api_token": {
+                "mode": "0400", "restartUnits": ["ddclient.service", "traefik.service"],
+            },
+        })
+        torrent_secret = {"mode": "0400", "restartUnits": ["docker-qbittorrent-vpn.service"]}
+        self.assertEqual(result["torrentSecrets"], {
+            "nas/qbittorrent/webui_password": torrent_secret,
+            "nas/protonvpn/wireguard_private_key": torrent_secret,
+        })
+        wireguard_secret = {"mode": "0400", "restartUnits": ["wg-quick-wg0.service"]}
+        self.assertEqual(result["wireguardSecrets"], {
+            "nas/wireguard/server_key": wireguard_secret,
+            "nas/wireguard/phone_psk": wireguard_secret,
+        })
+        self.assertTrue(result["file"].endswith("/secrets/nas.yaml"))
+        self.assertEqual(result["sshKeyPaths"], ["/etc/ssh/ssh_host_ed25519_key"])
+
+    def test_dashboard_composes_its_widget_credential_provider(self):
+        result = evaluate(f'''let
+          f = builtins.getFlake "{ROOT}";
+          probe = f.inputs.flake-parts.lib.mkFlake {{ inputs = f.inputs; }}
+            ({{ den, ... }}: {{
+              imports = [ (f.inputs.import-tree {ROOT}/modules) ];
+              den.hosts.x86_64-linux.kiss-dashboard = {{}};
+              den.aspects.kiss-dashboard.includes = [ den.aspects.dashboard ];
+            }});
+          c = probe.nixosConfigurations.kiss-dashboard.config;
+          password = c.sops.placeholder."nas/qbittorrent/webui_password" or null;
+        in {{
+          names = builtins.attrNames c.sops.secrets;
+          inherit password;
+          template = if password != null then
+            c.sops.templates."homepage-services.yaml".content else null;
+        }}''')
+        self.assertEqual(result["names"], [
+            "nas/cloudflare/dns_api_token",
+            "nas/protonvpn/wireguard_private_key",
+            "nas/qbittorrent/webui_password",
+        ])
+        self.assertIsNotNone(result["password"])
+        self.assertIn(f'password: {result["password"]}', result["template"])
+
+    def test_provisioning_and_backup_follow_sops_path_overrides(self):
+        result = evaluate(f'''let
+          f = builtins.getFlake "{ROOT}";
+          probe = f.inputs.flake-parts.lib.mkFlake {{ inputs = f.inputs; }} {{
+            imports = [ (f.inputs.import-tree {ROOT}/modules) ];
+            den.aspects.nas.nixos.sops.secrets = {{
+              "nas/prowlarr/username".path = "/run/custom/prowlarr-user";
+              "nas/prowlarr/password".path = "/run/custom/prowlarr-password";
+              "nas/qbittorrent/webui_password".path = "/run/custom/qbittorrent-password";
+            }};
+            den.aspects.backup.nixos.sops.secrets."backup/ssh_key".path = "/run/custom/backup key";
+          }};
+          c = probe.nixosConfigurations.nas.config;
+        in {{
+          prowlarr = c.systemd.services.prowlarr-configure.environment;
+          qbittorrent = c.systemd.services.qbittorrent-config.environment;
+          units = {{
+            prowlarr = c.systemd.units."prowlarr-configure.service".text;
+            qbittorrent = c.systemd.units."qbittorrent-config.service".text;
+          }};
+          volumes = c.virtualisation.oci-containers.containers.qbittorrent-vpn.volumes;
+          ssh = builtins.mapAttrs (_: h: h.config.programs.ssh.extraConfig)
+            probe.nixosConfigurations;
+        }}''')
+        expected = {
+            "PROWLARR_USERNAME_FILE": "/run/custom/prowlarr-user",
+            "PROWLARR_PASSWORD_FILE": "/run/custom/prowlarr-password",
+            "QBITTORRENT_PASSWORD_FILE": "/run/custom/qbittorrent-password",
+        }
+        for name, path in expected.items():
+            self.assertEqual(result["prowlarr"].get(name), path)
+            self.assertIn(f"{name}={path}", result["units"]["prowlarr"])
+        self.assertEqual(result["qbittorrent"].get("QBITTORRENT_PASSWORD_FILE"), expected["QBITTORRENT_PASSWORD_FILE"])
+        self.assertIn("QBITTORRENT_PASSWORD_FILE=/run/custom/qbittorrent-password", result["units"]["qbittorrent"])
+        self.assertIn("/run/custom/qbittorrent-password:/run/secrets/qbittorrent-webui-password:ro", result["volumes"])
+        for host in ("desktop", "laptop", "wsl"):
+            self.assertIn('IdentityFile "/run/custom/backup key"', result["ssh"][host])
+        self.assertNotIn("/run/custom/backup key", result["ssh"]["nas"])
+
     def test_media_has_no_network_policy_or_transfer_package(self):
         result = evaluate(f'''let
           aspect = (import {ROOT}/modules/features/media.nix).den.aspects.media;
