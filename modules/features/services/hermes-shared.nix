@@ -20,6 +20,17 @@ in
         workspaceDir = "${dataDir}/workspace";
         hermesUid = 986; # Preserve the NAS account UID used by its user manager.
         hermes = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        hermesWorkspaceShell = pkgs.writeShellApplication {
+          name = "hermes-workspace-shell";
+          runtimeInputs = [
+            pkgs.bashInteractive
+            pkgs.coreutils
+            pkgs.git
+            pkgs.openssh
+            pkgs.nix
+          ];
+          text = builtins.readFile ./hermes-workspace-shell.sh;
+        };
         hermesDashboard = pkgs.writeShellApplication {
           name = "hermes-dashboard";
           runtimeInputs = [ hermes ];
@@ -66,7 +77,10 @@ in
           shell = "${pkgs.shadow}/bin/nologin";
         };
 
-        environment.systemPackages = [ hermes ];
+        environment.systemPackages = [
+          hermes
+          hermesWorkspaceShell
+        ];
 
         services.traefik.dynamicConfigOptions.http = httpsRoute {
           router = "hermes";
@@ -99,6 +113,9 @@ in
                 "+${pkgs.coreutils}/bin/install -d -o hermes -g hermes -m 0750 ${dataDir}"
                 "+${pkgs.coreutils}/bin/install -d -o hermes -g hermes -m 0700 ${hermesHome}"
                 "+${pkgs.coreutils}/bin/install -d -o hermes -g hermes -m 0750 ${workspaceDir}"
+                # Grant SFTP workspace access as hermes, never recurse as root.
+                "${pkgs.acl}/bin/setfacl -m u:admin:--x ${dataDir}"
+                "${pkgs.acl}/bin/setfacl -m u:admin:rwx,d:u:admin:rwx,d:u:hermes:rwx ${workspaceDir}"
               ];
               Environment = [
                 "HOME=${hermesHome}"

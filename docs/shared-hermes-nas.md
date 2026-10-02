@@ -48,3 +48,34 @@ The NixOS configuration creates the service account, SOPS-rendered Basic Auth
 environment file, service directories, Traefik's trusted-network HTTPS route, and
 host-name mappings. It does not create the ZFS dataset, activate a rebuild, or
 sign in to the provider accounts; those remain deliberate user-controlled steps.
+
+## One-click interactive workspace terminal
+
+After applying the NAS and workstation configurations, launch **NAS Hermes
+Terminal** from Plasma's application launcher on desktop or laptop. The same
+launcher is available as `nas-hermes-terminal` inside Hermes Desktop's local
+Terminal pane. It connects using the existing admin SSH identity, then uses
+admin's existing sudo access to open an unprivileged shell as `hermes`.
+
+The shell starts in `/srv/hermes/workspace/nix-config` when that checkout exists,
+otherwise `/srv/hermes/workspace`. Git, SSH, Nix, and Bash are available without
+per-command `nix run` or `sudo -u` prefixes. Git uses Hermes's home and GitHub SSH
+identity. Nothing is pulled or downloaded automatically; type `git status` or
+`git pull --ff-only` yourself, and use `exit` to close the session.
+
+The default SSH endpoint is `192.168.178.3`. If the laptop's WireGuard route only
+reaches the NAS VPN address, run `nas-hermes-terminal 10.0.0.1` instead. The
+`NAS_HERMES_HOST` environment variable can also select a different host. Host-key
+verification remains strict; verify and enroll the NAS host key for the chosen
+address before first use. Existing laptop/desktop SSH credentials must be
+available; the launcher does not copy keys or forward the SSH agent to NAS.
+
+This is an interactive human-operated shell, separate from the model terminal
+runner and its systemd sandbox. It has Hermes's account permissions, not admin
+or root privileges. It does not grant sudo to Hermes; NAS deployment remains a
+separate admin operation. Files explicitly created with restrictive permissions
+can still require ACL/mode adjustments before shared SFTP editing.
+
+The NAS `hermes-workspace-shell` helper must be deployed before the workstation
+shortcut works. Merely building the helpers or adding the desktop entry does
+not activate either machine's configuration.
