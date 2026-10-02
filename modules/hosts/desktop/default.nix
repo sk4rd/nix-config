@@ -11,10 +11,6 @@
 
     ];
 
-    # Adopt the existing desktop profile without moving its history/bookmarks.
-    # Fresh machines use the reusable Firefox feature's default profile path.
-    provides.to-users.homeManager.programs.firefox.profiles.default.path = "mygnli95.default";
-
     nixos = {
       nix.settings.trusted-users = [ "miko" ];
       networking.hosts."192.168.178.3" = [
