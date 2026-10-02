@@ -29,7 +29,13 @@ in
             pkgs.openssh
             pkgs.nix
           ];
-          text = builtins.readFile ./hermes-workspace-shell.sh;
+          text =
+            let
+              palette = builtins.fromJSON (builtins.readFile ../desktop/neon-flux-theme/palette.json);
+            in
+            builtins.replaceStrings [ "@accent@" "@structure@" ] [ palette.accent palette.structure ] (
+              builtins.readFile ./hermes-workspace-shell.sh
+            );
         };
         hermesDashboard = pkgs.writeShellApplication {
           name = "hermes-dashboard";

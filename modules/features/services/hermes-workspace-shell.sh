@@ -14,8 +14,22 @@ export SHELL
 SHELL="$(command -v bash)"
 unset BASH_ENV ENV CDPATH
 cd /srv/hermes/workspace
-if [[ -d nix-config/.git ]]; then
-  cd nix-config
+export PS1='[HERMES @ NAS] \w\n\$ '
+if [[ -t 1 && ${TERM:-dumb} != dumb ]]; then
+  # Tokens are substituted from the shared Neon Flux palette by Nix.
+  accent='@accent@'
+  structure='@structure@'
+  rgb() {
+    printf '%d;%d;%d' "0x${1:1:2}" "0x${1:3:2}" "0x${1:5:2}"
+  }
+  cyan="$(rgb "$accent")"
+  violet="$(rgb "$structure")"
+  printf '\033]0;HERMES · NAS workspace\007'
+  printf '\n\033[38;2;%sm  ◆ HERMES · NAS\033[0m\n' "$cyan"
+  printf '\033[38;2;%sm  ──────────────────────────────\033[0m\n' "$violet"
+  printf -v PS1 '\\[\\e[38;2;%sm\\]HERMES\\[\\e[0m\\] @ NAS \\[\\e[38;2;%sm\\]\\w\\[\\e[0m\\]\\n\\[\\e[38;2;%sm\\]❯\\[\\e[0m\\] ' "$cyan" "$violet" "$cyan"
+else
+  printf '\n  HERMES · NAS\n'
 fi
-printf 'NAS Hermes workspace — account: hermes. Git is available; exit returns to your laptop.\n'
+printf '  Workspace: /srv/hermes/workspace · account: hermes\n  Git is ready. Type exit to disconnect.\n\n'
 exec "$SHELL" --noprofile --norc -i

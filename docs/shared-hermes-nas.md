@@ -57,11 +57,14 @@ launcher is available as `nas-hermes-terminal` inside Hermes Desktop's local
 Terminal pane. It connects using the existing admin SSH identity, then uses
 admin's existing sudo access to open an unprivileged shell as `hermes`.
 
-The shell starts in `/srv/hermes/workspace/nix-config` when that checkout exists,
-otherwise `/srv/hermes/workspace`. Git, SSH, Nix, and Bash are available without
-per-command `nix run` or `sudo -u` prefixes. Git uses Hermes's home and GitHub SSH
-identity. Nothing is pulled or downloaded automatically; type `git status` or
-`git pull --ff-only` yourself, and use `exit` to close the session.
+The shell starts in `/srv/hermes/workspace`, even when the Nix checkout exists.
+A Neon Flux cyan/violet banner and persistent `HERMES @ NAS` prompt distinguish
+this shell from a local terminal; the terminal title identifies the session too.
+Terminals without colour support use a plain labelled prompt. Git, SSH, Nix,
+and Bash are available without per-command `nix run` or `sudo -u` prefixes.
+Git uses Hermes's home and GitHub SSH identity. Nothing is pulled or downloaded
+automatically; enter a checkout (for example, `cd nix-config`) before running
+`git status` or `git pull --ff-only`, and use `exit` to close the session.
 
 The default SSH endpoint is `192.168.178.3`. If the laptop's WireGuard route only
 reaches the NAS VPN address, run `nas-hermes-terminal 10.0.0.1` instead. The

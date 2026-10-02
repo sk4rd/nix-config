@@ -1,6 +1,7 @@
 """Launcher argument and SSH failures; no network or deployment."""
 import json
 import os
+import pty
 from pathlib import Path
 import subprocess
 import tempfile
@@ -43,7 +44,7 @@ class NasHermesTerminalTests(unittest.TestCase):
 
 
 class WorkspaceShellTests(unittest.TestCase):
-    def test_workspace_and_checkout_fallback_with_correct_identity(self):
+    def test_always_starts_in_workspace_with_hermes_prompt(self):
         source = (ROOT / "modules/features/services/hermes-workspace-shell.sh").read_text()
         for checkout in (False, True):
             with self.subTest(checkout=checkout), tempfile.TemporaryDirectory() as tmp:
@@ -58,10 +59,57 @@ class WorkspaceShellTests(unittest.TestCase):
                 script = base / "helper.sh"
                 script.write_text(source.replace("/srv/hermes/workspace", str(workspace)).replace("/srv/hermes/home", str(base / "home")))
                 env = dict(os.environ, PATH=tmp + os.pathsep + os.environ["PATH"])
-                r = subprocess.run(["bash", "-euo", "pipefail", str(script)], env=env, input="pwd; printf 'HOME=%s\\n' \"$HOME\"; exit\n", text=True, capture_output=True)
+                r = subprocess.run(["bash", "-euo", "pipefail", str(script)], env=env, input="pwd; printf 'HOME=%s\\n' \"$HOME\"; printf 'PROMPT=%s\\n' \"$PS1\"; exit\n", text=True, capture_output=True)
                 self.assertEqual(r.returncode, 0, r.stderr)
-                self.assertIn(str(workspace / "nix-config" if checkout else workspace), r.stdout)
+                self.assertIn(str(workspace), r.stdout)
+                self.assertNotIn(str(workspace / "nix-config"), r.stdout)
+                self.assertIn("HERMES", r.stdout)
+                self.assertIn("PROMPT=", r.stdout)
                 self.assertIn("HOME=" + str(base / "home"), r.stdout)
+
+    def test_coloured_terminal_has_palette_title_and_persistent_prompt(self):
+        source = (ROOT / "modules/features/services/hermes-workspace-shell.sh").read_text()
+        palette = json.loads((ROOT / "modules/features/desktop/neon-flux-theme/palette.json").read_text())
+        source = source.replace("@accent@", palette["accent"]).replace("@structure@", palette["structure"])
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            workspace = base / "workspace"
+            (workspace / "nix-config").mkdir(parents=True)
+            fake = base / "id"
+            fake.write_text("#!/bin/sh\nprintf 'hermes\\n'\n")
+            fake.chmod(0o755)
+            script = base / "helper.sh"
+            script.write_text(source.replace("/srv/hermes/workspace", str(workspace)))
+            env = dict(os.environ, PATH=tmp + os.pathsep + os.environ["PATH"], TERM="xterm-256color")
+            master, slave = pty.openpty()
+            try:
+                r = subprocess.run(["bash", "-euo", "pipefail", str(script)], env=env,
+                                   input="pwd\ncd nix-config\npwd\nexit\n", text=True,
+                                   stdout=slave, stderr=slave, timeout=10)
+                os.close(slave)
+                slave = None
+                chunks = []
+                while True:
+                    try:
+                        chunk = os.read(master, 4096)
+                    except OSError:
+                        break
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                output = b"".join(chunks).decode()
+            finally:
+                os.close(master)
+                if slave is not None:
+                    os.close(slave)
+            self.assertEqual(r.returncode, 0, output)
+            self.assertIn("\033]0;HERMES · NAS workspace\007", output)
+            for name in ("accent", "structure"):
+                colour = palette[name].lstrip("#")
+                rgb = ";".join(str(int(colour[i:i + 2], 16)) for i in (0, 2, 4))
+                self.assertIn("\033[38;2;" + rgb + "m", output)
+            self.assertGreaterEqual(output.count("HERMES"), 3)
+            self.assertIn(str(workspace / "nix-config"), output)
 
     def test_launchers_are_scoped_to_intended_hosts(self):
         from scripts.test_feature_composition import evaluate
