@@ -18,6 +18,7 @@ in
         dataDir = "/srv/hermes";
         hermesHome = "${dataDir}/home";
         workspaceDir = "${dataDir}/workspace";
+        hermesUid = 986; # Preserve the NAS account UID used by its user manager.
         hermes = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
         hermesDashboard = pkgs.writeShellApplication {
           name = "hermes-dashboard";
@@ -57,6 +58,8 @@ in
         users.groups.hermes = { };
         users.users.hermes = {
           isSystemUser = true;
+          uid = hermesUid;
+          linger = true;
           group = "hermes";
           home = hermesHome;
           createHome = false;
@@ -80,9 +83,9 @@ in
             wantedBy = [ "multi-user.target" ];
             after = [
               "network-online.target"
-              "sops-install-secrets.service"
+              "user@${toString hermesUid}.service"
             ];
-            requires = [ "sops-install-secrets.service" ];
+            requires = [ "user@${toString hermesUid}.service" ];
             wants = [ "network-online.target" ];
             unitConfig.ConditionPathExists = config.sops.templates."hermes.env".path;
             serviceConfig = {
@@ -98,6 +101,8 @@ in
               Environment = [
                 "HOME=${hermesHome}"
                 "HERMES_HOME=${hermesHome}"
+                "XDG_RUNTIME_DIR=/run/user/${toString hermesUid}"
+                "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/${toString hermesUid}/bus"
                 "HERMES_DASHBOARD_HOST=0.0.0.0"
                 "HERMES_DASHBOARD_PORT=9119"
                 "HERMES_DASHBOARD_PUBLIC_URL=https://hermes.sk4rd.com"
@@ -110,7 +115,7 @@ in
               UMask = "0077";
               NoNewPrivileges = true;
               PrivateTmp = true;
-              ProtectHome = true;
+              ProtectHome = "read-only";
               ProtectSystem = "strict";
               ReadWritePaths = [ dataDir ];
               RestrictAddressFamilies = [

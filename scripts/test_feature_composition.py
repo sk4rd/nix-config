@@ -100,12 +100,15 @@ class FeatureCompositionTests(unittest.TestCase):
           trustedNetworks =
             c.services.traefik.dynamicConfigOptions.http.middlewares.trustedNetworks.ipAllowList.sourceRange;
           upstream = c.services.traefik.dynamicConfigOptions.http.services.hermes.loadBalancer.servers;
+          hermesUid = c.users.users.hermes.uid;
+          hermesLinger = c.users.users.hermes.linger;
+          hermesUnit = c.systemd.units."hermes-dashboard.service".text;
         }}''')
         unit = result["unit"]
         self.assertRegex(unit, r"(?m)^WorkingDirectory=/srv/hermes$")
         self.assertRegex(unit, r"(?m)^AssertPathIsMountPoint=/srv/hermes$")
         self.assertRegex(unit, r"(?m)^RequiresMountsFor=/srv/hermes$")
-        self.assertRegex(unit, r"(?m)^Requires=.*sops-install-secrets.service")
+        self.assertNotIn("sops-install-secrets.service", unit)
         self.assertIn(
             "install -d -o hermes -g hermes -m 0750 /srv/hermes/workspace", unit
         )
@@ -120,6 +123,16 @@ class FeatureCompositionTests(unittest.TestCase):
         self.assertIn("HERMES_DASHBOARD_BASIC_AUTH_USERNAME", source)
         self.assertIn("cd ${workspaceDir}", source)
         self.assertRegex(unit, r"(?m)^RestartPreventExitStatus=78$")
+        self.assertEqual(result["hermesUid"], 986)
+        self.assertTrue(result["hermesLinger"])
+        self.assertIn("XDG_RUNTIME_DIR=/run/user/986", result["hermesUnit"])
+        self.assertIn(
+            "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/986/bus",
+            result["hermesUnit"],
+        )
+        self.assertRegex(result["hermesUnit"], r"(?m)^After=.*user@986\.service")
+        self.assertRegex(result["hermesUnit"], r"(?m)^Requires=.*user@986\.service")
+        self.assertRegex(result["hermesUnit"], r"(?m)^ProtectHome=read-only$")
 
         firewall = result["firewall"]
         self.assertTrue(firewall["enable"])
