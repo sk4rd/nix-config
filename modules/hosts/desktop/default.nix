@@ -7,8 +7,7 @@
       den.aspects.secure-boot
       den.aspects.zram
       den.aspects.plasma-workstation
-      den.aspects.rustdesk-host
-
+      den.aspects.rustdesk
     ];
 
     nixos = {
