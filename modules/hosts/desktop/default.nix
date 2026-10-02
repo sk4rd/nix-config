@@ -8,7 +8,7 @@
       den.aspects.zram
       den.aspects.plasma-workstation
       den.aspects.rustdesk-host
-      den.aspects.single-gpu-passthrough
+
     ];
 
     # Adopt the existing desktop profile without moving its history/bookmarks.
