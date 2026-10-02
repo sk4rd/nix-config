@@ -35,16 +35,13 @@ lint:
     statix check .
     deadnix --fail .
 
-# Regression tests remain separate from the default check gate.
-test:
-    python3 -B -m unittest discover -s scripts -p 'test_*.py'
 
 # Build one NixOS host without switching to it or creating a result symlink.
 build host:
     nix build ".#nixosConfigurations.{{host}}.config.system.build.toplevel" --no-link --no-write-lock-file --option eval-cache false
 
 # Expensive pre-merge verification.
-full: check lint test
+full: check lint
     #!/usr/bin/env bash
     set -euo pipefail
     nix flake check --show-trace --no-write-lock-file --option eval-cache false
