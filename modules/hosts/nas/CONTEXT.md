@@ -66,6 +66,20 @@ rollback inventory below until an independent backup and deletion policy exist.
 - Retired: Forgejo, Joplin, Logseq, AdGuard Home, Syncthing, WSDD, and the
   torrent health dashboard. Retired note-service datasets have been removed.
 
+## Media requests
+
+Seerr, Radarr, and Sonarr provide discovery, requests, and automated media imports.
+Their state datasets must be provisioned at `/srv/seerr`, `/srv/radarr`, and
+`/srv/sonarr` before deployment; units assert those mounts before creating state.
+The trusted-network HTTPS names are `requests`, `radarr`, and `sonarr.sk4rd.com`.
+Protected Unix-socket relays let VPN-isolated Prowlarr reach the native manager
+APIs without publishing their raw ports. Existing manual torrent categories are
+preserved. Completed automation downloads live under `/srv/samba/media/.downloads`
+so library imports can use hardlinks. Jellyfin cannot write to media within its
+service; store metadata in its state directory instead of alongside video files.
+See [media request setup](../../../docs/media-requests.md) for provisioning,
+first-run application connections, permissions, and end-to-end checks.
+
 ## SilverBullet
 
 Before deploying the SilverBullet aspect, create the

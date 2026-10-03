@@ -7,6 +7,8 @@
     den.aspects.zfs-storage
     den.aspects.samba
     den.aspects.jellyfin
+    den.aspects.seerr
+    den.aspects.media-indexer-relay
     den.aspects.silverbullet
     den.aspects.prowlarr
     den.aspects.torrenting

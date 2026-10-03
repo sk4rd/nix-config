@@ -167,6 +167,25 @@ in
           });
 
       systemd.services = {
+        media-download-directories = mountSafety [ "/srv/samba/media" ] // {
+          description = "Prepare media automation directories without changing existing ownership";
+          serviceConfig.Type = "oneshot";
+          script = ''
+            for path in /srv/samba/media/.downloads /srv/samba/media/.downloads/radarr /srv/samba/media/.downloads/sonarr /srv/samba/media/Movies /srv/samba/media/Shows; do
+              if [ -L "$path" ]; then
+                echo "Refusing symlink at $path" >&2
+                exit 1
+              fi
+              if [ ! -e "$path" ]; then
+                ${pkgs.coreutils}/bin/install -d -m 2770 -o miko -g qbittorrent "$path"
+              elif [ ! -d "$path" ]; then
+                echo "Expected a directory at $path" >&2
+                exit 1
+              fi
+            done
+          '';
+        };
+
         docker-qbittorrent-vpn = mountSafety [ "/srv/qbittorrent" ];
 
         docker-qbittorrent =
@@ -181,10 +200,12 @@ in
             restartTriggers = [ configure ];
             after = [
               "qbittorrent-config.service"
+              "media-download-directories.service"
               "zfs-mount.service"
             ];
             requires = [
               "qbittorrent-config.service"
+              "media-download-directories.service"
               "zfs-mount.service"
             ];
           };

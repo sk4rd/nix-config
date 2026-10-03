@@ -35,6 +35,15 @@ in
               - Jellyfin:
                   href: https://media.sk4rd.com
                   icon: sh-jellyfin
+              - Requests:
+                  href: https://requests.sk4rd.com
+                  icon: sh-jellyseerr
+              - Radarr:
+                  href: https://radarr.sk4rd.com
+                  icon: sh-radarr
+              - Sonarr:
+                  href: https://sonarr.sk4rd.com
+                  icon: sh-sonarr
           - Downloading:
               - qBittorrent:
                   href: https://torrent.sk4rd.com

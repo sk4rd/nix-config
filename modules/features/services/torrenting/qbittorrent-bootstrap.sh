@@ -30,4 +30,6 @@ docker exec "$container" sh -lc '
   qbt_set_listen_port_from_file
   ensure_category Movies /media/Movies
   ensure_category Shows /media/Shows
+  ensure_category radarr /media/.downloads/radarr
+  ensure_category sonarr /media/.downloads/sonarr
 '

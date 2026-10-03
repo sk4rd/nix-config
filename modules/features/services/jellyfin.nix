@@ -24,11 +24,18 @@ in
       };
     };
 
-    users.users.jellyfin.extraGroups = [ "miko" ];
-
-    systemd.services.jellyfin = mountSafety [
-      "/srv/jellyfin"
-      "/srv/samba/media"
+    users.users.jellyfin.extraGroups = [
+      "miko"
+      "qbittorrent"
     ];
+
+    systemd.services.jellyfin =
+      mountSafety [
+        "/srv/jellyfin"
+        "/srv/samba/media"
+      ]
+      // {
+        serviceConfig.ReadOnlyPaths = [ "/srv/samba/media" ];
+      };
   };
 }
