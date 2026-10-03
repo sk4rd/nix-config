@@ -21,7 +21,7 @@
       den.aspects.firefox
       den.aspects.gaming
       den.aspects.hermes-desktop
-      den.aspects.nas-hermes-terminal
+
       den.aspects.libvirt
       den.aspects.media
       den.aspects.localsend

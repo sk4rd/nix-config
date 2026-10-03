@@ -27,9 +27,3 @@ creation_rules:
           - *nas_legacy_yubikey
         age:
           - *nas
-  - path_regex: secrets/hermes\.yaml$
-    key_groups:
-      - pgp:
-          - *nas_legacy_yubikey
-        age:
-          - *nas
