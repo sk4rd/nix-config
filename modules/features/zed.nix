@@ -108,8 +108,8 @@ let
 
   # Syntactic roles. The names are Zed's own token vocabulary — taken from the
   # bundled One Dark theme of the pinned Zed version, which is also the only
-  # authority for the style keys above — and the colours follow the role
-  # mapping the VS Code port uses (decorators yellow, keywords violet, functions
+  # authority for the style keys above — and the colours follow the Neon Flux
+  # role mapping (decorators yellow, keywords violet, functions
   # cyan, properties accent-bright, literals hot pink, comments italic grey).
   syntax = {
     attribute = fg palette.warning;

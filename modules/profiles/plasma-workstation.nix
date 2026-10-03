@@ -29,7 +29,6 @@
       den.aspects.plasma
       den.aspects.super-productivity
       den.aspects.vesktop
-      den.aspects.vscode
       den.aspects.yubikey-openpgp
       den.aspects.zed
     ];

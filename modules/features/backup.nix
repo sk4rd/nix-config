@@ -43,8 +43,6 @@
           ".cache"
           "**/.cache"
           ".local/share/Trash"
-          ".vscode-server"
-          ".vscode-remote-containers"
           ".copilot"
           ".npm"
           "**/node_modules"
