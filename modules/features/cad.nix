@@ -7,6 +7,7 @@
           pkgs.freecad
           pkgs.kicad
           pkgs.openscad
+          pkgs.orca-slicer
         ];
       };
   };
