@@ -25,12 +25,14 @@
       den.aspects.libvirt
       den.aspects.media
       den.aspects.localsend
-      den.aspects.neon-flux-theme
       den.aspects.plasma
       den.aspects.super-productivity
       den.aspects.vesktop
       den.aspects.yubikey-openpgp
       den.aspects.zed
+      (den.lib.policy.when ({ hasAspect, ... }: hasAspect den.aspects.neon-flux-theme) {
+        includes = [ den.aspects.neon-flux-theme ];
+      })
     ];
   };
 }

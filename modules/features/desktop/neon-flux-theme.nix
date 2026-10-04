@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ den, lib, ... }:
 
 let
 
@@ -140,7 +140,6 @@ let
   );
 
   # Profile keys/groups are defined in Konsole's Profile.cpp.
-  # Home Manager-only use requires BlexMono installed separately to avoid silent fallback.
   konsoleProfile = lib.generators.toINI { } {
     General = {
       Name = "Neon Flux";
@@ -164,86 +163,11 @@ let
   };
 in
 {
-  den.aspects.neon-flux-theme.nixos = { pkgs, ... }: {
-    services.displayManager.sddm = {
-      theme = "neon-flux";
-      extraPackages = [ pkgs.qt6.qtdeclarative ];
-    };
-    environment.systemPackages = [
-      (pkgs.runCommand "sddm-neon-flux" { } ''
-        theme="$out/share/sddm/themes/neon-flux"
-        mkdir -p "$theme"
-        cp ${./neon-flux-theme/sddm/Main.qml} "$theme/Main.qml"
-        cp ${./neon-flux-theme/sddm/metadata.desktop} "$theme/metadata.desktop"
-        cp ${./neon-flux-theme/neon-flux-desktop-3840x2160.png} "$theme/background.png"
-        cp ${
-          pkgs.writeText "neon-flux-sddm.conf" (lib.generators.toINI { } { General = palette; })
-        } "$theme/theme.conf"
-      '')
-    ];
-    fonts.packages = [ pkgs.nerd-fonts.blex-mono ];
-  };
+  den.aspects = {
+    plasma-neon-flux-theme = {
+      includes = [ den.aspects.plasma ];
 
-  den.aspects.neon-flux-theme.homeManager =
-    { pkgs, ... }:
-    let
-      # A mirrored composition distinguishes the lock screen from the desktop.
-      lockscreenWallpaper =
-        pkgs.runCommand "neon-flux-lockscreen.png"
-          {
-            nativeBuildInputs = [ (pkgs.python3.withPackages (ps: [ ps.pillow ])) ];
-          }
-          ''
-            python -c 'from PIL import Image, ImageOps; import sys; ImageOps.mirror(Image.open(sys.argv[1])).save(sys.argv[2], format="PNG")' ${./neon-flux-theme/neon-flux-desktop-3840x2160.png} "$out"
-          '';
-    in
-    {
-      # Plasma's API avoids hardcoding mutable containment/monitor IDs.
-      systemd.user.services.neon-flux-wallpaper = {
-        Unit = {
-          Description = "Neon Flux desktop wallpaper";
-          After = [ "plasma-plasmashell.service" ];
-          Requisite = [ "plasma-plasmashell.service" ];
-          PartOf = [ "graphical-session.target" ];
-        };
-        Service = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = "${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-wallpaperimage --fill-mode preserveAspectCrop ${./neon-flux-theme/neon-flux-desktop-3840x2160.png}";
-        };
-        Install.WantedBy = [ "plasma-workspace.target" ];
-      };
-
-      xdg.dataFile = {
-        "wallpapers/NeonFlux/neon-flux-desktop-3840x2160.png".source =
-          ./neon-flux-theme/neon-flux-desktop-3840x2160.png;
-        "wallpapers/NeonFlux/neon-flux-lockscreen-3840x2160.png".source = lockscreenWallpaper;
-        "color-schemes/NeonFlux.colors".text = lib.generators.toINI { } colorScheme;
-
-        # Konsole resolves scheme/profile names by filename ("Neon Flux", not "NeonFlux").
-        # Its editor can replace these files; force keeps activation authoritative.
-        "konsole/Neon Flux.colorscheme" = {
-          force = true;
-          text = konsoleScheme;
-        };
-        "konsole/Neon Flux.profile" = {
-          force = true;
-          text = konsoleProfile;
-        };
-      };
-
-      # kwriteconfig6 leaves unrelated KDE preferences writable.
-      # Install palette values too: activation may run without Plasma.
-      qt.kde.settings = {
-        # Preserve the stock unlock UI and Daemon/PAM settings; it inherits Complementary colors.
-        kscreenlockerrc = {
-          Greeter.WallpaperPlugin = "org.kde.image";
-          Greeter.Wallpaper."org.kde.image".General = {
-            Image = "file://${lockscreenWallpaper}";
-            FillMode = 2; # PreserveAspectCrop
-          };
-        };
-
+      homeManager.qt.kde.settings = {
         kdeglobals = (builtins.removeAttrs colorScheme [ "General" ]) // {
           General = {
             ColorScheme = "NeonFlux";
@@ -261,9 +185,36 @@ in
           library = "org.kde.breeze";
           theme = "Breeze";
         };
+      };
+      homeManager.xdg.dataFile."color-schemes/NeonFlux.colors".text =
+        lib.generators.toINI { }
+          colorScheme;
+    };
+
+    konsole-neon-flux-theme.homeManager =
+      { pkgs, ... }:
+      {
+        fonts.fontconfig.enable = true;
+        home.packages = [
+          pkgs.nerd-fonts.blex-mono
+          pkgs.kdePackages.konsole
+        ];
+
+        xdg.dataFile = {
+          # Konsole resolves scheme/profile names by filename ("Neon Flux", not "NeonFlux").
+          # Its editor can replace these files; force keeps activation authoritative.
+          "konsole/Neon Flux.colorscheme" = {
+            force = true;
+            text = konsoleScheme;
+          };
+          "konsole/Neon Flux.profile" = {
+            force = true;
+            text = konsoleProfile;
+          };
+        };
 
         # Keep the hostname visible with one tab; use the tab title as the window caption.
-        konsolerc = {
+        qt.kde.settings.konsolerc = {
           "Desktop Entry".DefaultProfile = "Neon Flux.profile";
           TabBar = {
             TabBarVisibility = "AlwaysShowTabBar";
@@ -272,5 +223,85 @@ in
           KonsoleWindow.ShowWindowTitleOnTitleBar = false;
         };
       };
+
+    sddm-neon-flux-theme.nixos = { pkgs, ... }: {
+      services.displayManager.sddm = {
+        enable = true;
+        theme = "neon-flux";
+        extraPackages = [ pkgs.qt6.qtdeclarative ];
+      };
+      environment.systemPackages = [
+        (pkgs.runCommand "sddm-neon-flux" { } ''
+          theme="$out/share/sddm/themes/neon-flux"
+          mkdir -p "$theme"
+          cp ${./neon-flux-theme/sddm/Main.qml} "$theme/Main.qml"
+          cp ${./neon-flux-theme/sddm/metadata.desktop} "$theme/metadata.desktop"
+          cp ${./neon-flux-theme/neon-flux-desktop-3840x2160.png} "$theme/background.png"
+          cp ${
+            pkgs.writeText "neon-flux-sddm.conf" (lib.generators.toINI { } { General = palette; })
+          } "$theme/theme.conf"
+        '')
+      ];
+      fonts.packages = [ pkgs.nerd-fonts.blex-mono ];
     };
+
+    wallpaper-neon-flux-theme = {
+      includes = [ den.aspects.plasma ];
+
+      homeManager =
+        { pkgs, ... }:
+        {
+          # Plasma's API avoids hardcoding mutable containment/monitor IDs.
+          systemd.user.services.neon-flux-wallpaper = {
+            Unit = {
+              Description = "Neon Flux desktop wallpaper";
+              After = [ "plasma-plasmashell.service" ];
+              Requisite = [ "plasma-plasmashell.service" ];
+              PartOf = [ "graphical-session.target" ];
+            };
+            Service = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+              ExecStart = "${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-wallpaperimage --fill-mode preserveAspectCrop ${./neon-flux-theme/neon-flux-desktop-3840x2160.png}";
+            };
+            Install.WantedBy = [ "plasma-workspace.target" ];
+          };
+
+          xdg.dataFile."wallpapers/NeonFlux/neon-flux-desktop-3840x2160.png".source =
+            ./neon-flux-theme/neon-flux-desktop-3840x2160.png;
+        };
+    };
+
+    lockscreen-neon-flux-theme = {
+      includes = [ den.aspects.plasma ];
+
+      homeManager =
+        { pkgs, ... }:
+        let
+          # A mirrored composition distinguishes the lock screen from the desktop.
+          lockscreenWallpaper =
+            pkgs.runCommand "neon-flux-lockscreen.png"
+              {
+                nativeBuildInputs = [ (pkgs.python3.withPackages (ps: [ ps.pillow ])) ];
+              }
+              ''
+                python -c 'from PIL import Image, ImageOps; import sys; ImageOps.mirror(Image.open(sys.argv[1])).save(sys.argv[2], format="PNG")' ${./neon-flux-theme/neon-flux-desktop-3840x2160.png} "$out"
+              '';
+        in
+        {
+          xdg.dataFile."wallpapers/NeonFlux/neon-flux-lockscreen-3840x2160.png".source = lockscreenWallpaper;
+
+          # kwriteconfig6 leaves unrelated KDE preferences writable.
+          # Install palette values too: activation may run without Plasma.
+          qt.kde.settings.kscreenlockerrc = {
+            # Preserve the stock unlock UI and Daemon/PAM settings; it inherits Complementary colors.
+            Greeter.WallpaperPlugin = "org.kde.image";
+            Greeter.Wallpaper."org.kde.image".General = {
+              Image = "file://${lockscreenWallpaper}";
+              FillMode = 2; # PreserveAspectCrop
+            };
+          };
+        };
+    };
+  };
 }

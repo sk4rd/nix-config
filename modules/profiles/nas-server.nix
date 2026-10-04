@@ -10,6 +10,7 @@
     den.aspects.seerr
     den.aspects.media-indexer-relay
     den.aspects.silverbullet
+    den.aspects.neon-flux-theme
     den.aspects.prowlarr
     den.aspects.torrenting
     den.aspects.home-assistant
