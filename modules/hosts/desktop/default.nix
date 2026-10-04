@@ -13,6 +13,7 @@
     nixos =
       { pkgs, ... }:
       {
+        services.fprintd.enable = false;
         services.displayManager.sddm.settings.X11.DisplayCommand =
           "${pkgs.xrandr}/bin/xrandr --output DP-1 --primary";
         nix.settings.trusted-users = [ "miko" ];

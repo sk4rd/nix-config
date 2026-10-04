@@ -5,7 +5,15 @@
     {
       boot = {
         loader.efi.canTouchEfiVariables = true;
-        kernelModules = [ "kvm-amd" ];
+        kernelModules = [
+          "kvm-amd"
+          "vfio-pci"
+        ];
+        kernelParams = [
+          "iommu=pt"
+          # Keep firmware-selected BAR sizes for GPU passthrough.
+          "amdgpu.rebar=0"
+        ];
 
         # Prevent large transfers from accumulating gigabytes of dirty pages.
         kernel.sysctl = {
