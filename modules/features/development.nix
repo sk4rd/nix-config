@@ -5,7 +5,6 @@
       home.packages = with pkgs; [
         tree
 
-        # Terminal utilities
         btop
         duf
         fd
@@ -15,7 +14,6 @@
         yazi
         zellij
 
-        # Common agent scripting, inspection, and repository checks
         python3
         curl
         wget
@@ -25,11 +23,9 @@
         shellcheck
         just
 
-        # Rust
         rustup
         gcc
 
-        # Nix
         nixd
         nixfmt
         statix

@@ -34,6 +34,19 @@ Follow the principles at https://den.denful.dev/:
   source and primary docs. Follow established local patterns for ordinary settings;
   load `den-research` when behavior is uncertain rather than guessing.
 
+## Documentation
+
+- Do not add documentation files or expand existing documentation unless the user
+  explicitly requests or confirms it. A code change alone is not authorization.
+- Avoid unsolicited or unnecessary documentation additions. If documentation
+  would be useful, propose it and wait for confirmation before making changes.
+
+## Code comments
+
+- Keep comments minimal. Add one only when it provides real value to a developer,
+  such as explaining non-obvious intent, constraints, or tradeoffs.
+- Keep comments concise and on point; do not narrate obvious code or restate it.
+
 ## Change workflow
 
 1. Inspect relevant files and, for configuration changes, aspects and inventory.

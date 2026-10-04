@@ -1,5 +1,4 @@
-// Project settings — the repository formats with nixfmt (`nix fmt .`), so the
-// editor uses the same binary for the buffer.
+
 {
   "languages": {
     "Nix": {

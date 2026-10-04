@@ -1,7 +1,7 @@
 
 /* Keep native Firefox layout and controls; change colors only. */
 :root {
-  /* Firefox uses these urlbar-specific tokens while the address bar is focused. */
+
   --urlbar-box-bgcolor: var(--raised) !important;
   --urlbar-box-focused-bgcolor: var(--raised) !important;
   --urlbar-box-hover-bgcolor: var(--raised) !important;

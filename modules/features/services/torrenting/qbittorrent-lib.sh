@@ -1,5 +1,4 @@
-# Shared qBittorrent WebUI API helpers. Sourced by the Gluetun port-forward
-# callbacks and the bootstrap service; runs inside the gluetun container.
+# Sourced by port-forward callbacks and bootstrap inside the Gluetun container.
 set -eu
 
 API="http://127.0.0.1:18080/api/v2"

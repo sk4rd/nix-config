@@ -9,9 +9,8 @@ Use only sources and content you are authorized to access.
 
 ## Infrastructure
 
-All three new applications are native services from the locked nixpkgs input.
-Their HTTP listeners bind to loopback and their HTTPS routes are restricted to
-LAN (`192.168.178.0/24`) and WireGuard (`10.0.0.0/24`):
+HTTP listeners bind to loopback; HTTPS access is restricted to LAN
+(`192.168.178.0/24`) and WireGuard (`10.0.0.0/24`):
 
 | Application | HTTPS name | Local API | State mount |
 |---|---|---|---|
@@ -19,18 +18,12 @@ LAN (`192.168.178.0/24`) and WireGuard (`10.0.0.0/24`):
 | Radarr | `radarr.sk4rd.com` | `127.0.0.1:7878` | `/srv/radarr` |
 | Sonarr | `sonarr.sk4rd.com` | `127.0.0.1:8989` | `/srv/sonarr` |
 
-Each stores configuration beneath `config/` on its state mount. Services refuse
-to start without their mounts. Creation of state directories runs after mount
-assertions, not through activation-time directory creation. Seerr has no media
-filesystem access; Jellyfin's media mount is read-only within its service.
+Services refuse to start without their state mounts. Jellyfin's media mount is
+read-only; store its metadata in the state directory, not alongside video files.
 
-The existing Gluetun namespace and loopback publications remain unchanged:
-qBittorrent at port 18080, Prowlarr at 9696, and FlareSolverr at 8191. qBittorrent
-and Prowlarr use ProtonVPN. Seerr and the native managers use the normal host
-route. Prowlarr synchronization does **not** route all subsequent manager indexer
-requests through the VPN; metadata, RSS, and download-link traffic from the
-managers must not be assumed VPN-isolated. All-indexer VPN routing is a separate
-networking change.
+qBittorrent and Prowlarr use ProtonVPN; Seerr, Radarr, and Sonarr use the normal
+host route. Prowlarr synchronization does **not** route subsequent manager
+metadata, RSS, or download-link requests through the VPN.
 
 ## Before deployment
 
@@ -53,14 +46,10 @@ not authorization to perform either. Follow `docs/agent-operations.md` first.
    `192.168.178.3`. The configuration does not publish them through DDNS.
 4. Review the scoped configuration diff and validation before an authorized switch.
 
-The directory preparation unit creates missing `.downloads`, `.downloads/radarr`,
-`.downloads/sonarr`, `Movies`, and `Shows` beneath `/srv/samba/media`, owned by
-`miko:qbittorrent` with mode `2770`. It rejects symlinks and leaves existing
-ownership and modes unchanged. Radarr/Sonarr join both shared groups. Existing
-library directories must permit these services to import files; correct any
-specific incompatible directory only after inspecting it. New subdirectories
-should inherit a shared group through setgid and files should be group-writable.
-Do not solve permission issues with a recursive `chown` or `chmod` of the dataset.
+Existing library directories must permit Radarr/Sonarr to import files; directory
+preparation leaves existing ownership and modes unchanged. Inspect incompatible
+directories individually. Use shared-group access, setgid directories, and
+group-writable files; do not recursively `chown` or `chmod` the dataset.
 
 ## First-run application integration
 
@@ -92,14 +81,12 @@ copied into world-readable Nix settings.
 6. Test the download-client connection. Keep existing torrents and categories
    unchanged; do not bulk import or reclassify them.
 
-The bootstrap creates the new categories with destinations
-`/media/.downloads/radarr` and `/media/.downloads/sonarr`. The existing bootstrap
-continues to enforce `Movies` → `/media/Movies` and `Shows` → `/media/Shows`; these
-repository-owned destinations are unchanged by this integration. Custom UI edits
-to those category destinations are overwritten on bootstrap, as before. The global incomplete directory
-remains `/downloads/incomplete/` on the torrents dataset to avoid changing manual
-workflows. Completion may copy data across datasets, but completed automation
-files and final libraries share the media dataset and can be hardlinked.
+Bootstrap owns category destinations: `radarr` → `/media/.downloads/radarr`,
+`sonarr` → `/media/.downloads/sonarr`, `Movies` → `/media/Movies`, and
+`Shows` → `/media/Shows`. UI edits to these destinations are overwritten.
+The incomplete directory `/downloads/incomplete/` is on the torrents dataset;
+completion may copy data across datasets, but completed automation files and
+final libraries share the media dataset and can be hardlinked.
 
 ### Prowlarr
 
@@ -111,14 +98,9 @@ In **Settings → Apps**, add Radarr and Sonarr with their respective API keys.
 - Select the indexers/tags and synchronization level deliberately; full sync makes
   Prowlarr authoritative for the synchronized indexer settings.
 
-Prowlarr runs inside Gluetun, so its own loopback is **not** the host loopback.
-Two minimal Nix-built socat containers listen on ports 17878/18989 exclusively on
-loopback inside that namespace. They connect through protected Unix sockets under
-`/run/media-indexer-relay` to socket-activated host relays, which forward to the
-native manager APIs. No relay TCP ports are published on the host. Relay containers
-run as UID/GID 1003 without capabilities or writable root filesystems, and their
-Unix sockets are accessible only to the Prowlarr identity. The normal manager
-ports 7878/8989 are used by Seerr and the host, not by Prowlarr.
+Prowlarr runs inside Gluetun, so its loopback is **not** the host loopback.
+Use relay ports 17878/18989 above, not the host's manager ports 7878/8989.
+The relays are internal; no relay TCP ports are published on the host.
 
 ### Seerr and Jellyfin
 
@@ -139,9 +121,9 @@ ports 7878/8989 are used by Seerr and the host, not by Prowlarr.
 ## End-to-end verification after deployment
 
 - Confirm listeners with `ss -ltn`: 5055, 7878, and 8989 must bind only to
-  `127.0.0.1`. Public requests to the new HTTPS names must be denied; LAN/WireGuard
+  `127.0.0.1`. Public requests to the HTTPS names must be denied; LAN/WireGuard
   requests must reach authenticated application pages.
-- Check the new units and mount guards. Inspect generated directory modes and
+- Check the service units and mount guards. Inspect generated directory modes and
   verify each manager can read the download files and write its library.
 - Request authorized sample content and verify category, download, completion,
   import, Jellyfin scan, and playback. Use `stat -c '%d %i %h %n'` on the completed

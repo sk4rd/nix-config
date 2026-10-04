@@ -42,7 +42,7 @@ a span { color: var(--accent); }
 a:hover { color: var(--accentBright); border-color: var(--structure); }
 footer { margin-top: 48px; color: var(--text); font-size: 12px; }
 kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
-/* Keep the static composition as the default for reduced-motion users. */
+/* Motion is opt-in; reduced-motion users keep the static layout. */
 @media (prefers-reduced-motion: no-preference) {
   .cat-speech { transition: opacity 400ms ease, visibility 400ms; }
   header, .launch, form, nav, footer {
@@ -76,7 +76,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; bac
   0%, 100% { opacity: .5; transform: scale(.85); }
   50% { opacity: 1; transform: scale(1.15); }
 }
-/* Tighten the composition on short windows instead of hiding usable content. */
+
 @media (max-height: 800px) {
   header { padding-bottom: 10px; }
   .launch { margin: 24px 0; }
@@ -159,7 +159,7 @@ let lastThought = -1;
 let thoughtTimer;
 function scheduleThought() {
   thoughtTimer = setTimeout(() => {
-    // Pick a different thought each time without disturbing keyboard focus.
+    // The nonzero modular offset prevents consecutive repeats.
     const next = (lastThought + 1 + Math.floor(Math.random() * (thoughts.length - 1))) % thoughts.length;
     lastThought = next;
     catThought.textContent = thoughts[next];
@@ -172,7 +172,7 @@ function scheduleThought() {
     }, 6000);
   }, 15000 + Math.random() * 15000);
 }
-// Let the copilot nap in background tabs rather than cycling unseen messages.
+// Pause messages in background tabs.
 document.addEventListener('visibilitychange', () => {
   clearTimeout(thoughtTimer);
   catThought.classList.remove('is-visible');

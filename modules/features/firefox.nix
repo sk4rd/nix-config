@@ -19,14 +19,13 @@ in
     in
     {
       programs.firefox = {
-        # Firefox has no preference for a custom new-tab URL. Use the wrapper's
-        # AutoConfig hook to point it at the same immutable page as the homepage.
+        # Custom new-tab URLs require AutoConfig; Firefox exposes no preference.
         package = pkgs.firefox.override {
           extraAutoConfig = ''
             pref("general.config.sandbox_enabled", false);
           '';
           extraPrefs = ''
-            // Wait until browser initialization has finished setting up AboutNewTab.
+            // AboutNewTab must finish initializing before overriding its URL.
             Services.obs.addObserver(() => {
               const { AboutNewTab } = ChromeUtils.importESModule(
                 "resource:///modules/AboutNewTab.sys.mjs"

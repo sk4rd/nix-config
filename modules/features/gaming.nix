@@ -18,10 +18,8 @@
         programs = {
           steam = {
             enable = true;
-            # In-home streaming and Remote Play Together.
             remotePlay.openFirewall = true;
-            # Declarative Proton GE-Proton; newer versions can be added with
-            # ProtonUp-Qt (in the Home Manager package set below).
+            # ProtonUp-Qt can install newer versions alongside this pinned package.
             extraCompatPackages = [ pkgs.proton-ge-bin ];
           };
 
@@ -41,8 +39,8 @@
           pkgs.protonup-qt
         ];
 
-        # Keep Flathub and Bottles user-scoped; downloads happen after login,
-        # outside Home Manager activation, and retry if the network is offline.
+        # Download user-scoped Bottles after login, not during HM activation;
+        # retry on network failure.
         systemd.user.services.bottles-flatpak = {
           Unit.Description = "Install Bottles from Flathub";
           Service = {

@@ -4,7 +4,7 @@
     {
       devShells.default = pkgs.mkShellNoCC {
         packages = with pkgs; [
-          # Repository workflow
+
           just
 
           git
@@ -13,7 +13,6 @@
           tree
           jq
 
-          # Common agent scripting and inspection
           python3
           curl
           wget
@@ -22,13 +21,11 @@
           patch
           shellcheck
 
-          # Nix development
           nixd
           nixfmt
           statix
           deadnix
 
-          # Secrets
           sops
           ssh-to-age
         ];

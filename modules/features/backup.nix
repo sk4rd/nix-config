@@ -17,16 +17,14 @@
 
       environment.systemPackages = [ pkgs.restic ];
 
-      # Scope the dedicated backup key to exactly backup@the-NAS. Interactive
-      # SSH as admin is unaffected (no Match), so it keeps using the YubiKey.
+      # Limit the backup identity to backup@NAS; admin SSH keeps using the YubiKey.
       programs.ssh = {
         extraConfig = ''
           Match host 192.168.178.3 user backup
             IdentityFile "${config.sops.secrets."backup/ssh_key".path}"
             IdentitiesOnly yes
         '';
-        # Pin the NAS host key so headless restic runs never prompt; the key is
-        # verified against this entry instead of the user's known_hosts.
+        # Pin the NAS host key for noninteractive restic verification.
         knownHosts.nas = {
           hostNames = [ "192.168.178.3" ];
           publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILArnumluz/iLq+plACTbdY83uVZGw+B0T8TNeCINHD5 root@nixos";
@@ -57,8 +55,7 @@
         ];
         extraBackupArgs = [ "--exclude-caches" ];
         timerConfig = {
-          # Devices are usually off at night, so back up shortly after boot
-          # and again every 24h of continuous uptime, instead of a fixed time.
+          # Use boot/uptime timers rather than nighttime schedules on devices often off at night.
           OnBootSec = "15min";
           OnUnitActiveSec = "24h";
           RandomizedDelaySec = "10min";

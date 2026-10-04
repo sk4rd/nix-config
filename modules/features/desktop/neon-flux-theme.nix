@@ -1,13 +1,10 @@
 { lib, ... }:
 
 let
-  # Keep exact Neon Flux hex tokens in one place; KColorScheme and Konsole both
-  # want decimal RGB.
+
   palette = builtins.fromJSON (builtins.readFile ./neon-flux-theme/palette.json);
 
-  # KColorScheme and Konsole both read colours as decimal `r,g,b` — that is what
-  # every *.colors, kdeglobals and *.colorscheme entry on disk looks like. The
-  # arithmetic below stays integer for the same reason.
+  # KColorScheme and Konsole require decimal `r,g,b` channels.
   channels =
     hex:
     map (offset: lib.fromHexString (builtins.substring offset 2 hex)) [
@@ -18,8 +15,7 @@ let
   toRgb = hex: lib.concatMapStringsSep "," toString (channels hex);
   rgb = lib.mapAttrs (_: toRgb) palette;
 
-  # Faint (SGR 2) variants are derived, not a second palette: every ANSI colour
-  # stepped half-way back to the canvas.
+  # SGR 2 (faint) blends each ANSI colour halfway toward the canvas.
   faint =
     hex:
     lib.concatMapStringsSep "," toString (
@@ -89,11 +85,7 @@ let
     };
   };
 
-  # Konsole keeps its terminal palette in *.colorscheme files (a KConfig with one
-  # section per ANSI slot), never in the application colour scheme above. The
-  # ANSI table is the one the Windows Terminal port ships
-  # (parts/terminal/install.ps1 in the neon-flux repo); slots that are palette
-  # roles are named here instead of being repeated as literals.
+  # ANSI order matches the Neon Flux Windows Terminal port (parts/terminal/install.ps1).
   ansi = [
     palette.surface # black
     palette.error # red
@@ -122,17 +114,15 @@ let
     );
 
   konsoleScheme = lib.generators.toINI { } (
-    # Every ANSI slot ends up as `Color = <r>,<g>,<b>`; the values are converted
-    # once, before the sections are built.
+    # Konsole requires a separate KConfig section with a Color key for each slot.
     lib.mapAttrs (_: value: { Color = value; }) (
       (lib.mapAttrs (_: toRgb) {
-        # Neon Flux paints exactly one terminal background, so every background
-        # variant is the canvas.
+
         Background = palette.canvas;
         BackgroundIntense = palette.canvas;
         BackgroundFaint = palette.canvas;
         Foreground = palette.text;
-        ForegroundIntense = "#FFFFFF"; # bold text: the ANSI bright white
+        ForegroundIntense = "#FFFFFF";
         ForegroundFaint = palette.muted;
       })
       // numbered "Color" "" (map toRgb ansi)
@@ -149,30 +139,25 @@ let
     }
   );
 
-  # Profile keys and their groups come from Profile.cpp in the Konsole sources.
-  # This theme's NixOS component installs the font (nerd-fonts.blex-mono);
-  # Konsole falls back silently if only the Home Manager component is used
-  # without the font installed separately.
+  # Profile keys/groups are defined in Konsole's Profile.cpp.
+  # Home Manager-only use requires BlexMono installed separately to avoid silent fallback.
   konsoleProfile = lib.generators.toINI { } {
     General = {
       Name = "Neon Flux";
-      # The hostname leads the tab title, and with ShowWindowTitleOnTitleBar
-      # disabled the window caption follows it, so "desktop : nix-config" is what
-      # the tab, KWin and the taskbar all show.
+      # %h = hostname; %d = working directory basename.
       LocalTabTitleFormat = "%h : %d";
-      # A remote tab has no local working directory to report: "%U%h" is
-      # "user@host", or the bare host when ssh was given no user.
+      # %U adds user@ when SSH specifies a user; %h is the remote host.
       RemoteTabTitleFormat = "%U%h";
     };
     Appearance = {
       ColorScheme = "Neon Flux";
-      # BlexMono at one point below the Windows Terminal profile's 11.
+
       Font = "BlexMono Nerd Font Mono,10,-1,5,50,0,0,0,0,0";
-      TabColor = toRgb palette.accent; # bar drawn across the top of the tab
+      TabColor = toRgb palette.accent;
     };
     "Cursor Options" = {
       UseCustomCursorColor = true;
-      CursorShape = 1; # I-beam, i.e. the bar cursor the theme asks for
+      CursorShape = 1; # I-beam
       CustomCursorColor = toRgb palette.accent;
       CustomCursorTextColor = toRgb palette.canvas;
     };
@@ -213,10 +198,7 @@ in
           '';
     in
     {
-      # Apply through Plasma's supported API, rather than hardcoding mutable
-      # containment/monitor IDs in plasma-org.kde.plasma.desktop-appletsrc.
-      # The user unit runs after plasmashell on every graphical login; its store
-      # image path also changes the unit when a new wallpaper is generated.
+      # Plasma's API avoids hardcoding mutable containment/monitor IDs.
       systemd.user.services.neon-flux-wallpaper = {
         Unit = {
           Description = "Neon Flux desktop wallpaper";
@@ -238,14 +220,8 @@ in
         "wallpapers/NeonFlux/neon-flux-lockscreen-3840x2160.png".source = lockscreenWallpaper;
         "color-schemes/NeonFlux.colors".text = lib.generators.toINI { } colorScheme;
 
-        # Konsole reads its terminal palette and its profiles from
-        # ~/.local/share/konsole, and in Konsole a colour scheme's name *is* its
-        # file name — so this artifact is "Neon Flux" while the application scheme
-        # above is "NeonFlux". Both files are generated from palette.json and are
-        # named the way Konsole names them itself ("<Name>.profile"), so they stay
-        # theme artifacts: the profile editor writes its own copy to these paths,
-        # and force keeps the module's copy authoritative instead of failing the
-        # next activation over a clobbered file.
+        # Konsole resolves scheme/profile names by filename ("Neon Flux", not "NeonFlux").
+        # Its editor can replace these files; force keeps activation authoritative.
         "konsole/Neon Flux.colorscheme" = {
           force = true;
           text = konsoleScheme;
@@ -256,12 +232,10 @@ in
         };
       };
 
-      # Modify only these keys via Home Manager's kwriteconfig6 activation, not
-      # immutable config symlinks. KDE can keep writing unrelated preferences.
-      # Install the palette as well as its name: activation may run without Plasma.
+      # kwriteconfig6 leaves unrelated KDE preferences writable.
+      # Install palette values too: activation may run without Plasma.
       qt.kde.settings = {
-        # Keep KDE's stock secure unlock UI, which inherits the Complementary
-        # palette below. Only appearance keys are touched: no Daemon/PAM changes.
+        # Preserve the stock unlock UI and Daemon/PAM settings; it inherits Complementary colors.
         kscreenlockerrc = {
           Greeter.WallpaperPlugin = "org.kde.image";
           Greeter.Wallpaper."org.kde.image".General = {
@@ -288,8 +262,7 @@ in
           theme = "Breeze";
         };
 
-        # The hostname indicator lives in the tab title, so the tab bar must not
-        # hide itself in a single-tab window. The window caption is the tab title.
+        # Keep the hostname visible with one tab; use the tab title as the window caption.
         konsolerc = {
           "Desktop Entry".DefaultProfile = "Neon Flux.profile";
           TabBar = {

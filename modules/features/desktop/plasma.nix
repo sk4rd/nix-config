@@ -10,10 +10,8 @@
       services.desktopManager.plasma6.enable = true;
       services.displayManager.sddm.enable = true;
 
-      # SDDM upstream delegates authentication to `login`, whose fingerprint
-      # prompt blocks password entry. Preserve that stack's other auth policy,
-      # but materialise it here without fprintd. Account/session/password stacks
-      # still include login, so wallet opening and session setup stay unchanged.
+      # login's fingerprint prompt blocks SDDM password entry; copy auth without fprintd.
+      # Leave account/session/password stacks delegated to login.
       security.pam.services.sddm = {
         fprintAuth = false;
         rules.auth = lib.mkForce (

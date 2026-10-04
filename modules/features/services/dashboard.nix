@@ -80,9 +80,8 @@ in
         oci-containers.containers.homepage = {
           image = "ghcr.io/gethomepage/homepage@sha256:da9dca9ec258c628146bed1445da0853f2b88f0b10bafd97c091de807c363d60";
           pull = "missing";
-          # Host networking lets the widgets reach every service on 127.0.0.1,
-          # including the loopback-only torrent stack. The NAS firewall still
-          # blocks direct access to port 3000, so Traefik remains the entry.
+          # Host networking reaches loopback-only widgets, including the torrent stack.
+          # The NAS firewall blocks direct port 3000 access; ingress stays on Traefik.
           extraOptions = [ "--network=host" ];
           environment = {
             TZ = "Europe/Berlin";

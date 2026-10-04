@@ -1,5 +1,5 @@
 
-/* Never recolor arbitrary websites. Only Firefox's built-in landing pages. */
+/* Keep overrides scoped to Firefox's landing pages, never websites. */
 @-moz-document url("about:home"), url("about:newtab") {
   @palette@
   :root {

@@ -37,10 +37,9 @@ defaults = {
         "WebUI\\TrustedReverseProxiesList": "127.0.0.1/32",
         "WebUI\\ServerDomains": "*",
     },
-    # qBittorrent 5.x persists download paths and TMM under [BitTorrent]
-    # Session\*; the legacy [Preferences] Downloads\* keys above remain for
-    # compatibility. The listen port is runtime state managed by the Gluetun
-    # port-forward callbacks and bootstrap, so it is never pinned here.
+    # qBittorrent 5.x uses [BitTorrent] Session\* for paths and TMM;
+    # retain legacy [Preferences] Downloads\* keys for compatibility.
+    # Do not pin the listen port: Gluetun callbacks and bootstrap manage it.
     "BitTorrent": {
         "Session\\DefaultSavePath": "/downloads/",
         "Session\\TempPathEnabled": "true",

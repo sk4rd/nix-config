@@ -1,21 +1,14 @@
 { lib, ... }:
 
 let
-  # The canonical Neon Flux tokens, shared with every other surface in this
-  # repository (KDE, Konsole, Firefox, SilverBullet).
   palette = builtins.fromJSON (builtins.readFile ./desktop/neon-flux-theme/palette.json);
 
-  # Zed colours are 8-digit `#RRGGBBAA` and the palette is 6-digit, so a
-  # translucent variant appends an alpha byte instead of hand-mixing a colour.
-  # The alphas below are the ones the bundled One Dark theme uses for the same
-  # kinds of surface: 0d/1a for guides and tints, 4c/66 for scrollbars and
-  # match highlights, 59/cc for word-level diffs.
+  # Append alpha to #RRGGBB for Zed's #RRGGBBAA format. Alpha values follow
+  # bundled One Dark: 0d/1a guides/tints, 4c/66 scrollbars/matches, 59/cc word diffs.
   alpha = value: token: "${token}${value}";
 
-  # Half-way back to the canvas: the same derivation the Konsole palette uses
-  # for its faint (SGR 2) slots. Zed wants a dim value for the terminal's
-  # `dim_*` slots and for the border of a tinted badge, where the full-strength
-  # hue would shout.
+  # Match Konsole's faint (SGR 2) blend: halfway to the canvas for dim ANSI
+  # slots and badge borders.
   channels =
     hex:
     map (offset: lib.fromHexString (builtins.substring offset 2 hex)) [
@@ -38,11 +31,7 @@ let
       )
     );
 
-  # The ANSI table of the existing terminal ports (Windows Terminal scheme,
-  # Konsole colour scheme): palette roles where one exists, the terminal
-  # scheme's own bright row where the palette has no token for it (the spec's
-  # bright black is the raised grey, the rest are lighter takes on the hues
-  # above).
+  # Match existing terminal ports; use their bright row where palette tokens are absent.
   ansi = {
     black = palette.surface;
     red = palette.error;
@@ -73,9 +62,7 @@ let
     )
   );
 
-  # A status/badge colour is three keys — the hue, a 10% tint behind it, and a
-  # border derived back towards the canvas — the shape the bundled themes use
-  # for the status, version-control and diagnostic roles.
+  # Bundled themes use hue, 10% background tint and a dim border for status roles.
   badge = name: colour: {
     "${name}" = colour;
     "${name}.background" = alpha "1a" colour;
@@ -92,25 +79,17 @@ let
     (badge "modified" palette.warning)
     (badge "renamed" palette.info)
     (badge "deleted" palette.error)
-    # These four are not diagnostics: hidden, ignored, unreachable and
-    # predictive are deliberately quiet, so they stay on the muted ramp
-    # instead of taking a hue of their own.
+    # Keep non-diagnostic states muted rather than assigning diagnostic hues.
     (badge "hidden" palette.muted)
     (badge "ignored" palette.muted)
     (badge "unreachable" palette.comment)
     (badge "predictive" palette.comment)
   ];
 
-  # A syntax entry is an object, never a bare colour: the bundled One Dark theme
-  # writes `{ color, font_style, font_weight }` for all 46 tokens, and that is
-  # the shape the theme deserializer reads. `fg` is the colour-only form of it.
+  # Zed deserializes syntax entries as objects, not bare colours.
   fg = colour: { color = colour; };
 
-  # Syntactic roles. The names are Zed's own token vocabulary — taken from the
-  # bundled One Dark theme of the pinned Zed version, which is also the only
-  # authority for the style keys above — and the colours follow the Neon Flux
-  # role mapping (decorators yellow, keywords violet, functions
-  # cyan, properties accent-bright, literals hot pink, comments italic grey).
+  # Token names and style keys follow bundled One Dark in the pinned Zed version.
   syntax = {
     attribute = fg palette.warning;
     boolean = fg palette.hot;
@@ -118,8 +97,7 @@ let
       color = palette.comment;
       font_style = "italic";
     };
-    # Doc comments step up to the secondary text grey rather than a comment
-    # variant of their own, so the palette keeps its single comment colour.
+    # Distinguish doc comments using secondary text, without adding a palette token.
     "comment.doc" = {
       color = palette.muted;
       font_style = "italic";
@@ -180,16 +158,13 @@ let
     "diff.minus" = fg palette.error;
   };
 
-  # Key names are literal Zed style keys (`surface.background`, not a nested
-  # object), which is why the dotted names are quoted rather than nested.
+  # Zed expects literal dotted style keys, not nested objects.
   style = lib.mergeAttrsList [
     {
       background = palette.canvas;
       "surface.background" = palette.surface;
       "elevated_surface.background" = palette.raised;
 
-      # Interactive chrome: raised fills, hover one step up, selection the
-      # theme's selection blue, focus cyan.
       "element.background" = palette.raised;
       "element.hover" = palette.border;
       "element.active" = palette.selection;
@@ -229,8 +204,6 @@ let
       "tab.active_background" = palette.canvas;
       "panel.background" = palette.surface;
 
-      # The title bar, the tab bar and the panels carry the chrome; the editor
-      # keeps the canvas to itself.
       "search.match_background" = palette.selectionTranslucent;
       "search.active_match_background" = alpha "66" palette.hot;
 
@@ -270,8 +243,7 @@ let
       "version_control.conflict_marker.ours" = alpha "1a" palette.success;
       "version_control.conflict_marker.theirs" = alpha "1a" palette.info;
     }
-    # Focus rings are the exception the bundled themes also make: an inherited
-    # border reads as "no focus" and the pane keeps its own outline.
+    # Explicit focus borders avoid the inherited "no focus" appearance.
     {
       "panel.focused_border" = palette.structure;
       "pane.focused_border" = palette.structure;
@@ -279,7 +251,6 @@ let
     ansiStyles
     badges
     {
-      # Multiplayer cursor colours, in accent order.
       players =
         map
           (colour: {
@@ -317,9 +288,6 @@ in
   den.aspects.zed.homeManager =
     { pkgs, ... }:
     {
-      # The theme asks for JetBrainsMono NFM in the editor and BlexMono in the
-      # terminal — the same two families every other Neon Flux surface uses, so
-      # install them for this home rather than relying on the machine.
       fonts.fontconfig.enable = true;
       home.packages = with pkgs.nerd-fonts; [
         jetbrains-mono
@@ -329,14 +297,10 @@ in
       programs.zed-editor = {
         enable = true;
 
-        # `nixd` is the language server the `nix` extension talks to (it also
-        # accepts `nil`). extraPackages wraps the editor with a PATH that
-        # carries it, so no machine-level install is needed for the LSP.
+        # extraPackages puts nixd on the editor's PATH for the Nix extension.
         extraPackages = [ pkgs.nixd ];
 
-        # Installed on Zed's first start (auto_install_extensions). Rust,
-        # Python, Markdown, YAML, JSON, TypeScript, Bash, C/C++, CSS and Go are
-        # built in and need no entry here.
+        # Auto-installed on first start; built-in languages need no extension entry.
         extensions = [
           "nix" # Nix syntax + nixd
           "just" # Justfile, the task runner this repository uses
@@ -345,15 +309,10 @@ in
           "color-highlight" # paints #RRGGBB literals inline
         ];
 
-        # One theme, not two: the family carries a single dark appearance and
-        # both mode slots point at it, so nothing falls back to a stock theme.
         themes.neon-flux = theme;
 
-        # Zed's own GUI also writes settings.json, so the module keeps its
-        # impure merge (mutableUserSettings stays at its default). That merge is
-        # shallow by top-level key: the `theme`, `terminal` and `buffer_font_*`
-        # objects below replace whatever the GUI put in those same objects,
-        # while every other key in the file survives.
+        # Keep default mutableUserSettings for GUI edits. Its shallow merge replaces
+        # configured top-level keys wholesale and preserves other settings.
         userSettings = {
           theme = {
             mode = "dark";

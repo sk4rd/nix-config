@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# Apply Prowlarr's declarative configuration on each start: web authentication
-# and the qBittorrent download client. Runs after the Prowlarr container has
-# created its config and database, using Prowlarr's own API.
+# Wait for Prowlarr to create its config and database before configuring its API.
 import json
 import os
 import time

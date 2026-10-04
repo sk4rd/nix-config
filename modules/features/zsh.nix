@@ -32,10 +32,7 @@
                 source ${pkgs.oh-my-zsh}/share/oh-my-zsh/lib/git.zsh
                 source ${pkgs.oh-my-zsh}/share/oh-my-zsh/themes/lambda.zsh-theme
 
-                # The lambda theme's prompt is "λ ~/ git:(...)"; %m names the host so
-                # a shell on laptop/nas/wsl is identifiable at a glance. $fg[cyan] is
-                # ANSI 6, which the terminal palette maps to the Neon Flux accent, so
-                # the host carries the theme's colour without a hardcoded hex.
+                # Identify remote shells by host; ANSI cyan uses the terminal's Neon Flux accent.
                 PROMPT='λ %{$fg[cyan]%}%m%{$reset_color%} %~/ $(git_prompt_info)%{$reset_color%}'
               '')
             ];

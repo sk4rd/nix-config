@@ -55,30 +55,10 @@ The retired Forgejo dataset remains mounted and contains data; retirement of
 the service is not authorization to delete the dataset. Keep it and the migration
 rollback inventory below until an independent backup and deletion policy exist.
 
-## Services
-
-- Jellyfin, Home Assistant (Container, host network), Samba (SMB3, port 445
-  only), Traefik, Cloudflare DDNS, WireGuard server, qBittorrent with
-  Gluetun/ProtonVPN and Firefox, Docker, SilverBullet, SearXNG, and a monthly
-  ZFS scrub.
-- Internal-only HTTPS names (`ha`, `torrent`, `firefox`) resolve to
-  `192.168.178.3`; `media` and `vpn` resolve to the public address.
-- Retired: Forgejo, Joplin, Logseq, AdGuard Home, Syncthing, WSDD, and the
-  torrent health dashboard. Retired note-service datasets have been removed.
-
 ## Media requests
 
-Seerr, Radarr, and Sonarr provide discovery, requests, and automated media imports.
-Their state datasets must be provisioned at `/srv/seerr`, `/srv/radarr`, and
-`/srv/sonarr` before deployment; units assert those mounts before creating state.
-The trusted-network HTTPS names are `requests`, `radarr`, and `sonarr.sk4rd.com`.
-Protected Unix-socket relays let VPN-isolated Prowlarr reach the native manager
-APIs without publishing their raw ports. Existing manual torrent categories are
-preserved. Completed automation downloads live under `/srv/samba/media/.downloads`
-so library imports can use hardlinks. Jellyfin cannot write to media within its
-service; store metadata in its state directory instead of alongside video files.
-See [media request setup](../../../docs/media-requests.md) for provisioning,
-first-run application connections, permissions, and end-to-end checks.
+See [media request setup](../../../docs/media-requests.md) for required state
+datasets, application connections, permissions, and end-to-end checks.
 
 ## SilverBullet
 
@@ -91,17 +71,9 @@ Open `https://silverbullet.sk4rd.com` and use the first-run Space Manager flow
 to create the account and a space named `notes`. The authenticated service is
 available through the public HTTPS endpoint. Install the PWA on each device for
 offline access.
-SilverBullet synchronizes browser replicas with the NAS-hosted space and
-creates conflict copies rather than merging simultaneous edits to one file.
 
-Theme installation runs separately as `silverbullet-theme.service`, guarded by
-the same dataset mount assertion and running as UID/GID 1004. A missing `notes`
-space is logged and skipped; it does not prevent the first-run UI from starting.
-The theme unit never creates or registers a space. After creating `notes` through
-Space Manager, install or refresh the managed theme on the NAS with
-`sudo systemctl restart silverbullet-theme.service`. Check
-`journalctl -u silverbullet-theme.service` for skipped installs or write failures.
-Let `Neon Flux.md` sync, then reload the client or run **System: Reload**.
+See [theme installation](../../features/services/silverbullet/README.md) after
+creating the space.
 
 The authoritative space is under `/srv/silverbullet/space`. It is not
 independently backed up while automatic ZFS snapshots remain disabled.
@@ -131,9 +103,8 @@ external backup exists and a retention period is chosen:
 
 ## Snapshots
 
-Automatic ZFS snapshots are disabled. The legacy retention was 24 hourly, 30
-daily, 8 weekly, and 12 monthly; re-enable only with an explicit policy that
-will not prune the retained migration snapshots.
+Automatic ZFS snapshots are disabled. Re-enable only with an explicit policy
+that will not prune the retained migration snapshots.
 
 ## Clean installation
 
