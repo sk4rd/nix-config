@@ -1,49 +1,56 @@
+{ den, ... }:
+
 {
-  den.aspects.development.homeManager =
-    { pkgs, ... }:
-    {
-      home.packages = with pkgs; [
-        tree
+  den.aspects.development = {
+    includes = [ (den.batteries.unfree [ "antigravity-cli" ]) ];
 
-        btop
-        duf
-        fd
-        jq
-        ncdu
-        ripgrep
-        yazi
-        zellij
+    homeManager =
+      { pkgs, ... }:
+      {
+        home.packages = with pkgs; [
+          tree
+          antigravity-cli
 
-        python3
-        curl
-        wget
-        file
-        unzip
-        patch
-        shellcheck
-        just
+          btop
+          duf
+          fd
+          jq
+          ncdu
+          ripgrep
+          yazi
+          zellij
 
-        rustup
-        gcc
+          python3
+          curl
+          wget
+          file
+          unzip
+          patch
+          shellcheck
+          just
 
-        nixd
-        nixfmt
-        statix
-        deadnix
-      ];
+          rustup
+          gcc
 
-      programs.git = {
-        enable = true;
-        settings = {
-          init.defaultBranch = "main";
-          pull.rebase = true;
+          nixd
+          nixfmt
+          statix
+          deadnix
+        ];
+
+        programs.git = {
+          enable = true;
+          settings = {
+            init.defaultBranch = "main";
+            pull.rebase = true;
+          };
+        };
+
+        programs.lazygit = {
+          enable = true;
+          # Reviewing local changes should not automatically fetch remotes.
+          settings.git.autoFetch = false;
         };
       };
-
-      programs.lazygit = {
-        enable = true;
-        # Reviewing local changes should not automatically fetch remotes.
-        settings.git.autoFetch = false;
-      };
-    };
+  };
 }
