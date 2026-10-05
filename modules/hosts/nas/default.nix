@@ -5,6 +5,7 @@
     includes = [
       den.aspects.nas-secrets
       den.aspects.nas-server
+      den.aspects.hermes-central
     ];
 
     nixos = {
