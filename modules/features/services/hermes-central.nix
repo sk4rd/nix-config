@@ -8,8 +8,26 @@ in
     includes = [ den.aspects.nas-ingress ];
 
     nixos =
-      { config, pkgs, ... }:
+      {
+        config,
+        lib,
+        pkgs,
+        ...
+      }:
       let
+        # The pinned upstream flake otherwise stamps the runtime as 0.0.0.
+        hermesPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+          version = "0.21.5";
+          distance = 6831;
+        };
+        homeassistantPlugin = pkgs.fetchFromGitHub {
+          name = "homeassistant";
+          owner = "NousResearch";
+          repo = "hermes-homeassistant";
+          rev = "ba30cb0cf86c52bdb5cde98974bc062e97966529";
+          hash = "sha256-Pg4smvkiVpmcmUola0rziMBfq5V7UjzX8864Dem76pI=";
+        };
+        homeassistantEnvironmentFile = "-/var/lib/hermes/.hermes/homeassistant.env";
         shellTools = with pkgs; [
           bashInteractive
           coreutils
@@ -41,12 +59,29 @@ in
 
         systemd.services.hermes-agent = {
           path = shellTools;
+          environment.HASS_URL = "http://127.0.0.1:8123";
+          serviceConfig.EnvironmentFile = lib.mkAfter [ homeassistantEnvironmentFile ];
           unitConfig.RequiresMountsFor = [ "/var/lib/hermes" ];
         };
         systemd.services.hermes-backend = {
           path = shellTools;
+          environment.HASS_URL = "http://127.0.0.1:8123";
+          serviceConfig.EnvironmentFile = [
+            config.sops.secrets."nas/hermes/dashboard_env".path
+            homeassistantEnvironmentFile
+          ];
           unitConfig.RequiresMountsFor = [ "/var/lib/hermes" ];
         };
+
+        programs.bash.interactiveShellInit = ''
+          if [ "$USER" = hermes ] && [ -n "$SSH_CONNECTION" ]; then
+            cd -- ${lib.escapeShellArg config.services.hermes-agent.workingDirectory}
+          fi
+        '';
+
+        users.users.hermes.openssh.authorizedKeys.keys = [
+          (lib.removeSuffix "\n" (builtins.readFile ../../users/miko/ssh.pub))
+        ];
 
         # Terminal login shells reset PATH; keep tools in the user's managed profile.
         users.users.hermes.packages = shellTools ++ [
@@ -58,12 +93,16 @@ in
 
         services.hermes-agent = {
           enable = true;
+          package = hermesPackage;
+          extraPlugins = [ homeassistantPlugin ];
           backend = {
             mode = "dashboard";
             host = "127.0.0.1";
             port = 9119;
           };
           settings = {
+            plugins.enabled = [ "homeassistant" ];
+            platforms.homeassistant.enabled = false;
             dashboard = {
               public_url = "https://hermes.sk4rd.com";
 
@@ -99,8 +138,6 @@ in
           restartUnits = [ "hermes-backend.service" ];
         };
 
-        systemd.services.hermes-backend.serviceConfig.EnvironmentFile =
-          config.sops.secrets."nas/hermes/dashboard_env".path;
       };
   };
 }
