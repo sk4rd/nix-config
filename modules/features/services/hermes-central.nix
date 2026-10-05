@@ -138,6 +138,16 @@ in
           restartUnits = [ "hermes-backend.service" ];
         };
 
+        sops.secrets."nas/hermes/homeassistant_env" = {
+          path = "/var/lib/hermes/.hermes/homeassistant.env";
+          owner = "hermes";
+          mode = "0400";
+          restartUnits = [
+            "hermes-agent.service"
+            "hermes-backend.service"
+          ];
+        };
+
       };
   };
 }
