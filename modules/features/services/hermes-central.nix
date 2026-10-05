@@ -16,10 +16,48 @@ in
       }:
       let
         # The pinned upstream flake otherwise stamps the runtime as 0.0.0.
-        hermesPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-          version = "0.21.5";
-          distance = 6831;
+        hermesBasePackage =
+          inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default.override
+            {
+              version = "0.21.5";
+              distance = 6831;
+            };
+        mkHindsightWheel =
+          pname: sha256:
+          hermesBasePackage.python.pkgs.buildPythonPackage {
+            inherit pname;
+            version = "0.10.1";
+            format = "wheel";
+            src = pkgs.fetchPypi {
+              pname = lib.replaceStrings [ "-" ] [ "_" ] pname;
+              inherit sha256;
+              version = "0.10.1";
+              format = "wheel";
+              dist = "py3";
+              python = "py3";
+              abi = "none";
+              platform = "any";
+            };
+            # Dependencies are already supplied by Hermes' sealed environment.
+            PYTHONPATH = "${hermesBasePackage.hermesVenv}/${hermesBasePackage.python.sitePackages}";
+            pythonImportsCheck = [ (lib.replaceStrings [ "-" ] [ "_" ] pname) ];
+          };
+        hermesPackage = hermesBasePackage.override {
+          extraPythonPackages = [
+            (mkHindsightWheel "hindsight-client" "04e03353a0f9dcfa7b1b1000cccc8f077a93a788b27af62cc5e014b2dd3b960c")
+            (mkHindsightWheel "hindsight-embed" "6cf2294ea94113dcf13b2ca61010d571673d2bca6245cd2c3a714fd760cdb8c0")
+          ];
         };
+        hindsightSource = pkgs.fetchFromGitHub {
+          owner = "vectorize-io";
+          repo = "hindsight";
+          rev = "d56c4acdf59c41957613d399094cdf8c489b060c";
+          hash = "sha256-L5HjVF64foSslizP6FPvEcnzorK4LY78YnuuP8rfEcA=";
+        };
+        hindsightPlugin = pkgs.runCommand "hindsight" { } ''
+          mkdir -p "$out"
+          cp -r ${hindsightSource}/hindsight-integrations/hermes/. "$out/"
+        '';
         homeassistantPlugin = pkgs.fetchFromGitHub {
           name = "homeassistant";
           owner = "NousResearch";
@@ -57,13 +95,70 @@ in
           fsType = "zfs";
         };
 
+        # Memory-provider discovery requires the canonical directory name.
+        systemd.tmpfiles.rules = [
+          "L+ ${config.services.hermes-agent.stateDir}/.hermes/plugins/hindsight - - - - ${hindsightPlugin}"
+        ];
+
+        virtualisation.oci-containers = {
+          backend = "docker";
+          containers.hindsight = {
+            image = "ghcr.io/vectorize-io/hindsight@sha256:d1840062a5b79940ab7a9f4809ceb90fc776d4ad737cd9329e9b5836cc64ab70";
+            pull = "missing";
+            environment = {
+              CODEX_HOME = "/home/hindsight/.codex";
+              HINDSIGHT_API_LLM_PROVIDER = "openai-codex";
+              HINDSIGHT_API_LLM_MODEL = "gpt-6-luna";
+              HINDSIGHT_API_LLM_REASONING_EFFORT = "low";
+              HINDSIGHT_API_WORKER_ID = "hermes-nas";
+            };
+            volumes = [
+              "hindsight-data:/home/hindsight/.pg0"
+              "/var/lib/hindsight/codex:/home/hindsight/.codex"
+            ];
+            ports = [
+              "127.0.0.1:8888:8888/tcp"
+              "127.0.0.1:9999:9999/tcp"
+            ];
+            extraOptions = [
+              "--shm-size=1g"
+              "--stop-timeout=60"
+            ];
+          };
+        };
+        systemd.services.docker-hindsight = {
+          unitConfig.RequiresMountsFor = [ "/var/lib/hermes" ];
+          serviceConfig = {
+            StateDirectory = "hindsight";
+            StateDirectoryMode = "0700";
+            TimeoutStartSec = lib.mkForce 900;
+          };
+          preStart = ''
+            ${pkgs.coreutils}/bin/install -d -m 0700 -o 1000 -g 1000 /var/lib/hindsight/codex
+            # Seed once; the service owns its rotating tokens from then on.
+            if [ ! -f /var/lib/hindsight/codex/auth.json ]; then
+              ${pkgs.coreutils}/bin/install -m 0600 -o 1000 -g 1000 \
+                /var/lib/hermes/.hindsight/codex/auth.json /var/lib/hindsight/codex/auth.json
+            fi
+          '';
+          postStart = ''
+            ${pkgs.curl}/bin/curl --fail --silent --show-error \
+              --retry 120 --retry-delay 2 --retry-all-errors --max-time 5 \
+              http://127.0.0.1:8888/health >/dev/null
+          '';
+        };
+
         systemd.services.hermes-agent = {
+          wants = [ "docker-hindsight.service" ];
+          after = [ "docker-hindsight.service" ];
           path = shellTools;
           environment.HASS_URL = "http://127.0.0.1:8123";
           serviceConfig.EnvironmentFile = lib.mkAfter [ homeassistantEnvironmentFile ];
           unitConfig.RequiresMountsFor = [ "/var/lib/hermes" ];
         };
         systemd.services.hermes-backend = {
+          wants = [ "docker-hindsight.service" ];
+          after = [ "docker-hindsight.service" ];
           path = shellTools;
           environment.HASS_URL = "http://127.0.0.1:8123";
           serviceConfig.EnvironmentFile = [
@@ -95,13 +190,26 @@ in
           enable = true;
           package = hermesPackage;
           extraPlugins = [ homeassistantPlugin ];
+          hermesHomeFiles."hindsight/config.json" = builtins.toJSON {
+            mode = "local_external";
+            api_url = "http://127.0.0.1:8888";
+            bank_id = "hermes-default";
+            bank_id_template = "hermes-{profile}";
+            memory_mode = "hybrid";
+            auto_recall = true;
+            auto_retain = true;
+          };
           backend = {
             mode = "dashboard";
             host = "127.0.0.1";
             port = 9119;
           };
           settings = {
-            plugins.enabled = [ "homeassistant" ];
+            plugins.enabled = [
+              "homeassistant"
+              "hindsight"
+            ];
+            memory.provider = "hindsight";
             platforms.homeassistant.enabled = false;
             dashboard = {
               public_url = "https://hermes.sk4rd.com";
