@@ -1,13 +1,18 @@
 {
   den.aspects.cad = {
     homeManager =
-      { pkgs, ... }:
+      { lib, pkgs, ... }:
       {
         home.packages = [
           pkgs.freecad
           pkgs.kicad
           pkgs.openscad
-          pkgs.orca-slicer
+          (pkgs.orca-slicer.overrideAttrs (old: {
+            # Avoid embedding libstdc++.a alongside the Bambu plugin's shared C++ runtime.
+            buildInputs = map (
+              input: if input == pkgs.gcc-unwrapped then lib.getLib pkgs.gcc-unwrapped else input
+            ) old.buildInputs;
+          }))
         ];
       };
   };

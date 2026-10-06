@@ -42,7 +42,10 @@ in
             PYTHONPATH = "${hermesBasePackage.hermesVenv}/${hermesBasePackage.python.sitePackages}";
             pythonImportsCheck = [ (lib.replaceStrings [ "-" ] [ "_" ] pname) ];
           };
-        hermesPackage = hermesBasePackage.override {
+        hermesPackage = import ../../../lib/hermes-nix-integration.nix {
+          package = hermesUnpatchedPackage;
+        };
+        hermesUnpatchedPackage = hermesBasePackage.override {
           extraPythonPackages = [
             (mkHindsightWheel "hindsight-client" "04e03353a0f9dcfa7b1b1000cccc8f077a93a788b27af62cc5e014b2dd3b960c")
             (mkHindsightWheel "hindsight-embed" "6cf2294ea94113dcf13b2ca61010d571673d2bca6245cd2c3a714fd760cdb8c0")
@@ -211,6 +214,7 @@ in
             ];
             memory.provider = "hindsight";
             platforms.homeassistant.enabled = false;
+            platforms.telegram.enabled = true;
             dashboard = {
               public_url = "https://hermes.sk4rd.com";
 
@@ -234,20 +238,21 @@ in
         };
 
         services.traefik.dynamicConfigOptions.http =
-          (httpsRoute {
-            router = "hermes";
-            backend = "hermes";
-            domain = "hermes.sk4rd.com";
-            url = "http://127.0.0.1:9119";
-            exposure = "trustedNetworks";
-          })
-          // (httpsRoute {
-            router = "hindsight";
-            backend = "hindsight";
-            domain = "hindsight.sk4rd.com";
-            url = "http://127.0.0.1:8888";
-            exposure = "trustedNetworks";
-          });
+          lib.recursiveUpdate
+            (httpsRoute {
+              router = "hermes";
+              backend = "hermes";
+              domain = "hermes.sk4rd.com";
+              url = "http://127.0.0.1:9119";
+              exposure = "trustedNetworks";
+            })
+            (httpsRoute {
+              router = "hindsight";
+              backend = "hindsight";
+              domain = "hindsight.sk4rd.com";
+              url = "http://127.0.0.1:9999";
+              exposure = "trustedNetworks";
+            });
 
         sops.secrets."nas/hermes/dashboard_env" = {
           mode = "0400";
