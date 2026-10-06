@@ -68,6 +68,23 @@ in
           rev = "ba30cb0cf86c52bdb5cde98974bc062e97966529";
           hash = "sha256-Pg4smvkiVpmcmUola0rziMBfq5V7UjzX8864Dem76pI=";
         };
+        avoidAiWritingSource = pkgs.fetchFromGitHub {
+          owner = "conorbronsdon";
+          repo = "avoid-ai-writing";
+          rev = "db82bc8a2631f75fa829e97dc811c16a091fe1d9";
+          hash = "sha256-emdv05J8geHp0xjDlimUIPNsSv1LafvJ1FB2jqOt0Q4=";
+        };
+        superpowersSource = pkgs.fetchFromGitHub {
+          owner = "obra";
+          repo = "superpowers";
+          rev = "8ca22dba9a94f28898bbce59f2537ff4d87c747d";
+          hash = "sha256-BWPiXoXV+jePP+wn/Z+Af4iehIL7oei00plaWaTzq8s=";
+        };
+        superpowersPlugin = pkgs.runCommand "superpowers" { } ''
+          mkdir -p "$out"
+          cp -r ${superpowersSource}/.hermes-plugin/. "$out/"
+          cp -r ${superpowersSource}/skills "$out/skills"
+        '';
         homeassistantEnvironmentFile = "-/var/lib/hermes/.hermes/homeassistant.env";
         shellTools = with pkgs; [
           bashInteractive
@@ -192,7 +209,10 @@ in
         services.hermes-agent = {
           enable = true;
           package = hermesPackage;
-          extraPlugins = [ homeassistantPlugin ];
+          extraPlugins = [
+            homeassistantPlugin
+            superpowersPlugin
+          ];
           hermesHomeFiles."hindsight/config.json" = builtins.toJSON {
             mode = "local_external";
             api_url = "http://127.0.0.1:8888";
@@ -211,7 +231,9 @@ in
             plugins.enabled = [
               "homeassistant"
               "hindsight"
+              "superpowers"
             ];
+            skills.external_dirs = [ "${avoidAiWritingSource}/skills/avoid-ai-writing" ];
             memory.provider = "hindsight";
             platforms.homeassistant.enabled = false;
             platforms.telegram.enabled = true;

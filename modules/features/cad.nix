@@ -12,6 +12,9 @@
             buildInputs = map (
               input: if input == pkgs.gcc-unwrapped then lib.getLib pkgs.gcc-unwrapped else input
             ) old.buildInputs;
+            preFixup = (old.preFixup or "") + ''
+              gappsWrapperArgs+=(--set SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt)
+            '';
           }))
         ];
       };

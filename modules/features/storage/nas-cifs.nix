@@ -35,6 +35,11 @@
           fsType = "cifs";
           options = mountOptions;
         };
+        "/mnt/nas/hermes" = {
+          device = "//192.168.178.3/HermesWorkspace";
+          fsType = "cifs";
+          options = mountOptions;
+        };
         "/mnt/nas/torrents" = {
           device = "//192.168.178.3/Torrents";
           fsType = "cifs";

@@ -1,5 +1,9 @@
 { den, ... }:
 
+let
+  inherit (import ../../../lib/nas-service-helpers.nix) mountSafety;
+in
+
 {
   den.aspects.nas = {
     includes = [
@@ -23,6 +27,20 @@
       systemd.tmpfiles.rules = [
         "d /storage-pool/backups/restic 0750 backup backup -"
       ];
+      services.samba.settings.HermesWorkspace = {
+        path = "/var/lib/hermes/workspace";
+        browseable = "yes";
+        "read only" = "no";
+        "guest ok" = "no";
+        "valid users" = "miko";
+        "force user" = "hermes";
+        "force group" = "hermes";
+        "follow symlinks" = "no";
+        "wide links" = "no";
+        "create mask" = "0660";
+        "directory mask" = "0770";
+      };
+      systemd.services.samba-smbd = mountSafety [ "/var/lib/hermes" ];
       security.sudo.extraRules = [
         {
           users = [ "admin" ];
