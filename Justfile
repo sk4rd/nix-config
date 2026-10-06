@@ -40,6 +40,10 @@ lint:
 build host:
     nix build ".#nixosConfigurations.{{host}}.config.system.build.toplevel" --no-link --no-write-lock-file --option eval-cache false
 
+# Refresh the persistent local source mirror without activating it.
+sync:
+    bash modules/tooling/pull-nix-config.sh
+
 # Expensive pre-merge verification.
 full: check lint
     #!/usr/bin/env bash

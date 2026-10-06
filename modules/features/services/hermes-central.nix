@@ -233,13 +233,21 @@ in
           };
         };
 
-        services.traefik.dynamicConfigOptions.http = httpsRoute {
-          router = "hermes";
-          backend = "hermes";
-          domain = "hermes.sk4rd.com";
-          url = "http://127.0.0.1:9119";
-          exposure = "trustedNetworks";
-        };
+        services.traefik.dynamicConfigOptions.http =
+          (httpsRoute {
+            router = "hermes";
+            backend = "hermes";
+            domain = "hermes.sk4rd.com";
+            url = "http://127.0.0.1:9119";
+            exposure = "trustedNetworks";
+          })
+          // (httpsRoute {
+            router = "hindsight";
+            backend = "hindsight";
+            domain = "hindsight.sk4rd.com";
+            url = "http://127.0.0.1:8888";
+            exposure = "trustedNetworks";
+          });
 
         sops.secrets."nas/hermes/dashboard_env" = {
           mode = "0400";
