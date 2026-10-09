@@ -11,7 +11,7 @@ let
       den.aspects.wallpaper-neon-flux-theme
       den.aspects.lockscreen-neon-flux-theme
     ])
-    (whenPresent den.aspects.firefox [ den.aspects.firefox-neon-flux-theme ])
+    (whenPresent den.aspects.librewolf [ den.aspects.librewolf-neon-flux-theme ])
     (whenPresent den.aspects.zed [ den.aspects.zed-neon-flux-theme ])
   ];
 in

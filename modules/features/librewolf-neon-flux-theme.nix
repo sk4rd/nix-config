@@ -8,14 +8,14 @@ let
     + "\n}";
 in
 {
-  den.aspects.firefox-neon-flux-theme.includes = [ den.aspects.firefox ];
+  den.aspects.librewolf-neon-flux-theme.includes = [ den.aspects.librewolf ];
 
-  den.aspects.firefox-neon-flux-theme.homeManager =
+  den.aspects.librewolf-neon-flux-theme.homeManager =
     { pkgs, ... }:
     let
       startPage = "file://${
         pkgs.writeText "neon-flux-start.html" (
-          builtins.replaceStrings [ "@palette@" ] [ variables ] (builtins.readFile ./firefox/start.html)
+          builtins.replaceStrings [ "@palette@" ] [ variables ] (builtins.readFile ./librewolf/start.html)
         )
       }";
     in
@@ -23,9 +23,9 @@ in
       fonts.fontconfig.enable = true;
       home.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
 
-      programs.firefox = {
+      programs.librewolf = {
         # Custom new-tab URLs require AutoConfig; Firefox exposes no preference.
-        package = pkgs.firefox.override {
+        package = pkgs.librewolf.override {
           extraAutoConfig = ''
             pref("general.config.sandbox_enabled", false);
           '';
@@ -48,9 +48,9 @@ in
             "browser.theme.toolbar-theme" = 0;
             "extensions.activeThemeID" = "firefox-compact-dark@mozilla.org";
           };
-          userChrome = variables + builtins.readFile ./firefox/userChrome.css;
+          userChrome = variables + builtins.readFile ./librewolf/userChrome.css;
           userContent = builtins.replaceStrings [ "@palette@" ] [ variables ] (
-            builtins.readFile ./firefox/userContent.css
+            builtins.readFile ./librewolf/userContent.css
           );
         };
       };

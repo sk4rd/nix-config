@@ -18,10 +18,11 @@
 
     provides.to-users.includes = [
       den.aspects.cad
-      den.aspects.firefox
+      den.aspects.chromium
       den.aspects.gaming
       den.aspects.hermes-desktop
 
+      den.aspects.librewolf
       den.aspects.libvirt
       den.aspects.media
       den.aspects.localsend

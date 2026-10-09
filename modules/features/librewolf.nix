@@ -1,6 +1,6 @@
 {
-  den.aspects.firefox.homeManager = {
-    programs.firefox = {
+  den.aspects.librewolf.homeManager = {
+    programs.librewolf = {
       profiles.default = {
         id = 0;
         isDefault = true;
