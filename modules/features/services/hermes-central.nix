@@ -171,7 +171,6 @@ in
         systemd.services.hermes-agent = {
           wants = [ "docker-hindsight.service" ];
           after = [ "docker-hindsight.service" ];
-          path = shellTools;
           environment.HASS_URL = "http://127.0.0.1:8123";
           serviceConfig.EnvironmentFile = lib.mkAfter [ homeassistantEnvironmentFile ];
           unitConfig.RequiresMountsFor = [ "/var/lib/hermes" ];
@@ -179,7 +178,6 @@ in
         systemd.services.hermes-backend = {
           wants = [ "docker-hindsight.service" ];
           after = [ "docker-hindsight.service" ];
-          path = shellTools;
           environment.HASS_URL = "http://127.0.0.1:8123";
           serviceConfig.EnvironmentFile = [
             config.sops.secrets."nas/hermes/dashboard_env".path
@@ -198,8 +196,7 @@ in
           (lib.removeSuffix "\n" (builtins.readFile ../../users/miko/ssh.pub))
         ];
 
-        # Terminal login shells reset PATH; keep tools in the user's managed profile.
-        users.users.hermes.packages = shellTools ++ [
+        users.users.hermes.packages = [
           config.nix.package
           config.services.hermes-agent.package
           pkgs.openssh
@@ -209,6 +206,7 @@ in
         services.hermes-agent = {
           enable = true;
           package = hermesPackage;
+          extraPackages = shellTools;
           extraPlugins = [
             homeassistantPlugin
             superpowersPlugin
@@ -241,20 +239,11 @@ in
               public_url = "https://hermes.sk4rd.com";
 
             };
-            model = {
-              provider = "openai-codex";
-              default = "gpt-6-luna";
-              api_mode = "codex_responses";
-            };
-            agent.reasoning_effort = "medium";
+
             delegation = {
               max_concurrent_children = 2;
               max_spawn_depth = 1;
               orchestrator_enabled = false;
-            };
-            auxiliary.review = {
-              provider = "openai-codex";
-              model = "gpt-6-sol";
             };
           };
         };

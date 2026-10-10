@@ -7,6 +7,7 @@ keys:
   - &nas age1fx7378dsesr74eu50ylzs3ll9q5uk3ep596psazp4w6epzz69yksupmtl5
 
 creation_rules:
+
   - path_regex: secrets/miko-password\.yaml$
     key_groups:
       - pgp:
