@@ -112,28 +112,10 @@
         <address domain="0x0000" bus="0x03" slot="0x00" function="0x1"/>
       </source>
     </hostdev>
-    <hostdev mode="subsystem" type="usb">
-      <source startupPolicy="mandatory">
-        <vendor id="0x6b62"/>
-        <product id="0x6869"/>
-      </source>
-    </hostdev>
-    <hostdev mode="subsystem" type="usb">
-      <source startupPolicy="mandatory">
-        <vendor id="0x1532"/>
-        <product id="0x00c1"/>
-      </source>
-    </hostdev>
-    <hostdev mode="subsystem" type="usb">
-      <source startupPolicy="optional">
-        <vendor id="0x2d99"/>
-        <product id="0xa094"/>
-      </source>
-    </hostdev>
-    <hostdev mode="subsystem" type="usb">
-      <source startupPolicy="optional">
-        <vendor id="0x19f7"/>
-        <product id="0x0003"/>
+    <!-- Hand off the peripheral hub, including hotplugged devices, only while Windows runs. -->
+    <hostdev mode="subsystem" type="pci" managed="yes">
+      <source>
+        <address domain="0x0000" bus="0x13" slot="0x00" function="0x4"/>
       </source>
     </hostdev>
     <channel type="unix">

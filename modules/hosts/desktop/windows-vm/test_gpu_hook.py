@@ -52,18 +52,26 @@ class HookTests(unittest.TestCase):
             (group / address).symlink_to(device)
             (device / "class").write_text("0x030000")
         (pci / "0000:03:00.0/reset").touch()
+        controller = pci / "0000:13:00.4"
+        controller.mkdir(parents=True, exist_ok=True)
+        (controller / "reset").touch()
         for core in range(8, 16):
             cpu = self.sys / f"devices/system/cpu/cpu{core}"
             (cpu / "topology").mkdir(parents=True)
             (cpu / "topology/thread_siblings_list").write_text(f"{core},{core + 16}")
             (cpu / "cache/index3").mkdir(parents=True)
             (cpu / "cache/index3/shared_cpu_list").write_text("8-15,24-31")
+        usb_bus = controller / "usb7"
+        usb_bus.mkdir()
         usb = self.sys / "bus/usb/devices"
+        usb.mkdir(parents=True)
         for index, (vendor, product) in enumerate((("6b62", "6869"), ("1532", "00c1"))):
-            device = usb / f"1-{index + 1}"
-            device.mkdir(parents=True)
+            name = f"1-{index + 1}"
+            device = usb_bus / name
+            device.mkdir()
             (device / "idVendor").write_text(vendor)
             (device / "idProduct").write_text(product)
+            (usb / name).symlink_to(device)
         console = self.sys / "class/vtconsole/vtcon0"
         console.mkdir(parents=True)
         (console / "name").write_text("frame buffer device")
@@ -91,8 +99,8 @@ class HookTests(unittest.TestCase):
     def test_gpu_rom_bar_disabled_without_external_rom(self):
         root = hook.validate_xml(DOMAIN_XML)
         devices = root.findall("./devices/hostdev[@type='pci']")
-        gpu = next(device for device in devices if device.find("./source/address").get("function") == "0x0")
-        audio = next(device for device in devices if device.find("./source/address").get("function") == "0x1")
+        gpu = next(device for device in devices if device.find("./source/address").get("bus") == "0x03" and device.find("./source/address").get("function") == "0x0")
+        audio = next(device for device in devices if device.find("./source/address").get("bus") == "0x03" and device.find("./source/address").get("function") == "0x1")
         self.assertEqual([element.attrib for element in gpu.findall("rom")], [{"bar": "off"}])
         self.assertIsNone(audio.find("rom"))
 
@@ -105,6 +113,44 @@ class HookTests(unittest.TestCase):
         ):
             with self.subTest(changed=changed[-100:]), self.assertRaises(RuntimeError):
                 hook.validate_xml(changed)
+
+    def test_xml_has_one_managed_pci_usb_controller_and_no_usb_hostdevs(self):
+        root = hook.validate_xml(DOMAIN_XML)
+        hostdevs = root.findall("./devices/hostdev")
+        usb_controller = [device for device in hostdevs if device.find("./source/address") is not None
+                          and device.find("./source/address").get("bus") == "0x13"]
+        self.assertEqual(len(usb_controller), 1)
+        self.assertEqual(usb_controller[0].get("managed"), "yes")
+        self.assertEqual(usb_controller[0].find("./source/address").attrib, {
+            "domain": "0x0000", "bus": "0x13", "slot": "0x00", "function": "0x4",
+        })
+        self.assertEqual(root.findall("./devices/hostdev[@type='usb']"), [])
+
+    def test_xml_rejects_missing_unmanaged_or_unexpected_usb_controller(self):
+        import xml.etree.ElementTree as ET
+        for mutation in ("missing", "unmanaged", "unexpected"):
+            with self.subTest(mutation=mutation):
+                root = ET.fromstring(DOMAIN_XML)
+                controller = next(device for device in root.findall("./devices/hostdev[@type='pci']")
+                                  if device.find("./source/address").get("bus") == "0x13")
+                if mutation == "missing":
+                    root.find("./devices").remove(controller)
+                elif mutation == "unmanaged":
+                    controller.set("managed", "no")
+                else:
+                    controller.find("./source/address").set("function", "0x3")
+                with self.assertRaises(RuntimeError):
+                    hook.validate_xml(ET.tostring(root, encoding="unicode"))
+
+    def test_xml_rejects_usb_device_hostdevs_as_double_assignment(self):
+        import xml.etree.ElementTree as ET
+        root = ET.fromstring(DOMAIN_XML)
+        usb = ET.SubElement(root.find("./devices"), "hostdev", {"mode": "subsystem", "type": "usb"})
+        source = ET.SubElement(usb, "source")
+        ET.SubElement(source, "vendor", {"id": "0x6b62"})
+        ET.SubElement(source, "product", {"id": "0x6869"})
+        with self.assertRaises(RuntimeError):
+            hook.validate_xml(ET.tostring(root, encoding="unicode"))
 
     def test_preflight_valid_fixture(self):
         xml = self.create_preflight_tree()
@@ -124,6 +170,53 @@ class HookTests(unittest.TestCase):
         self.create_preflight_tree()
         (self.sys / "devices/system/cpu/cpu8/topology/thread_siblings_list").write_text("8")
         with self.assertRaisesRegex(RuntimeError, "CPU topology"):
+            hook.preflight(xml)
+
+    def test_preflight_requires_controller_hardware_driver_group_and_reset(self):
+        xml = self.create_preflight_tree()
+        controller = self.sys / "bus/pci/devices/0000:13:00.4"
+        (controller / "vendor").write_text("0xffff")
+        with self.assertRaisesRegex(RuntimeError, "Unexpected hardware"):
+            hook.preflight(xml)
+
+        self.create_preflight_tree()
+        controller = self.sys / "bus/pci/devices/0000:13:00.4"
+        (controller / "driver").unlink()
+        with self.assertRaisesRegex(RuntimeError, "xhci_hcd"):
+            hook.preflight(xml)
+
+        self.create_preflight_tree()
+        controller = self.sys / "bus/pci/devices/0000:13:00.4"
+        extra = self.sys / "bus/pci/devices/0000:13:00.5"
+        extra.mkdir()
+        (extra / "class").write_text("0x020000")
+        (controller / "iommu_group/devices/0000:13:00.5").symlink_to(extra)
+        with self.assertRaisesRegex(RuntimeError, "Unsafe IOMMU group"):
+            hook.preflight(xml)
+
+        self.create_preflight_tree()
+        (controller / "reset").unlink()
+        with self.assertRaisesRegex(RuntimeError, "reset"):
+            hook.preflight(xml)
+
+    def test_preflight_requires_inputs_under_controller_exactly_once(self):
+        xml = self.create_preflight_tree()
+        misplaced = self.sys / "bus/usb/devices/1-1"
+        misplaced.unlink()
+        other = self.sys / "bus/usb/devices/1-1"
+        other.mkdir()
+        (other / "idVendor").write_text("6b62")
+        (other / "idProduct").write_text("6869")
+        with self.assertRaisesRegex(RuntimeError, "USB input"):
+            hook.preflight(xml)
+
+        self.create_preflight_tree()
+        duplicate = self.sys / "bus/pci/devices/0000:13:00.4/usb7/1-3"
+        duplicate.mkdir()
+        (duplicate / "idVendor").write_text("6b62")
+        (duplicate / "idProduct").write_text("6869")
+        (self.sys / "bus/usb/devices/1-3").symlink_to(duplicate)
+        with self.assertRaisesRegex(RuntimeError, "USB input"):
             hook.preflight(xml)
 
     def test_preflight_rejects_unsafe_group_and_missing_input(self):
@@ -243,6 +336,48 @@ class HookTests(unittest.TestCase):
         with mock.patch.object(hook, "run"), self.assertRaisesRegex(RuntimeError, "unexpected driver"):
             hook.restore()
         self.assertTrue((self.state / "state.json").exists())
+
+    def test_restore_recovers_usb_controller_before_display_manager(self):
+        self.create_preflight_tree()
+        controller_address = "0000:13:00.4"
+        controller = self.sys / "bus/pci/devices" / controller_address
+        (controller / "driver").unlink()
+        (controller / "driver").symlink_to(self.sys / "bus/pci/drivers/vfio-pci")
+        self.write_state(display_manager=True)
+        observed = []
+        def run(*args, **kwargs):
+            observed.append(args)
+            return result("running\n" if args == ("systemctl", "is-system-running") else "")
+        drivers = [expected for _, _, expected in hook.DEVICES.values()]
+        with mock.patch.object(hook, "run", side_effect=run), mock.patch.object(
+            hook, "driver", side_effect=[*drivers[:-1], "vfio-pci", drivers[-1]]
+        ), mock.patch.object(hook, "write"), mock.patch.object(hook.time, "sleep"), mock.patch.object(hook, "log"):
+            hook.restore()
+        controller_modprobe = observed.index(("modprobe", hook.DEVICES[controller_address][2]))
+        display_start = observed.index(("systemctl", "start", "display-manager.service"))
+        self.assertLess(controller_modprobe, display_start)
+        self.assertFalse((self.state / "state.json").exists())
+
+    def test_restore_controller_failure_retains_state_and_does_not_start_display_manager(self):
+        self.create_preflight_tree()
+        self.write_state(display_manager=True)
+        controller_address = "0000:13:00.4"
+        expected_drivers = {address: expected for address, (_, _, expected) in hook.DEVICES.items()}
+        calls = []
+        def run(*args, **kwargs):
+            calls.append(args)
+            return result()
+        def current_driver(device):
+            return None if device.name == controller_address else expected_drivers[device.name]
+
+        with mock.patch.object(hook, "run", side_effect=run), mock.patch.object(
+            hook, "driver", side_effect=current_driver
+        ), mock.patch.object(hook, "write"), mock.patch.object(hook.time, "sleep"), self.assertRaisesRegex(
+            RuntimeError, "state retained"
+        ):
+            hook.restore()
+        self.assertTrue((self.state / "state.json").exists())
+        self.assertNotIn(("systemctl", "start", "display-manager.service"), calls)
 
     def test_restore_failure_retains_state(self):
         self.write_state()

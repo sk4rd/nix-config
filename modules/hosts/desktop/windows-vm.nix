@@ -106,7 +106,8 @@
             exec ${config.security.wrapperDir}/sudo /run/current-system/sw/bin/windows-vm-start
           fi
           echo 'This closes local graphical sessions and their user services, including unsaved work.'
-          echo 'The login screen returns after Windows shuts down. Save your work first.'
+          echo 'Windows takes all devices on USB controller 13:00.4, including the peripheral hub and YubiKey.'
+          echo 'The USB controller and login screen return after Windows shuts down. Save your work first.'
           read -r -p 'Type start to continue: ' response
           [[ "$response" == start ]] || exit 1
           # Survive the originating terminal and user manager being stopped by the hook.

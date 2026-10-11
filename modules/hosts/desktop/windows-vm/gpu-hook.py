@@ -11,10 +11,13 @@ import xml.etree.ElementTree as ET
 
 DOMAIN = "windows-gaming"
 UUID = "9ed40d76-ad6e-4080-b345-6d7d2aece0a1"
+USB_CONTROLLER = "0000:13:00.4"
 DEVICES = {
     "0000:03:00.0": ("0x1002", "0x744c", "amdgpu"),
     "0000:03:00.1": ("0x1002", "0xab30", "snd_hda_intel"),
+    USB_CONTROLLER: ("0x1022", "0x15b7", "xhci_hcd"),
 }
+USB_INPUTS = ((0x6b62, 0x6869), (0x1532, 0x00c1))
 SYS = Path("/sys")
 STATE = Path("/run/windows-gaming-gpu")
 
@@ -45,13 +48,15 @@ def validate_xml(xml):
     addresses = set()
     for hostdev in root.findall("./devices/hostdev[@type='pci']"):
         if hostdev.get("managed") != "yes":
-            raise RuntimeError("GPU functions must use libvirt managed=yes")
+            raise RuntimeError("PCI devices must use libvirt managed=yes")
         address = hostdev.find("./source/address")
         addresses.add("%04x:%02x:%02x.%x" % tuple(
             int(address.get(key), 0) for key in ("domain", "bus", "slot", "function")
         ))
     if addresses != set(DEVICES):
-        raise RuntimeError("Domain PCI devices do not match the desktop GPU/audio pair")
+        raise RuntimeError("Domain PCI devices do not match the desktop GPU/audio and USB controller")
+    if root.findall("./devices/hostdev[@type='usb']"):
+        raise RuntimeError("USB devices must use the passed-through controller, not individual USB hostdevs")
     return root
 
 
@@ -71,6 +76,8 @@ def preflight(xml):
                 raise RuntimeError(f"Unsafe IOMMU group: {address} shares it with {member.name}")
     if not (SYS / "bus/pci/devices/0000:03:00.0/reset").exists():
         raise RuntimeError("GPU has no kernel-supported reset")
+    if not (SYS / "bus/pci/devices" / USB_CONTROLLER / "reset").exists():
+        raise RuntimeError("USB controller has no kernel-supported reset")
     for core in range(8, 16):
         cpu = SYS / f"devices/system/cpu/cpu{core}"
         if (cpu / "topology/thread_siblings_list").read_text().strip() != f"{core},{core + 16}":
@@ -81,13 +88,14 @@ def preflight(xml):
         if not Path(disk.get("file")).is_file():
             raise RuntimeError(f"Missing VM disk/media: {disk.get('file')}")
     usb_devices = list((SYS / "bus/usb/devices").glob("*/idVendor"))
-    for source in root.findall("./devices/hostdev[@type='usb']/source[@startupPolicy='mandatory']"):
-        vendor = int(source.find("vendor").get("id"), 0)
-        product = int(source.find("product").get("id"), 0)
+    controller = (SYS / "bus/pci/devices" / USB_CONTROLLER).resolve()
+    for vendor, product in USB_INPUTS:
         matches = [p for p in usb_devices if int(p.read_text(), 16) == vendor
                    and int((p.parent / "idProduct").read_text(), 16) == product]
         if len(matches) != 1:
             raise RuntimeError(f"Expected exactly one USB input device {vendor:04x}:{product:04x}")
+        if controller not in matches[0].parent.resolve().parents:
+            raise RuntimeError(f"USB input device {vendor:04x}:{product:04x} is not connected to {USB_CONTROLLER}")
 
 
 def graphical_sessions():
@@ -163,7 +171,7 @@ def restore():
         if system_state != "stopping":
             run("systemctl", "start", "display-manager.service")
     state_file.unlink()
-    log("Host GPU and login screen restored")
+    log("Host GPU, USB controller and login screen restored")
 
 
 def prepare(xml):
@@ -189,7 +197,7 @@ def prepare(xml):
         ensure_unused()
         for console in consoles:
             write(SYS / "class/vtconsole" / console / "bind", "0")
-        log("GPU released; libvirt will detach and reattach the managed PCI functions")
+        log("GPU released; libvirt will detach and reattach the GPU/audio and USB controller")
     except Exception:
         restore()
         raise
