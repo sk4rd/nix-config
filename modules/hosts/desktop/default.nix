@@ -3,6 +3,7 @@
 {
   den.aspects.desktop = {
     includes = [
+      den.aspects.betaflight
       den.aspects.disko
       den.aspects.secure-boot
       den.aspects.zram

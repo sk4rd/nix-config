@@ -8,7 +8,11 @@
       den.aspects.zsh
     ];
 
-    user.extraGroups = [ "wheel" ];
+    user.extraGroups = [
+      "wheel"
+      "dialout"
+      "plugdev"
+    ];
 
     homeManager = {
       programs.home-manager.enable = true;
