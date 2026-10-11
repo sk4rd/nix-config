@@ -5,6 +5,7 @@
     den.aspects.openssh-key-only
     den.aspects.nas-service-identities
     den.aspects.zfs-storage
+    den.aspects.syncthing-nas
     den.aspects.samba
     den.aspects.jellyfin
     den.aspects.seerr

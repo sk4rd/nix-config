@@ -1,4 +1,4 @@
-{ den, ... }:
+{ den, lib, ... }:
 
 {
   den.aspects.miko = {
@@ -6,6 +6,12 @@
       den.batteries.define-user
       den.aspects.development
       den.aspects.zsh
+      ({ host, ... }: {
+        includes = lib.optional (builtins.elem host.name [
+          "desktop"
+          "laptop"
+        ]) den.aspects.syncthing;
+      })
     ];
 
     user.extraGroups = [
