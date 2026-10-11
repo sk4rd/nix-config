@@ -8,34 +8,30 @@
       { pkgs, ... }:
       {
         home.packages = with pkgs; [
-          tree
-          antigravity-cli
-
           btop
+          curl
+          deadnix
           duf
           fd
-          jq
-          ncdu
-          ripgrep
-          yazi
-          zellij
-
-          python3
-          curl
-          wget
           file
-          unzip
-          patch
-          shellcheck
-          just
-
-          rustup
           gcc
-
+          jq
+          just
+          ncdu
           nixd
           nixfmt
+          opencode
+          patch
+          python3
+          ripgrep
+          rustup
+          shellcheck
           statix
-          deadnix
+          tree
+          unzip
+          wget
+          yazi
+          zellij
         ];
 
         programs.git = {

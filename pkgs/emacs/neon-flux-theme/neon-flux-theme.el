@@ -108,7 +108,28 @@
    `(diff-file-header ((t (:background ,raised :foreground ,accent :weight bold))))
    `(diff-hunk-header ((t (:background ,surface :foreground ,purple))))
    `(diff-refine-added ((t (:background ,selection :foreground ,success))))
-   `(diff-refine-removed ((t (:background ,selection :foreground ,error))))))
+   `(diff-refine-removed ((t (:background ,selection :foreground ,error)))))
+  ;; Vterm reads both attributes for ANSI text and background colors.
+  (dolist (entry `((vterm-color-black . ,surface)
+                   (vterm-color-red . ,error)
+                   (vterm-color-green . ,success)
+                   (vterm-color-yellow . ,warning)
+                   (vterm-color-blue . ,info)
+                   (vterm-color-magenta . ,purple)
+                   (vterm-color-cyan . ,accent)
+                   (vterm-color-white . ,text)
+                   ;; Bright ANSI colors match the Konsole and Zed ports.
+                   (vterm-color-bright-black . "#53607A")
+                   (vterm-color-bright-red . "#FF6B81")
+                   (vterm-color-bright-green . "#6FFFD4")
+                   (vterm-color-bright-yellow . "#FFF28A")
+                   (vterm-color-bright-blue . "#74C0FF")
+                   (vterm-color-bright-magenta . "#D19CFF")
+                   (vterm-color-bright-cyan . ,accent-bright)
+                   (vterm-color-bright-white . "#FFFFFF")))
+    (custom-theme-set-faces
+     'neon-flux
+     `(,(car entry) ((t (:foreground ,(cdr entry) :background ,(cdr entry))))))))
 
 (provide-theme 'neon-flux)
 (provide 'neon-flux-theme)
