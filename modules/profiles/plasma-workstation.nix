@@ -10,6 +10,7 @@
       den.aspects.libvirt
       den.aspects.nas-cifs
       den.aspects.neon-flux-theme
+      den.aspects.ollama
       den.aspects.openssh-key-only
       den.aspects.plasma
       den.aspects.printing-scanning
