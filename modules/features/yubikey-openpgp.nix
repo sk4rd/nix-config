@@ -14,7 +14,7 @@
           enable = true;
           enableScDaemon = true;
           enableSshSupport = true;
-          sshKeys = [ "B2C75C046C757FED9A1359BB566EB14A969EB784" ];
+          sshKeys = [ "F4E029FE36A682470371788A61692D508CDF9CE9" ];
 
           pinentry =
             if host.wsl.enable or false then
