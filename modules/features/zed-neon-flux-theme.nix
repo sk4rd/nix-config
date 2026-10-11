@@ -1,7 +1,7 @@
 { den, lib, ... }:
 
 let
-  palette = builtins.fromJSON (builtins.readFile ./desktop/neon-flux-theme/palette.json);
+  palette = builtins.fromJSON (builtins.readFile ../../themes/neon-flux/palette.json);
 
   # Append alpha to #RRGGBB for Zed's #RRGGBBAA format. Alpha values follow
   # bundled One Dark: 0d/1a guides/tints, 4c/66 scrollbars/matches, 59/cc word diffs.

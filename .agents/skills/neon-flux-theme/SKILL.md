@@ -12,15 +12,16 @@ pink highlights: **cyan does the work, pink marks hot spots, violet frames.**
 
 Paths below are relative to the repository root, not this skill directory.
 
-- Read `modules/features/desktop/neon-flux-theme/palette.json` before choosing
+- Read `themes/neon-flux/palette.json` before choosing
   colors. It is the canonical base palette; generate consumer values from its
   tokens rather than copying hex literals.
 - Read `docs/neon-flux-porting.md` for semantic roles, ANSI sources, typography,
   and rendering checks. Bright ANSI values currently live in the Nix consumers,
   not the base JSON; do not invent a replacement scheme.
 - `modules/features/desktop/neon-flux-theme.nix` implements Plasma, Konsole,
-  SDDM, and wallpaper configuration. `modules/features/zed.nix` implements Zed.
-  The adjacent theme `README.md` documents wallpaper and safe greeter previews.
+  SDDM, and wallpaper configuration. `modules/features/zed-neon-flux-theme.nix`
+  implements the Zed theme. `themes/neon-flux/README.md` documents wallpaper and
+  safe greeter previews.
 
 ## Porting workflow
 

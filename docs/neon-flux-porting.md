@@ -1,7 +1,7 @@
 # Neon Flux porting reference
 
 The authoritative base colors are in
-[`palette.json`](../modules/features/desktop/neon-flux-theme/palette.json).
+[`palette.json`](../themes/neon-flux/palette.json).
 Read it from disk before porting; this document intentionally does not duplicate
 its hex values. Map roles to the target's supported names, not colors by position.
 
@@ -38,7 +38,7 @@ Normal ANSI slots map to `surface`, `error`, `success`, `warning`, `info`,
 `purple`, `accent`, and `text` in black-to-white order. The existing bright row
 is defined in `ansiBright` in both
 [`neon-flux-theme.nix`](../modules/features/desktop/neon-flux-theme.nix) and
-[`zed.nix`](../modules/features/zed.nix); it is not fully represented in the base
+[`zed-neon-flux-theme.nix`](../modules/features/zed-neon-flux-theme.nix); it is not fully represented in the base
 palette JSON. Inspect those definitions when porting; keep them consistent rather
 than maintaining another table here. Derive faint (SGR 2) colors halfway to the
 canvas per channel when needed.
@@ -67,7 +67,7 @@ canvas per channel when needed.
 - Do not infer exact colors from a scaled screenshot. If a render is unavailable,
   report generated-output validation separately from unverified appearance.
 - For SDDM and screen-lock previews, follow the safe test-mode instructions in
-  the [theme README](../modules/features/desktop/neon-flux-theme/README.md).
+  the [theme README](../themes/neon-flux/README.md).
   Do not restart an active display manager or lock a session just for a screenshot.
 
 Windows surfaces belong to the separate `neon-flux` repository. Its palette and

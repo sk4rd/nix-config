@@ -1,7 +1,7 @@
 { den, lib, ... }:
 
 let
-  palette = builtins.fromJSON (builtins.readFile ./desktop/neon-flux-theme/palette.json);
+  palette = builtins.fromJSON (builtins.readFile ../../themes/neon-flux/palette.json);
   variables =
     ":root {\n"
     + lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: "  --${name}: ${value};") palette)

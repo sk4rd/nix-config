@@ -2,7 +2,7 @@
 
 let
 
-  palette = builtins.fromJSON (builtins.readFile ./neon-flux-theme/palette.json);
+  palette = builtins.fromJSON (builtins.readFile ../../../themes/neon-flux/palette.json);
 
   # KColorScheme and Konsole require decimal `r,g,b` channels.
   channels =
@@ -236,7 +236,7 @@ in
           mkdir -p "$theme"
           cp ${./neon-flux-theme/sddm/Main.qml} "$theme/Main.qml"
           cp ${./neon-flux-theme/sddm/metadata.desktop} "$theme/metadata.desktop"
-          cp ${./neon-flux-theme/neon-flux-desktop-3840x2160.png} "$theme/background.png"
+          cp ${../../../themes/neon-flux/wallpapers/neon-flux-desktop-3840x2160.png} "$theme/background.png"
           cp ${
             pkgs.writeText "neon-flux-sddm.conf" (lib.generators.toINI { } { General = palette; })
           } "$theme/theme.conf"
@@ -262,13 +262,13 @@ in
             Service = {
               Type = "oneshot";
               RemainAfterExit = true;
-              ExecStart = "${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-wallpaperimage --fill-mode preserveAspectCrop ${./neon-flux-theme/neon-flux-desktop-3840x2160.png}";
+              ExecStart = "${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-wallpaperimage --fill-mode preserveAspectCrop ${../../../themes/neon-flux/wallpapers/neon-flux-desktop-3840x2160.png}";
             };
             Install.WantedBy = [ "plasma-workspace.target" ];
           };
 
           xdg.dataFile."wallpapers/NeonFlux/neon-flux-desktop-3840x2160.png".source =
-            ./neon-flux-theme/neon-flux-desktop-3840x2160.png;
+            ../../../themes/neon-flux/wallpapers/neon-flux-desktop-3840x2160.png;
         };
     };
 
@@ -285,7 +285,7 @@ in
                 nativeBuildInputs = [ (pkgs.python3.withPackages (ps: [ ps.pillow ])) ];
               }
               ''
-                python -c 'from PIL import Image, ImageOps; import sys; ImageOps.mirror(Image.open(sys.argv[1])).save(sys.argv[2], format="PNG")' ${./neon-flux-theme/neon-flux-desktop-3840x2160.png} "$out"
+                python -c 'from PIL import Image, ImageOps; import sys; ImageOps.mirror(Image.open(sys.argv[1])).save(sys.argv[2], format="PNG")' ${../../../themes/neon-flux/wallpapers/neon-flux-desktop-3840x2160.png} "$out"
               '';
         in
         {

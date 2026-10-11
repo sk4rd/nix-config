@@ -13,8 +13,11 @@
 (show-paren-mode 1)
 (delete-selection-mode 1)
 (global-auto-revert-mode 1)
+(menu-bar-mode -1)
 (when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
+(when (fboundp 'scroll-bar-mode)
+  (scroll-bar-mode -1))
 
 (let* ((cache-directory "@emacsCacheDirectory@")
        (backup-directory (expand-file-name "backups/" cache-directory))
@@ -38,6 +41,11 @@
         recentf-save-file (expand-file-name "recentf" cache-directory)
         recentf-max-saved-items 50)
   (load custom-file 'noerror 'nomessage))
+
+(add-to-list 'custom-theme-load-path
+             (file-name-directory (locate-library "neon-flux-theme")))
+(load-theme 'neon-flux t)
+(set-face-attribute 'default nil :family "JetBrainsMono NFM")
 
 (savehist-mode 1)
 (save-place-mode 1)

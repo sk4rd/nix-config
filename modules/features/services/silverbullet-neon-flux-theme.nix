@@ -9,7 +9,7 @@ in
   den.aspects.silverbullet-neon-flux-theme.nixos =
     { pkgs, lib, ... }:
     let
-      palette = builtins.fromJSON (builtins.readFile ../desktop/neon-flux-theme/palette.json);
+      palette = builtins.fromJSON (builtins.readFile ../../../themes/neon-flux/palette.json);
       theme = pkgs.writeText "silverbullet-neon-flux.md" (
         lib.replaceStrings (map (name: "@${name}@") (
           builtins.attrNames palette
