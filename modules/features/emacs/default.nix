@@ -28,9 +28,11 @@
               epkgs.consult
               epkgs.corfu
               epkgs.cape
+              epkgs.diff-hl
               epkgs.eldoc-box
               epkgs.embark
               epkgs.embark-consult
+              epkgs.envrc
               epkgs.gptel
               epkgs.gptel-agent
               epkgs.marginalia
@@ -49,6 +51,7 @@
           home.packages = [
             pkgs.nerd-fonts.jetbrains-mono
             pkgs.ripgrep
+            pkgs.direnv
             pkgs.nixd
             pkgs.nixfmt
           ];

@@ -78,6 +78,9 @@
 (marginalia-mode 1)
 
 (require 'consult)
+(require 'consult-xref)
+(setq xref-show-xrefs-function #'consult-xref
+      xref-show-definitions-function #'consult-xref)
 
 (require 'embark)
 (global-set-key (kbd "C-.") #'embark-act)
@@ -265,6 +268,10 @@
 (require 'magit)
 (global-set-key (kbd "C-x g") #'magit-status)
 
+(require 'diff-hl)
+(global-diff-hl-mode 1)
+(add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)
+
 (require 'vterm)
 (global-set-key (kbd "C-c t") #'vterm)
 (setq vterm-max-scrollback 10000)
@@ -276,6 +283,7 @@
         (project-dired "Dired")
         (project-switch-to-buffer "Buffer")
         (project-vc-dir "VC-Dir")
+        (project-compile "Compile")
         (project-eshell "Eshell")))
 (define-key project-prefix-map (kbd "g") #'consult-ripgrep)
 
@@ -374,13 +382,32 @@
 (add-to-list 'auto-mode-alist '("\\.nix\\'" . nix-mode))
 
 (require 'eldoc-box)
+(require 'eglot)
+(require 'consult-flymake)
+(setq-default eglot-workspace-configuration
+              '(:nixd (:formatting (:command ["nixfmt"]))))
+(global-set-key (kbd "C-c e a") #'eglot-code-actions)
+(global-set-key (kbd "C-c e r") #'eglot-rename)
+(global-set-key (kbd "C-c e f") #'eglot-format-buffer)
+(global-set-key (kbd "C-c e d") #'consult-flymake)
+(global-set-key (kbd "C-c e D") #'flymake-show-project-diagnostics)
+(global-set-key (kbd "C-c e h") #'eldoc-doc-buffer)
 (add-hook 'eglot-managed-mode-hook
           (lambda ()
             (eldoc-box-hover-mode
-             (if (and eglot-managed-mode (display-graphic-p)) 1 -1))))
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs '(nix-mode . ("nixd"))))
+             (if (and (eglot-managed-p) (display-graphic-p)) 1 -1))))
+(add-to-list 'eglot-server-programs '(nix-mode . ("nixd")))
+
+(defun my/eglot-format-nix-on-save ()
+  "Format Nix buffers only while Eglot is managing them."
+  (when (and (derived-mode-p 'nix-mode) (eglot-managed-p))
+    (eglot-format-buffer)))
+
 (add-hook 'nix-mode-hook #'eglot-ensure)
 (add-hook 'nix-mode-hook
           (lambda ()
-            (add-hook 'before-save-hook #'eglot-format-buffer nil t)))
+            (add-hook 'before-save-hook #'my/eglot-format-nix-on-save nil t)))
+
+(require 'envrc)
+(global-set-key (kbd "C-c e v") envrc-command-map)
+(envrc-global-mode 1)
