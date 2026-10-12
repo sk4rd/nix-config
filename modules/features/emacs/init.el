@@ -116,6 +116,7 @@
 (require 'org-capture)
 (require 'org-agenda)
 (require 'org-datetree)
+(require 'org-timer)
 (setq org-directory (file-name-as-directory
                      (expand-file-name "@emacsNotesDirectory@"))
       org-agenda-files (mapcar (lambda (file) (expand-file-name file org-directory))
@@ -123,7 +124,8 @@
       org-default-notes-file (expand-file-name "inbox.org" org-directory)
       org-archive-location (concat (expand-file-name "archive/%s_archive" org-directory)
                                    "::")
-      org-todo-keywords '((sequence "TODO" "|" "DONE"))
+      org-todo-keywords '((sequence "TODO(t)" "DOING(p)" "|" "DONE(d)"))
+      org-log-done 'time
       org-startup-indented t
       org-hide-emphasis-markers t)
 
@@ -142,6 +144,10 @@
          "* %?\n%U\n%i\n")
         ("t" "Task" entry (file ,(expand-file-name "tasks.org" org-directory))
          "* TODO %?\n%U\n%i\n")
+        ("l" "Learning session" entry
+         (file ,(expand-file-name "tasks.org" org-directory))
+         "* TODO %^{Activity}\n:PROPERTIES:\n:Effort: %^{Duration (h:mm)|0:20|0:10|0:30}\n:END:\n%?"
+         :empty-lines 1)
         ("j" "Journal" entry
          (file+olp+datetree ,(expand-file-name "journal.org" org-directory))
          "* %<%H:%M> %?\n%i\n")))
@@ -152,6 +158,68 @@
              (not (member (org-get-todo-state) org-not-done-keywords)))
     (save-excursion (or (outline-next-heading) (point-max)))))
 (setq org-agenda-skip-function-global #'my/org-agenda-skip-unprocessed-inbox)
+
+(setq org-agenda-custom-commands
+      '(("l" "Learning today"
+         ((agenda ""
+                  ((org-agenda-overriding-header "Schedule — this week")
+                   (org-agenda-span 'week)
+                   (org-agenda-start-on-weekday 1)
+                   (org-agenda-skip-scheduled-if-done t)
+                   (org-agenda-skip-deadline-if-done t)))
+          (todo "DOING"
+                ((org-agenda-overriding-header "In progress")))
+          (todo "TODO"
+                ((org-agenda-overriding-header "Ready to study")
+                 (org-agenda-skip-function
+                  '(org-agenda-skip-entry-if 'scheduled 'deadline))
+                 (org-agenda-sorting-strategy '(effort-up category-keep))))
+          (agenda ""
+                  ((org-agenda-overriding-header "Completed — last seven days")
+                   (org-agenda-start-day "-6d")
+                   (org-agenda-start-on-weekday nil)
+                   (org-agenda-span 7)
+                   (org-agenda-show-log 'only)
+                   (org-agenda-log-mode-items '(closed))
+                   (org-agenda-show-all-dates nil)
+                   (org-agenda-use-time-grid nil)
+                   (org-agenda-skip-function-global nil))))
+         ((org-agenda-prefix-format
+           '((agenda . " %?-12t% s%?-6e ")
+             (todo . " %-6e ")))))))
+
+(defun my/org-learning-agenda ()
+  "Show the learning schedule, available sessions, and recent completions."
+  (interactive)
+  (org-agenda nil "l"))
+
+(defun my/org-learning-start ()
+  "Start the session at point using its Effort, from Org or the agenda."
+  (interactive)
+  (when org-timer-start-time
+    (user-error "Stop the current Org timer with C-c n x first"))
+  (let ((marker (cond
+                 ((derived-mode-p 'org-agenda-mode)
+                  (or (org-get-at-bol 'org-hd-marker)
+                      (user-error "Select a session in the agenda")))
+                 ((derived-mode-p 'org-mode) (point-marker))
+                 (t (user-error "Select a session in Org or its agenda")))))
+    (org-with-point-at marker
+      (org-back-to-heading t)
+      (unless (member (org-get-todo-state) '("TODO" "DOING"))
+        (user-error "Select a TODO or DOING session"))
+      (let* ((effort (or (org-entry-get nil org-effort-property)
+                         (read-string "Session duration (h:mm): " nil nil "0:20")))
+             (minutes (condition-case nil
+                          (org-duration-to-minutes effort)
+                        (error (user-error "Use a duration such as 0:20")))))
+        (unless (and (> minutes 0) (= minutes (floor minutes)))
+          (user-error "The duration must be a positive whole number of minutes"))
+        (org-set-effort nil effort)
+        (org-timer-set-timer (floor minutes))
+        (org-todo "DOING")))
+    (when (derived-mode-p 'org-agenda-mode)
+      (org-agenda-redo))))
 
 (defun my/org-journal-today ()
   "Open today's date tree in the same journal used by capture."
@@ -184,7 +252,10 @@
 (add-hook 'org-agenda-finalize-hook #'org-modern-agenda)
 
 (global-set-key (kbd "C-c n c") #'org-capture)
-(global-set-key (kbd "C-c n a") #'org-agenda)
+(global-set-key (kbd "C-c n a") #'my/org-learning-agenda)
+(global-set-key (kbd "C-c n A") #'org-agenda)
+(global-set-key (kbd "C-c n t") #'my/org-learning-start)
+(global-set-key (kbd "C-c n x") #'org-timer-stop)
 (global-set-key (kbd "C-c n f") #'org-roam-node-find)
 (global-set-key (kbd "C-c n i") #'org-roam-node-insert)
 (global-set-key (kbd "C-c n b") #'org-roam-buffer-toggle)
