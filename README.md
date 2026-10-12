@@ -16,12 +16,6 @@ Enter the repository's tool environment:
 nix develop
 ```
 
-## Zed workflow
-
-Launch `nix develop -c zeditor .` to give Zed the repository shell's tools.
-Restart an already-running editor to pick up environment changes.
-`.zed/tasks.json` exposes `format` and `check` through `task: spawn`.
-
 ## Commands
 
 ```sh

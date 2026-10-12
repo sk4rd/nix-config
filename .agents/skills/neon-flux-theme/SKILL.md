@@ -19,8 +19,7 @@ Paths below are relative to the repository root, not this skill directory.
   and rendering checks. Bright ANSI values currently live in the Nix consumers,
   not the base JSON; do not invent a replacement scheme.
 - `modules/features/desktop/neon-flux-theme.nix` implements Plasma, Konsole,
-  SDDM, and wallpaper configuration. `modules/features/zed-neon-flux-theme.nix`
-  implements the Zed theme. `themes/neon-flux/README.md` documents wallpaper and
+  SDDM, and wallpaper configuration. `themes/neon-flux/README.md` documents wallpaper and
   safe greeter previews.
 
 ## Porting workflow

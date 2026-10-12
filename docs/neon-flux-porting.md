@@ -36,10 +36,9 @@ foreground, selection, and cursor respectively.
 
 Normal ANSI slots map to `surface`, `error`, `success`, `warning`, `info`,
 `purple`, `accent`, and `text` in black-to-white order. The existing bright row
-is defined in `ansiBright` in both
-[`neon-flux-theme.nix`](../modules/features/desktop/neon-flux-theme.nix) and
-[`zed-neon-flux-theme.nix`](../modules/features/zed-neon-flux-theme.nix); it is not fully represented in the base
-palette JSON. Inspect those definitions when porting; keep them consistent rather
+is defined in `ansiBright` in
+[`neon-flux-theme.nix`](../modules/features/desktop/neon-flux-theme.nix); it is not fully represented in the base
+palette JSON. Inspect that definition when porting; keep consumers consistent rather
 than maintaining another table here. Derive faint (SGR 2) colors halfway to the
 canvas per channel when needed.
 

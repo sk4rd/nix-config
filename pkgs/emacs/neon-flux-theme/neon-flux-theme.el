@@ -118,7 +118,7 @@
                    (vterm-color-magenta . ,purple)
                    (vterm-color-cyan . ,accent)
                    (vterm-color-white . ,text)
-                   ;; Bright ANSI colors match the Konsole and Zed ports.
+                   ;; Bright ANSI colors match the Konsole port.
                    (vterm-color-bright-black . "#53607A")
                    (vterm-color-bright-red . "#FF6B81")
                    (vterm-color-bright-green . "#6FFFD4")
