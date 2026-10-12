@@ -29,6 +29,8 @@
               epkgs.corfu
               epkgs.cape
               epkgs.eldoc-box
+              epkgs.embark
+              epkgs.embark-consult
               epkgs.gptel
               epkgs.gptel-agent
               epkgs.marginalia

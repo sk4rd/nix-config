@@ -79,6 +79,15 @@
 
 (require 'consult)
 
+(require 'embark)
+(global-set-key (kbd "C-.") #'embark-act)
+(global-set-key (kbd "C-;") #'embark-dwim)
+(global-set-key (kbd "C-h B") #'embark-bindings)
+(setq prefix-help-command #'embark-prefix-help-command)
+
+(require 'embark-consult)
+(add-hook 'embark-collect-mode-hook #'consult-preview-at-point-mode)
+
 (require 'cape)
 (add-to-list 'completion-at-point-functions #'cape-file)
 (add-to-list 'completion-at-point-functions #'cape-dabbrev)
