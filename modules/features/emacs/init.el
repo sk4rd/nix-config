@@ -393,11 +393,10 @@ Present code for me to apply manually.")
 
 (require 'gptel-agent)
 (gptel-agent-update)
-(setf (gptel-tool-confirm (gptel-get-tool "WebFetch")) t)
 ;; Ordinary chats get web tools; the full agent preset is opt-in.
 (setq-default gptel-tools (mapcar #'gptel-get-tool '("WebSearch" "WebFetch"))
               gptel-use-tools t
-              gptel-confirm-tool-calls 'auto)
+              gptel-confirm-tool-calls t)
 
 (global-set-key (kbd "C-c g") #'gptel)
 (global-set-key (kbd "C-c r") #'gptel-rewrite)
