@@ -363,8 +363,33 @@
               (plist-put (gptel-fsm-info fsm) :include-reasoning nil))))
 (setq-default gptel-backend (gptel-get-backend "OpenAI-sub")
               gptel-model 'gpt-6-luna)
+
 (gptel-make-preset 'explain
-  :system "Explain what this code does to a novice programmer.")
+  :description "Learn how code works"
+  :system
+  "Act as a programming tutor.
+Explain concepts progressively.
+Focus on why the code works.
+Ask guiding questions when useful.
+Do not solve exercises unless requested.")
+
+(gptel-make-preset 'design
+  :description "Discuss architecture"
+  :system
+  "Act as a software design partner.
+Explore simple solutions first.
+Explain tradeoffs and alternatives.
+Follow existing project conventions.
+Leave architectural decisions to me.")
+
+(gptel-make-preset 'implement
+  :description "Assist with implementation"
+  :system
+  "Act as a pair programmer.
+Suggest small, understandable changes.
+Explain why each change is necessary.
+Avoid unnecessary abstractions.
+Present code for me to apply manually.")
 
 (require 'gptel-agent)
 (gptel-agent-update)
