@@ -38,9 +38,10 @@
               epkgs.marginalia
               epkgs.markdown-mode
               epkgs.magit
+              epkgs.meow
               epkgs.orderless
               epkgs.vertico
-              epkgs.vterm
+              epkgs.ghostel
               epkgs.nix-mode
               epkgs.org-roam
               epkgs.org-appear

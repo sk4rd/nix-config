@@ -32,6 +32,94 @@
 (setq which-key-idle-delay 0.5)
 (which-key-mode 1)
 
+(require 'meow)
+;; Upstream QWERTY layout: https://github.com/meow-edit/meow/blob/master/KEYBINDING_QWERTY.org
+(defun meow-setup ()
+  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+  (meow-motion-define-key
+   '("j" . meow-next)
+   '("k" . meow-prev)
+   '("<escape>" . ignore))
+  (meow-leader-define-key
+   ;; Use SPC (0-9) for digit arguments.
+   '("1" . meow-digit-argument)
+   '("2" . meow-digit-argument)
+   '("3" . meow-digit-argument)
+   '("4" . meow-digit-argument)
+   '("5" . meow-digit-argument)
+   '("6" . meow-digit-argument)
+   '("7" . meow-digit-argument)
+   '("8" . meow-digit-argument)
+   '("9" . meow-digit-argument)
+   '("0" . meow-digit-argument)
+   '("/" . meow-keypad-describe-key)
+   '("?" . meow-cheatsheet)
+   '("p" . project-switch-project))
+  (meow-normal-define-key
+   '("0" . meow-expand-0)
+   '("9" . meow-expand-9)
+   '("8" . meow-expand-8)
+   '("7" . meow-expand-7)
+   '("6" . meow-expand-6)
+   '("5" . meow-expand-5)
+   '("4" . meow-expand-4)
+   '("3" . meow-expand-3)
+   '("2" . meow-expand-2)
+   '("1" . meow-expand-1)
+   '("-" . negative-argument)
+   '(";" . meow-reverse)
+   '("," . meow-inner-of-thing)
+   '("." . meow-bounds-of-thing)
+   '("[" . meow-beginning-of-thing)
+   '("]" . meow-end-of-thing)
+   '("a" . meow-append)
+   '("A" . meow-open-below)
+   '("b" . meow-back-word)
+   '("B" . meow-back-symbol)
+   '("c" . meow-change)
+   '("d" . meow-delete)
+   '("D" . meow-backward-delete)
+   '("e" . meow-next-word)
+   '("E" . meow-next-symbol)
+   '("f" . meow-find)
+   '("g" . meow-cancel-selection)
+   '("G" . meow-grab)
+   '("h" . meow-left)
+   '("H" . meow-left-expand)
+   '("i" . meow-insert)
+   '("I" . meow-open-above)
+   '("j" . meow-next)
+   '("J" . meow-next-expand)
+   '("k" . meow-prev)
+   '("K" . meow-prev-expand)
+   '("l" . meow-right)
+   '("L" . meow-right-expand)
+   '("m" . meow-join)
+   '("n" . meow-search)
+   '("o" . meow-block)
+   '("O" . meow-to-block)
+   '("p" . meow-yank)
+   '("q" . meow-quit)
+   '("Q" . meow-goto-line)
+   '("r" . meow-replace)
+   '("R" . meow-swap-grab)
+   '("s" . meow-kill)
+   '("t" . meow-till)
+   '("u" . meow-undo)
+   '("U" . meow-undo-in-selection)
+   '("v" . meow-visit)
+   '("w" . meow-mark-word)
+   '("W" . meow-mark-symbol)
+   '("x" . meow-line)
+   '("X" . meow-goto-line)
+   '("y" . meow-save)
+   '("Y" . meow-sync-grab)
+   '("z" . meow-pop-selection)
+   '("'" . repeat)
+   '("<escape>" . ignore)))
+(meow-setup)
+(meow-global-mode 1)
+
 (let* ((cache-directory "@emacsCacheDirectory@")
        (backup-directory (expand-file-name "backups/" cache-directory))
        (auto-save-directory (expand-file-name "auto-saves/" cache-directory)))
@@ -272,9 +360,8 @@
 (global-diff-hl-mode 1)
 (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)
 
-(require 'vterm)
-(global-set-key (kbd "C-c t") #'vterm)
-(setq vterm-max-scrollback 10000)
+(require 'ghostel)
+(global-set-key (kbd "C-c t") #'ghostel)
 
 (require 'project)
 (setq project-switch-commands
@@ -284,8 +371,9 @@
         (project-switch-to-buffer "Buffer")
         (project-vc-dir "VC-Dir")
         (project-compile "Compile")
-        (project-eshell "Eshell")))
+        (ghostel-project "Ghostel")))
 (define-key project-prefix-map (kbd "g") #'consult-ripgrep)
+(define-key project-prefix-map (kbd "t") #'ghostel-project)
 
 (require 'dired)
 (setq dired-listing-switches "-alh --group-directories-first"
@@ -308,27 +396,52 @@
 (add-to-list 'auto-mode-alist '("\\(?:\\`\\|/\\)README\\.md\\'" . gfm-mode))
 
 (require 'gptel)
-(defun my/gptel-project-chat (original name &optional key initial interactivep)
-  "With a prefix, choose a project and open its dedicated chat."
-  (interactive
-   (lambda (spec)
-     (if current-prefix-arg
-         (list (project-prompt-project-dir) nil
-               (and (use-region-p)
-                    (buffer-substring (region-beginning) (region-end)))
-               t)
-       (advice-eval-interactive-spec spec))))
-  (if (and interactivep current-prefix-arg)
-      (let* ((root (file-name-as-directory (expand-file-name name)))
+(require 'gptel-context)
+(defun my/gptel-project-chat (&optional choose-project)
+  "Open the current project's chat, or choose one with CHOOSE-PROJECT.
+Outside a project, use the ordinary `gptel' buffer chooser."
+  (interactive "P")
+  (if-let* ((directory (if choose-project
+                          (project-prompt-project-dir)
+                        (when-let* ((project (project-current)))
+                          (project-root project)))))
+      (let* ((root (file-name-as-directory (file-truename directory)))
              (default-directory root)
-             (buffer (funcall original
-                              (format "*gptel: %s*" root)
-                              key initial interactivep)))
+             (name (format "*gptel: %s*" root))
+             (new-chat (not (get-buffer name)))
+             (buffer (gptel name nil nil t)))
         (with-current-buffer buffer
-          (setq-local default-directory root))
+          (setq-local default-directory root
+                      header-line-format (format " Project: %s" root))
+          (when new-chat
+            ;; Context is global by default; keep each project's files separate.
+            (setq-local gptel-context nil
+                        gptel-use-context 'system
+                        gptel-tools (mapcar #'gptel-get-tool '("WebSearch" "WebFetch"))
+                        gptel-use-tools t)
+            (setq-local gptel--system-message
+                        (plist-get (gptel-get-preset 'design) :system))
+            (let ((agents (expand-file-name "AGENTS.md" root)))
+              (when (file-readable-p agents)
+                (gptel-context-add-file agents)))))
         buffer)
-    (funcall original name key initial interactivep)))
-(advice-add 'gptel :around #'my/gptel-project-chat)
+    (call-interactively #'gptel)))
+
+(defun my/gptel-project-add-file (file)
+  "Attach FILE to the current project's chat."
+  (interactive
+   (list (read-file-name "Attach file to project chat: "
+                         (when-let* ((project (project-current)))
+                           (project-root project))
+                         buffer-file-name t)))
+  (when (file-directory-p file)
+    (user-error "Choose a source file, not a directory"))
+  (let ((file (expand-file-name file)))
+    (with-current-buffer (my/gptel-project-chat)
+      (gptel-context-add-file file)
+      (when (or (member file gptel-context) (assoc file gptel-context))
+        (message "Attached %s to project chat: %s"
+                 (file-name-nondirectory file) (buffer-name))))))
 
 (setq gptel-display-buffer-action
       '((display-buffer-in-side-window)
@@ -380,7 +493,9 @@ Do not solve exercises unless requested.")
 Explore simple solutions first.
 Explain tradeoffs and alternatives.
 Follow existing project conventions.
-Leave architectural decisions to me.")
+Leave architectural decisions to me.
+Discuss the supplied context without modifying files or running commands.
+If more source context is needed, ask me to attach specific files.")
 
 (gptel-make-preset 'implement
   :description "Assist with implementation"
@@ -398,7 +513,8 @@ Present code for me to apply manually.")
               gptel-use-tools t
               gptel-confirm-tool-calls t)
 
-(global-set-key (kbd "C-c g") #'gptel)
+(global-set-key (kbd "C-c g") #'my/gptel-project-chat)
+(global-set-key (kbd "C-c a") #'my/gptel-project-add-file)
 (global-set-key (kbd "C-c r") #'gptel-rewrite)
 (global-set-key (kbd "C-c RET") #'gptel-send)
 
