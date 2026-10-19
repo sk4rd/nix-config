@@ -10,7 +10,7 @@
       {
         options.programs.emacs.notesDirectory = lib.mkOption {
           type = lib.types.str;
-          default = "~/notes";
+          default = "~/Documents/notes";
           description = "Root directory for Org notes, tasks, journal, and Org-roam knowledge notes.";
         };
 

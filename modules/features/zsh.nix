@@ -11,6 +11,7 @@
           zsh = {
             autosuggestion.enable = true;
             syntaxHighlighting.enable = true;
+            shellAliases.conflicts = "rg --files --hidden --no-ignore -g '*.sync-conflict-*' . | fzf --multi";
 
             initContent = lib.mkMerge [
               (lib.mkOrder 500 ''

@@ -1,7 +1,8 @@
 let
   inherit (import ../../../lib/nas-service-helpers.nix) mountSafety;
-  mountpoint = "/storage-pool/notes";
-  dataset = "storage-pool/notes";
+  mountpoint = "/storage-pool/documents";
+  # storage-pool/documents already backs the Samba share.
+  dataset = "storage-pool/syncthing-documents";
 in
 {
   den.aspects.syncthing-nas.nixos =
@@ -20,17 +21,19 @@ in
       '';
       safety = mountSafety [ mountpoint ];
       guardedService = safety // {
+        after = safety.after ++ [ "documents-dataset.service" ];
+        requires = safety.requires ++ [ "documents-dataset.service" ];
         path = [ pkgs.util-linux ];
         preStart = checkMount;
       };
       snapshot = pkgs.writeShellApplication {
-        name = "org-notes-snapshot";
+        name = "documents-snapshot";
         runtimeInputs = [
           pkgs.zfs
           pkgs.coreutils
           pkgs.util-linux
         ];
-        text = builtins.readFile ../../../lib/org-notes-snapshots.sh;
+        text = builtins.readFile ../../../lib/documents-snapshots.sh;
       };
       policies = {
         hourly = 24;
@@ -45,16 +48,27 @@ in
         openDefaultPorts = true;
         overrideDevices = false;
         overrideFolders = false;
-        settings = import ../../../lib/org-notes-syncthing.nix {
-          inherit lib;
-          hostName = "nas";
-          path = mountpoint;
+        settings = {
+          devices = import ../../../lib/syncthing-devices.nix {
+            inherit lib;
+            hostName = "nas";
+          };
+          folders = {
+            documents = import ../../../lib/documents-syncthing.nix {
+              path = mountpoint;
+              devices = builtins.attrNames cfg.settings.devices;
+            };
+            hermes-profiles = import ../../../lib/hermes-profiles-syncthing.nix {
+              path = "${cfg.dataDir}/hermes-profiles";
+              devices = builtins.attrNames cfg.settings.devices;
+            };
+          };
         };
       };
 
       systemd.services = {
-        org-notes-dataset = {
-          description = "Create and mount the Org notes ZFS dataset";
+        documents-dataset = {
+          description = "Create and mount the Documents ZFS dataset";
           after = [ "zfs-mount.service" ];
           requires = [ "zfs-mount.service" ];
           before = [
@@ -77,9 +91,16 @@ in
               zfs create -u -o mountpoint=${mountpoint} -o compression=zstd -o atime=off ${dataset}
             fi
             # Existing datasets are validated, never reconfigured or recreated.
-            test "$(zfs get -H -o value mountpoint ${dataset})" = ${mountpoint}
-            test "$(zfs get -H -o value compression ${dataset})" = zstd
-            test "$(zfs get -H -o value atime ${dataset})" = off
+            require_property() {
+              actual=$(zfs get -H -o value "$1" ${dataset})
+              if test "$actual" != "$2"; then
+                printf 'Dataset %s: expected %s=%s, found %s\n' ${dataset} "$1" "$2" "$actual" >&2
+                exit 1
+              fi
+            }
+            require_property mountpoint ${mountpoint}
+            require_property compression zstd
+            require_property atime off
             if test "$(zfs get -H -o value mounted ${dataset})" != yes; then
               zfs mount ${dataset}
             fi
@@ -91,8 +112,6 @@ in
         syncthing = lib.mkMerge [
           guardedService
           {
-            after = [ "org-notes-dataset.service" ];
-            requires = [ "org-notes-dataset.service" ];
             serviceConfig = {
               UMask = "0077";
               ProtectSystem = "strict";
@@ -109,12 +128,12 @@ in
       }
       // lib.mapAttrs' (
         period: keep:
-        lib.nameValuePair "org-notes-snapshot-${period}" (
+        lib.nameValuePair "documents-snapshot-${period}" (
           lib.mkMerge [
             safety
             {
-              requires = [ "org-notes-dataset.service" ];
-              after = [ "org-notes-dataset.service" ];
+              requires = [ "documents-dataset.service" ];
+              after = [ "documents-dataset.service" ];
               startAt = "${period} UTC";
               serviceConfig = {
                 Type = "oneshot";
@@ -127,7 +146,7 @@ in
 
       systemd.timers = lib.mapAttrs' (
         period: _:
-        lib.nameValuePair "org-notes-snapshot-${period}" {
+        lib.nameValuePair "documents-snapshot-${period}" {
           timerConfig.Persistent = true;
         }
       ) policies;
