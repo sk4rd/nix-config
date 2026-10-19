@@ -1,0 +1,195 @@
+-- Run with the built Home Manager wrapper in an isolated XDG/HOME.
+local function check()
+  assert(vim.g.colors_name == 'neon-flux', 'Neon Flux must load at startup')
+  local p = require('neon-flux-palette')
+  assert(vim.api.nvim_get_hl(0, { name = 'Normal' }).bg == tonumber(p.canvas:sub(2), 16))
+  assert(vim.api.nvim_get_hl(0, { name = 'Function' }).fg == tonumber(p.accent:sub(2), 16))
+  assert(vim.o.termguicolors and vim.o.undofile)
+  assert(vim.g.mapleader == ' ')
+  assert(vim.fn.exists(':Neotree') == 2, 'Sidebar explorer missing')
+  assert(vim.fn.maparg('<Space>fe', 'n') ~= '', 'Sidebar toggle missing')
+  assert(vim.fn.exists(':Yazi') == 2, 'Yazi command missing')
+  local open_file = require('neon-flux-file-opener')
+  local pdf = vim.fn.expand('~/viewer test.pdf')
+  vim.fn.writefile({ '%PDF-1.4', '%%EOF' }, pdf)
+  local opened
+  local ui_open = vim.ui.open
+  vim.ui.open = function(path) opened = path; return {} end
+  open_file(pdf)
+  vim.ui.open = ui_open
+  assert(opened == pdf, 'PDF must use the desktop default viewer')
+  assert(vim.api.nvim_buf_get_name(0) ~= pdf, 'PDF opened as a text buffer')
+  local text = vim.fn.expand('~/text note.md')
+  vim.fn.writefile({ '# Text note' }, text)
+  open_file(text)
+  assert(vim.api.nvim_buf_get_name(0) == text, 'Text files must stay in Neovim')
+
+  assert(vim.fn.maparg('<Space>fd', 'n'):lower() == '<cmd>yazi<cr>', 'Directory browser must use Yazi')
+  assert(vim.fn.executable('yazi') == 1 and vim.fn.executable('ya') == 1, 'Yazi tools missing')
+  assert(vim.fn.exists(':Neogit') == 2, 'Magit-style Neogit UI missing')
+  for _, key in ipairs({ '<C-h>', '<C-j>', '<C-k>', 'gd' }) do
+    assert(vim.fn.maparg(key, 'n') == '', 'Default binding overridden: ' .. key)
+  end
+  assert(vim.fn.maparg('<C-l>', 'n', false, true).desc == ':help CTRL-L-default')
+  local references = vim.fn.maparg('grr', 'n', false, true)
+  assert(references.desc ~= 'References', 'Native grr was replaced')
+  local settings = require('neon-flux-settings')
+  local root = vim.fn.expand(settings.notesDirectory)
+  assert(vim.fn.filereadable(root .. '/inbox.md') == 1, 'Markdown inbox missing')
+  assert(vim.fn.readfile(root .. '/inbox.md')[1] == '# Existing inbox', 'Existing Markdown overwritten')
+  assert(vim.fn.readfile(root .. '/tasks.org')[1] == '* TODO Keep existing notes', 'Existing Org notes overwritten')
+  assert(vim.fn.isdirectory(root .. '/knowledge') == 1)
+  assert(vim.fn.filereadable(root .. '/templates/knowledge.md') == 1)
+  assert(Obsidian and not Obsidian._config_error, 'Obsidian setup failed')
+  assert(Obsidian.opts.picker.name == 'telescope.nvim')
+  assert(Obsidian.opts.link.style == 'markdown')
+  assert(Obsidian.opts.frontmatter.enabled == false)
+  assert(vim.g.obsidian_default_keymap == false)
+  assert(not pcall(require, 'orgmode'), 'Old Org plugin still installed')
+  assert(vim.fn.executable('nixd') == 1 and vim.fn.executable('nixfmt') == 1)
+  assert(vim.lsp.config.nixd.cmd[1] == 'nixd')
+  for _, key in ipairs({ '<Space>ff', '<Space>fd', '<Space>sp', '<Space>sb', '<Space>nc', '<Space>na', '<Space>nf', '<Space>ca', '<Space>cf', '<Space>cg', '<Space>cR', '<Space>cr', '<Space>cd', '<Space>ch', '<Space>cv' }) do
+    assert(vim.fn.maparg(key, 'n') ~= '', 'Missing mapping ' .. key)
+  end
+  vim.cmd.edit(vim.fn.fnameescape(root .. '/inbox.md'))
+  assert(vim.bo.filetype == 'markdown')
+  assert(vim.treesitter.get_parser(0, 'markdown'), 'Markdown parser unavailable')
+  assert(vim.fn.maparg('<CR>', 'n') == '', 'Obsidian overrides native Enter')
+  vim.cmd('Obsidian new Test knowledge')
+  assert(vim.wait(5000, function() return vim.api.nvim_buf_get_name(0):find('/knowledge/', 1, true) ~= nil end, 50))
+  vim.cmd.write()
+  assert(vim.api.nvim_buf_get_lines(0, 0, -1, false)[1]:find('Test knowledge', 1, true), 'Note template missing title')
+  local note_path = vim.api.nvim_buf_get_name(0)
+  local link = require('obsidian').api.format_link({ path = note_path,
+    dir = root .. '/daily', style = 'markdown', format = 'relative', label = 'Test knowledge' })
+  assert(link:find('../knowledge/', 1, true) and link:find('.md)', 1, true), 'Nonportable link: ' .. link)
+  assert(vim.api.nvim_buf_get_lines(0, 0, -1, false)[1] ~= '---', 'Unexpected YAML frontmatter')
+  vim.cmd('Obsidian today')
+  assert(vim.wait(5000, function() return vim.api.nvim_buf_get_name(0):find('/daily/', 1, true) ~= nil end, 50))
+  vim.cmd.write()
+  assert(vim.fn.filereadable(root .. '/daily/' .. os.date('%Y-%m-%d') .. '.md') == 1)
+  vim.cmd('enew')
+  vim.bo.filetype = 'nix'
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, { '{ answer = 42; }' })
+  assert(vim.treesitter.get_parser(0, 'nix'), 'Nix parser unavailable')
+  assert(require('cmp').get_config().sources[1].name == 'nvim_lsp')
+  local source = vim.fn.expand('~/project/default.nix')
+  vim.cmd('edit! ' .. vim.fn.fnameescape(vim.fn.expand('~/project/new.nix')))
+  assert(vim.bo.shiftwidth == 2 and vim.bo.expandtab, 'New Nix files need two-space indentation')
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('i<Tab>x<Esc>', true, false, true), 'xt', false)
+  assert(vim.api.nvim_get_current_line() == '  x', 'Nix Tab must insert two spaces')
+  local sample = vim.fn.expand('~/project/style.lua')
+  vim.fn.writefile({ 'local function sample()', '    if true then', '        return 42', '    end', 'end' }, sample)
+  vim.cmd('edit! ' .. vim.fn.fnameescape(sample))
+  assert(vim.bo.shiftwidth == 4 and vim.bo.expandtab, 'Existing four-space indentation not detected')
+  local two = vim.fn.expand('~/project/two.lua')
+  vim.fn.writefile({ 'local function sample()', '  if true then', '    return 42', '  end', 'end' }, two)
+  vim.cmd('edit! ' .. vim.fn.fnameescape(two))
+  assert(vim.bo.shiftwidth == 2 and vim.bo.expandtab, 'Existing two-space indentation not detected')
+  vim.cmd('edit! ' .. vim.fn.fnameescape(source))
+  assert(vim.wait(15000, function()
+    for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0, name = 'nixd' })) do
+      if client.initialized then return true end
+    end
+    return false
+  end, 100), 'nixd did not attach')
+  local client = vim.lsp.get_clients({ bufnr = 0, name = 'nixd' })[1]
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, { 'let mappedValue = 42; in mapped' })
+  vim.wait(500, function() return false end, 50)
+  local response = client:request_sync('textDocument/completion', {
+    textDocument = { uri = vim.uri_from_bufnr(0) },
+    position = { line = 0, character = #vim.api.nvim_get_current_line() },
+  }, 10000, 0)
+  assert(response and not response.err, 'Completion request failed: ' .. vim.inspect(response))
+  local items = response.result and (response.result.items or response.result) or {}
+  assert(vim.iter(items):any(function(item) return item.label:find('mappedValue', 1, true) end),
+    'nixd did not return attribute completion: ' .. vim.inspect(response))
+  local cmp = require('cmp')
+  assert(cmp.get_config().mapping['<CR>'] == nil, 'Enter must retain newline behavior')
+  assert(cmp.get_config().mapping['<Tab>'] ~= nil, 'Tab must accept the selected completion')
+  local confirm = cmp.confirm
+  local options
+  cmp.confirm = function(opts) options = opts; return true end
+  cmp.get_config().mapping['<Tab>'].i(function() error('Selected completion fell back to indentation') end)
+  cmp.confirm = confirm
+  assert(options and options.select == false, 'Tab must only accept an explicitly selected item')
+  local fallback = false
+  cmp.get_config().mapping['<Tab>'].i(function() fallback = true end)
+  assert(fallback, 'Tab must preserve indentation without a selected completion')
+  -- Exercise a real Telescope picker and its file finder, not just require().
+  require('telescope.builtin').find_files({ cwd = vim.fn.expand('~/project') })
+  assert(vim.wait(5000, function()
+    local ok, picker = pcall(require('telescope.actions.state').get_current_picker, vim.api.nvim_get_current_buf())
+    return ok and picker and picker.manager and picker.manager:num_results() > 0
+  end, 50), 'Telescope did not find project files')
+  require('telescope.actions').close(vim.api.nvim_get_current_buf())
+  vim.cmd('Obsidian quick_switch')
+  assert(vim.wait(5000, function()
+    local ok, picker = pcall(require('telescope.actions.state').get_current_picker, vim.api.nvim_get_current_buf())
+    return ok and picker and picker.manager and picker.manager:num_results() > 0
+  end, 50), 'Obsidian Telescope picker did not find notes')
+  require('telescope.actions').close(vim.api.nvim_get_current_buf())
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, { '{answer=42;}' })
+  vim.cmd.write()
+  assert(vim.fn.readfile(source)[1] == '{ answer = 42; }', 'Nix format-on-save failed')
+  local first_tab = vim.api.nvim_get_current_tabpage()
+  local first_cwd = vim.fn.getcwd(-1, 0)
+  local sidebar_root = vim.fn.expand('~/sidebar-project')
+  vim.fn.mkdir(sidebar_root .. '/nested', 'p')
+  vim.cmd('tabnew')
+  vim.cmd('tcd ' .. vim.fn.fnameescape(sidebar_root))
+  require('neo-tree.command').execute({ source = 'filesystem', position = 'right', action = 'focus' })
+  assert(vim.wait(5000, function() return vim.bo.filetype == 'neo-tree' end, 50), 'Sidebar did not open')
+  assert(#vim.api.nvim_tabpage_list_wins(0) == 2, 'Sidebar must preserve editor window')
+  assert(vim.api.nvim_win_get_position(0)[2] > 0, 'Sidebar must be on the right')
+  local state = require('neo-tree.sources.manager').get_state('filesystem')
+  assert(state.path == sidebar_root, 'Sidebar does not follow tab cwd')
+  assert(vim.wait(5000, function() return state.tree and state.tree:get_node(sidebar_root .. '/nested') ~= nil end, 50))
+  require('neo-tree.ui.renderer').focus_node(state, sidebar_root .. '/nested')
+  require('neo-tree.sources.filesystem.commands').set_root(state)
+  assert(vim.wait(5000, function() return vim.fn.getcwd(-1, 0) == sidebar_root .. '/nested' end, 50), 'Set-root must change tab cwd')
+  assert(vim.fn.getcwd(-1, vim.api.nvim_tabpage_get_number(first_tab)) == first_cwd, 'Other tab cwd changed')
+  vim.cmd('Neotree close')
+  vim.cmd('tabclose')
+  vim.cmd('lcd ' .. vim.fn.fnameescape(vim.fn.expand('~/project')))
+  require('neogit').open()
+  assert(vim.wait(10000, function() return vim.bo.filetype == 'NeogitStatus' end, 50), 'Neogit status did not open')
+  assert(vim.fn.maparg('s', 'n') ~= '' and vim.fn.maparg('c', 'n') ~= '', 'Neogit actions missing')
+  assert(require('neogit.config').values.fetch_after_checkout == false)
+  vim.cmd('tabclose')
+  vim.cmd('DiffviewOpen')
+  assert(vim.wait(10000, function()
+    return require('diffview.lib').get_current_view() ~= nil
+  end, 50), 'Diffview did not open')
+  vim.cmd('DiffviewClose')
+  local origin = vim.api.nvim_get_current_win()
+  local target = vim.fn.expand('~/project/selected-directory')
+  vim.fn.mkdir(target, 'p')
+  vim.cmd('lcd ' .. vim.fn.fnameescape(vim.fn.expand('~/project')))
+  require('yazi').yazi(nil, target)
+  assert(vim.wait(10000, function()
+    return vim.bo.buftype == 'terminal' and vim.b.terminal_job_id ~= nil
+  end, 50), 'Yazi terminal did not open')
+  local job = vim.b.terminal_job_id
+  assert(vim.fn.jobwait({ job }, 500)[1] == -1, 'Yazi exited unexpectedly')
+  local cwd_mapping = vim.fn.maparg('<C-\\>', 't', false, true)
+  assert(cwd_mapping.buffer == 1 and cwd_mapping.callback, 'Yazi change-directory mapping missing')
+  cwd_mapping.callback()
+  assert(vim.api.nvim_win_call(origin, function() return vim.fn.getcwd() end) == target,
+    'Yazi changed its floating window cwd, not the originating window cwd')
+  local escape = vim.fn.maparg('<Esc>', 't', false, true)
+  assert(escape.buffer == 1 and escape.rhs == 'q', 'Yazi Escape binding missing')
+  vim.fn.chansend(job, escape.rhs)
+  assert(vim.wait(5000, function() return vim.fn.jobwait({ job }, 0)[1] ~= -1 end, 50), 'Yazi did not quit')
+  assert(not vim.v.errmsg:find('Error'), vim.v.errmsg)
+  print('PASS: Neon Flux, Org/Markdown preservation, knowledge/daily templates, native keys, Telescope, Nix completion and format-on-save')
+end
+vim.defer_fn(function()
+  local ok, err = xpcall(check, debug.traceback)
+  if not ok then
+    io.stderr:write(err .. '\n')
+    vim.cmd('cquit 1')
+  else
+    vim.cmd('qa!')
+  end
+end, 1000)

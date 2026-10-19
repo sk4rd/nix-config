@@ -30,6 +30,7 @@
       den.aspects.vesktop
       den.aspects.yubikey-openpgp
       den.aspects.emacs
+      den.aspects.neovim
       (den.lib.policy.when ({ hasAspect, ... }: hasAspect den.aspects.neon-flux-theme) {
         includes = [ den.aspects.neon-flux-theme ];
       })
